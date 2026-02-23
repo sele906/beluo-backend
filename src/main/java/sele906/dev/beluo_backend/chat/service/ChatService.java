@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import sele906.dev.beluo_backend.ai.client.OpenAiClient;
 import sele906.dev.beluo_backend.ai.prompt.service.PromptService;
 import sele906.dev.beluo_backend.chat.domain.Message;
-import sele906.dev.beluo_backend.chat.repository.ChatRepository;
+import sele906.dev.beluo_backend.chat.repository.message.MessageRepository;
 
 import java.time.Instant;
 import java.util.*;
@@ -23,7 +23,7 @@ public class ChatService {
     private MongoTemplate mongoTemplate;
 
     @Autowired
-    private ChatRepository chatRepository;
+    private MessageRepository messageRepository;
 
     @Autowired
     private OpenAiClient openAiClient;
@@ -64,20 +64,24 @@ public class ChatService {
 
     //채팅 내용 db에 저장
     public Message chatDataSave(String role, String content, String chatRoomNum) {
-        Message m = new Message();
-        m.setSessionId(chatRoomNum);
-        m.setRole(role);
-        m.setContent(content);
-        m.setCreatedAt(Instant.now());
+        try {
+            Message m = new Message();
+            m.setSessionId(chatRoomNum);
+            m.setRole(role);
+            m.setContent(content);
+            m.setCreatedAt(Instant.now());
 
-        return chatRepository.save(m);
+            return messageRepository.save(m);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     //요약 후 실행된 대화 카운트
     public void afterSummaryChatCount(String chatRoomNum) {
 
         //요약 후 대화 횟수 증가
-        UpdateResult result = chatRepository.afterSummaryChatCount(chatRoomNum);
+        UpdateResult result = messageRepository.afterSummaryChatCount(chatRoomNum);
 
         //예외처리
         if (result.getMatchedCount() == 0) {
@@ -89,7 +93,7 @@ public class ChatService {
     public List<Message> requestRecentChat(String chatRoomNum) {
 
         //최근 10개 대화 불러오기
-        List<Message> recentMessages = chatRepository.requestRecentChat(chatRoomNum);
+        List<Message> recentMessages = messageRepository.requestRecentChat(chatRoomNum);
 
         //예외처리
         if (recentMessages.isEmpty()) {

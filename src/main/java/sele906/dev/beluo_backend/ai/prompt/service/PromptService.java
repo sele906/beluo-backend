@@ -48,10 +48,13 @@ public class PromptService {
 
         //요약 프롬프트 > 최종 프롬프트에 결합
         if (summaryPrompt != null) {
-            promptMessage.add(Map.of(
-                    "role", "system",
-                    "content", """PROMPT_REMOVED""" + summaryPrompt
-            ));
+            System.out.println("summaryPrompt: " + summaryPrompt);
+            if (!summaryPrompt.isEmpty()) {
+                promptMessage.add(Map.of(
+                        "role", "system",
+                        "content", """PROMPT_REMOVED""" + summaryPrompt
+                ));
+            }
         }
 
         //최근 대화 프롬프트 > 최종 프롬프트에 결합

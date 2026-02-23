@@ -24,4 +24,10 @@ public class Conversation {
     private ObjectId id;
     private String sessionId;
     private Instant createdAt;
+
+    private String characterName;
+    //private String characterProfile;
+    private String userName;
+    //private String userProfile;
+
 }

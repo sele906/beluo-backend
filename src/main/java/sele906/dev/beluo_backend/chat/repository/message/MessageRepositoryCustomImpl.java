@@ -1,4 +1,4 @@
-package sele906.dev.beluo_backend.chat.repository;
+package sele906.dev.beluo_backend.chat.repository.message;
 
 
 import com.mongodb.client.result.UpdateResult;
@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Repository
-public class ChatRepositoryCustomImpl implements ChatRepositoryCustom {
+public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 
     @Autowired
     private MongoTemplate mongoTemplate;
