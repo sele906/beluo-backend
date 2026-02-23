@@ -1,0 +1,30 @@
+package sele906.dev.beluo_backend.chat.repository;
+
+import com.mongodb.client.result.UpdateResult;
+import org.springframework.stereotype.Repository;
+import sele906.dev.beluo_backend.chat.domain.Message;
+
+import java.time.Instant;
+import java.util.List;
+
+public interface ChatRepositoryCustom {
+
+    //Chat
+
+    //요약 후 대화 횟수 증가
+    UpdateResult afterSummaryChatCount(String chatRoomNum);
+
+    //최근 10개 대화 불러오기
+    List<Message> requestRecentChat(String chatRoomNum);
+
+    //Summary
+
+    //요약 데이터 가져오기
+    Message summaryMessage(String sessionId);
+
+    //요약할 최근 대화
+    List<Message> recentMessagesToSummarize(String sessionId, Instant lastSummarizedAt);
+
+    //요약할 데이터 업데이트
+    UpdateResult summaryDataUpdate(String sessionId, String finishedSummary, Instant newLastSummarizedAt);
+}
