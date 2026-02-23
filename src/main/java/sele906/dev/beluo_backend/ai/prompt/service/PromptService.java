@@ -1,4 +1,4 @@
-package sele906.dev.beluo_backend.ai.prompt;
+package sele906.dev.beluo_backend.ai.prompt.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import sele906.dev.beluo_backend.ai.prompt.repository.PromptRepository;
 import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.chat.service.SummaryService;
 import java.util.*;
@@ -16,10 +17,10 @@ import java.util.*;
 public class PromptService {
 
     @Autowired
-    private MongoTemplate mongoTemplate;
+    private SummaryService summaryService;
 
     @Autowired
-    private SummaryService summaryService;
+    private PromptRepository promptRepository;
 
     //최종 프롬프트
     public List<Map<String, String>> buildPrompt(String sessionId) {
@@ -82,14 +83,9 @@ public class PromptService {
 
 
     private Message buildSystemPrompt(String sessionId) {
-        // 시스템 프롬프트 불러오기
-        Query systemQuery = new Query(
-                Criteria.where("sessionId").is(sessionId)
-                        .and("role").is("system")
-                        .and("type").is("system")
-        );
 
-        Message systemMessage = mongoTemplate.findOne(systemQuery, Message.class);
+        // 시스템 프롬프트 불러오기
+        Message systemMessage = promptRepository.systemMessage(sessionId);
 
         //예외처리
         if (systemMessage == null) {
@@ -102,13 +98,7 @@ public class PromptService {
     private String buildSummaryPrompt(String sessionId) {
 
         //요약 프롬프트 불러오기
-        Query summaryQuery = new Query(
-                Criteria.where("sessionId").is(sessionId)
-                        .and("role").is("system")
-                        .and("type").is("summary")
-        );
-
-        Message summaryMessage = mongoTemplate.findOne(summaryQuery, Message.class);
+        Message summaryMessage = promptRepository.summaryMessage(sessionId);
 
         //예외처리
         if (summaryMessage == null) {
@@ -142,7 +132,7 @@ public class PromptService {
             if (finishedSummary == null) {
                 throw new IllegalArgumentException("요약 응답 확인 불가");
             } else {
-                return null;
+                return finishedSummary;
             }
 
         } else {
@@ -152,14 +142,7 @@ public class PromptService {
 
     private List<Message> buildRecentMessagePrompt(String sessionId){
 
-        //요약 이후 쌓인 대화 수
-        Query summaryQuery = new Query(
-                Criteria.where("sessionId").is(sessionId)
-                        .and("role").is("system")
-                        .and("type").is("summary")
-        );
-
-        Message summaryMessage = mongoTemplate.findOne(summaryQuery, Message.class);
+        Message summaryMessage = promptRepository.summaryMessage(sessionId);
 
         //예외처리
         if (summaryMessage == null) {
@@ -168,17 +151,8 @@ public class PromptService {
 
         int sinceLastSummaryCount = summaryMessage.getSinceLastSummaryCount();
 
-        //최근 대화 불러오기
-        Query chatQuery = new Query(
-                Criteria.where("sessionId").is(sessionId)
-                        .and("role").in("user", "assistant")
-        );
-
-        chatQuery.with(Sort.by(Sort.Direction.DESC, "createdAt"));
-        chatQuery.limit(sinceLastSummaryCount);
-
-        List<Message> recentMessages = mongoTemplate.find(chatQuery, Message.class);
-        Collections.reverse(recentMessages);
+        //최근 대화 프롬프트 불러오기
+        List<Message> recentMessages = promptRepository.recentMessage(sessionId, sinceLastSummaryCount);
 
         //예외처리
         if (recentMessages.isEmpty()) {

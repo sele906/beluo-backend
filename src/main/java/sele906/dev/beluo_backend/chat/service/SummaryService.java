@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import sele906.dev.beluo_backend.ai.client.OpenAiClient;
 import sele906.dev.beluo_backend.chat.domain.Message;
+import sele906.dev.beluo_backend.chat.repository.ChatRepository;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -27,6 +28,9 @@ public class SummaryService {
     @Autowired
     private OpenAiClient openAiClient;
 
+    @Autowired
+    private ChatRepository chatRepository;
+
     //요약 채팅 api 실행
     public String summarizeChat(String sessionId) {
         //사용자 몰렸을 때 동시 중복 기능 실행 방지
@@ -36,13 +40,7 @@ public class SummaryService {
         List<Map<String, String>> sendSummaryMessage = new ArrayList<>();
 
         //요약 데이터 가져오기
-        Query summaryQuery = new Query(
-                Criteria.where("sessionId").is(sessionId)
-                        .and("role").is("system")
-                        .and("type").is("summary")
-        );
-
-        Message summaryMessage = mongoTemplate.findOne(summaryQuery, Message.class);
+        Message summaryMessage = chatRepository.summaryMessage(sessionId);
 
         //예외처리
         if (summaryMessage == null) {
@@ -52,18 +50,8 @@ public class SummaryService {
         String content = summaryMessage.getContent();
         Instant lastSummarizedAt = summaryMessage.getLastSummarizedAt();
 
-        //최근 10개 대화
-        Query query = new Query(
-                Criteria.where("sessionId").is(sessionId)
-                        .and("role").in("user", "assistant")
-                        .and("createdAt").gt(lastSummarizedAt)
-        );
-
-        query.with(Sort.by(Sort.Direction.ASC, "createdAt"));
-        query.limit(10);
-
-        List<Message> recentMessagesToSummarize =
-                mongoTemplate.find(query, Message.class);
+        //요약할 최근 대화
+        List<Message> recentMessagesToSummarize = chatRepository.recentMessagesToSummarize(sessionId, lastSummarizedAt);
 
         //예외처리
         if (recentMessagesToSummarize.isEmpty()) {
@@ -113,21 +101,8 @@ public class SummaryService {
 
         System.out.println("==================");
 
-
-        Query newSummaryQuery = new Query(
-                Criteria.where("sessionId").is(sessionId)
-                        .and("role").is("system")
-                        .and("type").is("summary")
-        );
-
-        Update summaryUpdate = new Update()
-                .set("content", finishedSummary)
-                .set("lastSummarizedAt", newLastSummarizedAt)
-                .set("sinceLastSummaryCount", 1)
-                .set("isSummarizing", false)
-                .inc("summaryVersion", 1);
-
-        UpdateResult result = mongoTemplate.updateFirst(newSummaryQuery, summaryUpdate, Message.class);
+        //요약 데이터 업데이트
+        UpdateResult result = chatRepository.summaryDataUpdate(sessionId, finishedSummary, newLastSummarizedAt);
 
         //예외처리
         if (result.getMatchedCount() == 0) {
