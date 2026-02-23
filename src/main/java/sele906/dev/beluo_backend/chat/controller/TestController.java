@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.chat.service.ChatService;
+import sele906.dev.beluo_backend.chat.service.ConversationService;
 
 import java.util.List;
 import java.util.Map;
@@ -17,12 +18,15 @@ public class TestController {
     @Autowired
     private ChatService chatService;
 
+    @Autowired
+    private ConversationService conversationService;
+
     @PostMapping("/testChatSend")
     public List<Message> testChatSend(@RequestBody Map<String, String> body) {
 
         //정보 가져오기
         String userMessage = body.get("message");
-        String chatRoomNum = "chatRoomNum";
+        String chatRoomNum = "c6a4b025-d994-4357-b183-376361c17da0";
 
         //유저 메세지 db에 저장
         //role
@@ -55,12 +59,12 @@ public class TestController {
 
     }
 
-    @GetMapping("/testCreateChatRoom")
-    public String testCreateChatRoom() {
-        //시스템 프롬프트
-        //빈 요약 프롬프트 만들기
-        //고유한 챗방 세션 생성
-        return "";
+    //캐릭터 상세정보 페이지와 이어짐
+    @GetMapping("/testCreateConversation")
+    public String testCreateConversation() {
+        String response = conversationService.createConversation();
+        System.out.println(response);
+        return response;
     }
 
     //최근 10개 대화 출력

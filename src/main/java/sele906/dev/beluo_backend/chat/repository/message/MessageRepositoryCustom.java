@@ -1,13 +1,12 @@
-package sele906.dev.beluo_backend.chat.repository;
+package sele906.dev.beluo_backend.chat.repository.message;
 
 import com.mongodb.client.result.UpdateResult;
-import org.springframework.stereotype.Repository;
 import sele906.dev.beluo_backend.chat.domain.Message;
 
 import java.time.Instant;
 import java.util.List;
 
-public interface ChatRepositoryCustom {
+public interface MessageRepositoryCustom {
 
     //Chat
 

@@ -23,7 +23,7 @@ public class Message {
     private String role; // system | user | assistant
     private String content;
     private Instant createdAt;
-    private String type;
+    private String type; // system | user | assistant
 
     //요약
     //나중에 분리 필요?

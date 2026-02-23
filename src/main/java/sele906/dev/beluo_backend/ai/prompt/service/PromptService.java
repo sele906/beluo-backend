@@ -48,14 +48,17 @@ public class PromptService {
 
         //요약 프롬프트 > 최종 프롬프트에 결합
         if (summaryPrompt != null) {
-            promptMessage.add(Map.of(
-                    "role", "system",
-                    "content", """
+            System.out.println("summaryPrompt: " + summaryPrompt);
+            if (!summaryPrompt.isEmpty()) {
+                promptMessage.add(Map.of(
+                        "role", "system",
+                        "content", """
                                     아래는 이전 대화의 요약이다.
                                     이 내용을 반드시 기억하고 대답해라.
 
                                     """ + summaryPrompt
-            ));
+                ));
+            }
         }
 
         //최근 대화 프롬프트 > 최종 프롬프트에 결합

@@ -2,15 +2,12 @@ package sele906.dev.beluo_backend.chat.service;
 
 import com.mongodb.client.result.UpdateResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import sele906.dev.beluo_backend.ai.client.OpenAiClient;
 import sele906.dev.beluo_backend.chat.domain.Message;
-import sele906.dev.beluo_backend.chat.repository.ChatRepository;
+import sele906.dev.beluo_backend.chat.repository.message.MessageRepository;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -29,7 +26,7 @@ public class SummaryService {
     private OpenAiClient openAiClient;
 
     @Autowired
-    private ChatRepository chatRepository;
+    private MessageRepository messageRepository;
 
     //요약 채팅 api 실행
     public String summarizeChat(String sessionId) {
@@ -40,7 +37,7 @@ public class SummaryService {
         List<Map<String, String>> sendSummaryMessage = new ArrayList<>();
 
         //요약 데이터 가져오기
-        Message summaryMessage = chatRepository.summaryMessage(sessionId);
+        Message summaryMessage = messageRepository.summaryMessage(sessionId);
 
         //예외처리
         if (summaryMessage == null) {
@@ -51,7 +48,7 @@ public class SummaryService {
         Instant lastSummarizedAt = summaryMessage.getLastSummarizedAt();
 
         //요약할 최근 대화
-        List<Message> recentMessagesToSummarize = chatRepository.recentMessagesToSummarize(sessionId, lastSummarizedAt);
+        List<Message> recentMessagesToSummarize = messageRepository.recentMessagesToSummarize(sessionId, lastSummarizedAt);
 
         //예외처리
         if (recentMessagesToSummarize.isEmpty()) {
@@ -102,7 +99,7 @@ public class SummaryService {
         System.out.println("==================");
 
         //요약 데이터 업데이트
-        UpdateResult result = chatRepository.summaryDataUpdate(sessionId, finishedSummary, newLastSummarizedAt);
+        UpdateResult result = messageRepository.summaryDataUpdate(sessionId, finishedSummary, newLastSummarizedAt);
 
         //예외처리
         if (result.getMatchedCount() == 0) {
