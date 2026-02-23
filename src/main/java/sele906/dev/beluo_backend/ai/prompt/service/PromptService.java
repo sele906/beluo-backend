@@ -9,6 +9,10 @@ import org.springframework.stereotype.Service;
 import sele906.dev.beluo_backend.ai.prompt.repository.PromptRepository;
 import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.chat.service.SummaryService;
+import sele906.dev.beluo_backend.exception.DataAccessException;
+import sele906.dev.beluo_backend.exception.PromptBuildException;
+import sele906.dev.beluo_backend.exception.SummaryException;
+
 import java.util.*;
 
 //프롬프트 조립하는 역할
@@ -88,7 +92,7 @@ public class PromptService {
 
         //예외처리
         if (systemMessage == null) {
-            throw new IllegalStateException("시스템 데이터 확인 불가");
+            throw new PromptBuildException("시스템 프롬프트 확인 불가");
         }
 
         return systemMessage;
@@ -101,7 +105,7 @@ public class PromptService {
 
         //예외처리
         if (summaryMessage == null) {
-            throw new IllegalArgumentException("요약 데이터 확인 불가");
+            throw new PromptBuildException("요약 프롬프트 확인 불가");
         }
 
         String content = summaryMessage.getContent();
@@ -129,7 +133,7 @@ public class PromptService {
 
             //예외처리
             if (finishedSummary == null) {
-                throw new IllegalArgumentException("요약 응답 확인 불가");
+                throw new PromptBuildException("요약 응답 확인 불가");
             } else {
                 return finishedSummary;
             }
@@ -145,7 +149,7 @@ public class PromptService {
 
         //예외처리
         if (summaryMessage == null) {
-            throw new IllegalArgumentException("요약 데이터 확인 불가");
+            throw new PromptBuildException("요약 데이터 확인 불가");
         }
 
         int sinceLastSummaryCount = summaryMessage.getSinceLastSummaryCount();
@@ -155,7 +159,7 @@ public class PromptService {
 
         //예외처리
         if (recentMessages.isEmpty()) {
-            throw new IllegalArgumentException("최근 대화 데이터 확인 불가");
+            throw new PromptBuildException("최근 대화 데이터 확인 불가");
         }
 
         //테스트용

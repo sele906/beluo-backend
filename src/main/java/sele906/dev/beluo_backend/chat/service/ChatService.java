@@ -9,6 +9,10 @@ import sele906.dev.beluo_backend.ai.client.OpenAiClient;
 import sele906.dev.beluo_backend.ai.prompt.service.PromptService;
 import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.chat.repository.message.MessageRepository;
+import sele906.dev.beluo_backend.exception.AiResponseException;
+import sele906.dev.beluo_backend.exception.DataAccessException;
+import sele906.dev.beluo_backend.exception.PromptBuildException;
+import sele906.dev.beluo_backend.exception.SummaryException;
 
 import java.time.Instant;
 import java.util.*;
@@ -18,9 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class ChatService {
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
 
     @Autowired
     private MessageRepository messageRepository;
@@ -46,7 +47,7 @@ public class ChatService {
 
         //예외처리
         if (prompt.isEmpty()) {
-            throw new IllegalArgumentException("프롬프트 확인 불가");
+            throw new PromptBuildException("프롬프트 확인 불가");
         }
 
         //모델 설정
@@ -56,7 +57,7 @@ public class ChatService {
 
         //예외처리
         if (reply == null) {
-            throw new IllegalArgumentException("API 응답 확인 불가");
+            throw new AiResponseException("API 응답 확인 불가");
         }
 
         return reply;
@@ -73,7 +74,7 @@ public class ChatService {
 
             return messageRepository.save(m);
         } catch (Exception e) {
-            throw new IllegalArgumentException(e);
+            throw new DataAccessException("메세지 저장 실패", e);
         }
     }
 
@@ -85,7 +86,7 @@ public class ChatService {
 
         //예외처리
         if (result.getMatchedCount() == 0) {
-            throw new IllegalStateException("요약 카운트 증가 실패");
+            throw new SummaryException("요약 카운트 증가 실패");
         }
     }
 
@@ -95,19 +96,16 @@ public class ChatService {
         //최근 10개 대화 불러오기
         List<Message> recentMessages = messageRepository.requestRecentChat(chatRoomNum);
 
+        for (Message r : recentMessages) {
+            System.out.println("최근 대화 테스트: " + r);
+        }
+
         //예외처리
         if (recentMessages.isEmpty()) {
-            throw new IllegalArgumentException("최근 대화 목록 확인 불가");
+            throw new DataAccessException("최근 대화 목록 확인 불가");
         }
 
         return recentMessages;
-    }
-
-    @PostConstruct
-    public void logMongoInfo() {
-        //테스트
-        System.out.println("Mongo DB = " + mongoTemplate.getDb().getName());
-        System.out.println("Collections = " + mongoTemplate.getDb().listCollectionNames().into(new ArrayList<>()));
     }
 
 }
