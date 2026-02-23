@@ -1,6 +1,8 @@
 package sele906.dev.beluo_backend.chat.controller;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,6 +11,7 @@ import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.chat.service.ChatService;
 import sele906.dev.beluo_backend.chat.service.ConversationService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,12 +24,15 @@ public class TestController {
     @Autowired
     private ConversationService conversationService;
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
     @PostMapping("/testChatSend")
     public List<Message> testChatSend(@RequestBody Map<String, String> body) {
 
         //정보 가져오기
         String userMessage = body.get("message");
-        String chatRoomNum = "c6a4b025-d994-4357-b183-376361c17da0";
+        String chatRoomNum = "chatRoomNum"; //초기세팅
 
         //유저 메세지 db에 저장
         //role
@@ -73,5 +79,12 @@ public class TestController {
 
         String chatRoomNum = "chatRoomNum";
         return chatService.requestRecentChat(chatRoomNum);
+    }
+
+    @PostConstruct
+    public void logMongoInfo() {
+        //테스트
+        System.out.println("Mongo DB = " + mongoTemplate.getDb().getName());
+        System.out.println("Collections = " + mongoTemplate.getDb().listCollectionNames().into(new ArrayList<>()));
     }
 }

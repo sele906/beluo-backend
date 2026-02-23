@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import sele906.dev.beluo_backend.ai.client.OpenAiClient;
 import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.chat.repository.message.MessageRepository;
+import sele906.dev.beluo_backend.exception.DataAccessException;
+import sele906.dev.beluo_backend.exception.SummaryException;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -41,7 +43,7 @@ public class SummaryService {
 
         //예외처리
         if (summaryMessage == null) {
-            throw new IllegalArgumentException("요약 데이터 확인 불가");
+            throw new DataAccessException("요약 데이터 확인 불가");
         }
 
         String content = summaryMessage.getContent();
@@ -52,7 +54,7 @@ public class SummaryService {
 
         //예외처리
         if (recentMessagesToSummarize.isEmpty()) {
-            throw new IllegalArgumentException("요약할 최근 대화 목록 확인 불가");
+            throw new DataAccessException("요약할 최근 대화 목록 확인 불가");
         }
 
         //테스트용
@@ -103,7 +105,7 @@ public class SummaryService {
 
         //예외처리
         if (result.getMatchedCount() == 0) {
-            throw new RuntimeException("요약 대화 데이터 업데이트 실패");
+            throw new SummaryException("요약 대화 데이터 업데이트 실패");
         }
 
         return finishedSummary;
