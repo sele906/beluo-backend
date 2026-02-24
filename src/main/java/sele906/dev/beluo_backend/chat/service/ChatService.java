@@ -94,6 +94,7 @@ public class ChatService {
     public List<Message> requestRecentChat(String chatRoomNum) {
 
         //최근 10개 대화 불러오기
+        //무조건 리밋 걸고 나중에 인덱스 추가할것
         List<Message> recentMessages = messageRepository.requestRecentChat(chatRoomNum);
 
         for (Message r : recentMessages) {
