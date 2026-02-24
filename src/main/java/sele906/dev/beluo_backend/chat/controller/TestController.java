@@ -28,11 +28,11 @@ public class TestController {
     private MongoTemplate mongoTemplate;
 
     @PostMapping("/testChatSend")
-    public List<Message> testChatSend(@RequestBody Map<String, String> body) {
+    public Map<String, String> testChatSend(@RequestBody Map<String, String> body) {
 
         //정보 가져오기
         String userMessage = body.get("message");
-        String chatRoomNum = "chatRoomNum"; //초기세팅
+        String chatRoomNum = "c6a4b025-d994-4357-b183-376361c17da0"; //초기세팅
 
         //유저 메세지 db에 저장
         //role
@@ -59,10 +59,7 @@ public class TestController {
         chatService.chatDataSave(aiRole, aiContent, chatRoomNum);
         chatService.afterSummaryChatCount(chatRoomNum);
 
-        //테스트용
-        //최근 10개 대화 출력
-        return chatService.requestRecentChat(chatRoomNum);
-
+        return Map.of("reply", aiContent);
     }
 
     //캐릭터 상세정보 페이지와 이어짐
