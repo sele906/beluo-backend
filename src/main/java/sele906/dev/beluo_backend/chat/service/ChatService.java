@@ -35,7 +35,7 @@ public class ChatService {
     private static final AtomicInteger counter = new AtomicInteger(0);
 
     //채팅 api 실행
-    public String sendChatApi(String userMessage, String chatRoomNum) {
+    public String sendChatApi(String userMessage, String sesionId) {
 
         //10번 테스트 제한
         if (counter.incrementAndGet() > 10) {
@@ -43,7 +43,7 @@ public class ChatService {
         }
 
         //프롬프트 작성
-        List<Map<String, String>> prompt = promptService.buildPrompt(chatRoomNum);
+        List<Map<String, String>> prompt = promptService.buildPrompt(sesionId);
 
         //예외처리
         if (prompt.isEmpty()) {
@@ -64,10 +64,10 @@ public class ChatService {
     }
 
     //채팅 내용 db에 저장
-    public Message chatDataSave(String role, String content, String chatRoomNum) {
+    public Message chatDataSave(String role, String content, String sesionId) {
         try {
             Message m = new Message();
-            m.setSessionId(chatRoomNum);
+            m.setSessionId(sesionId);
             m.setRole(role);
             m.setContent(content);
             m.setCreatedAt(Instant.now());
@@ -79,10 +79,10 @@ public class ChatService {
     }
 
     //요약 후 실행된 대화 카운트
-    public void afterSummaryChatCount(String chatRoomNum) {
+    public void afterSummaryChatCount(String sesionId) {
 
         //요약 후 대화 횟수 증가
-        UpdateResult result = messageRepository.afterSummaryChatCount(chatRoomNum);
+        UpdateResult result = messageRepository.afterSummaryChatCount(sesionId);
 
         //예외처리
         if (result.getMatchedCount() == 0) {
@@ -91,15 +91,11 @@ public class ChatService {
     }
 
     //최근 10개 대화 불러오기
-    public List<Message> requestRecentChat(String chatRoomNum) {
+    public List<Message> requestRecentChat(String sesionId) {
 
         //최근 10개 대화 불러오기
         //무조건 리밋 걸고 나중에 인덱스 추가할것
-        List<Message> recentMessages = messageRepository.requestRecentChat(chatRoomNum);
-
-        for (Message r : recentMessages) {
-            System.out.println("최근 대화 테스트: " + r);
-        }
+        List<Message> recentMessages = messageRepository.requestRecentChat(sesionId);
 
         //예외처리
         if (recentMessages.isEmpty()) {

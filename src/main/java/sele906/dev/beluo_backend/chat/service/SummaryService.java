@@ -71,9 +71,13 @@ public class SummaryService {
         sendSummaryMessage.add(Map.of(
                 "role", "system",
                 "content", """
-                                    이전에 요약된 내용과 함께 대화 내용을 요약해라
-
-                                    """ + content
+                                너는 대화 기록을 요약하는 전용 시스템이다.
+                                절대로 질문하지 마라.
+                                절대로 대화체로 말하지 마라.
+                                감정 표현을 하지 마라.
+                                아래 이전 요약과 새로운 대화를 하나의 요약 문단으로 정리해라.
+                                출력은 순수 요약 텍스트만 반환해라.
+                                """ + content
         ));
 
         for (Message m : recentMessagesToSummarize) {
@@ -85,6 +89,13 @@ public class SummaryService {
 
         //요약 프롬프트 출력
         String finishedSummary = openAiClient.chat(sendSummaryMessage);
+
+        //요약 확인 테스트
+        System.out.println("=========요약 확인 테스트=========");
+
+        System.out.println(finishedSummary);
+
+        System.out.println("==================");
 
         //요약 데이터 업데이트
         //요약 날짜를 10개 최근 대화 중 가장 최근 날짜로 수정
