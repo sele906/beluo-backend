@@ -3,10 +3,8 @@ package sele906.dev.beluo_backend.chat.controller;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import sele906.dev.beluo_backend.chat.domain.Conversation;
 import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.chat.service.ChatService;
 import sele906.dev.beluo_backend.chat.service.ConversationService;
@@ -32,7 +30,7 @@ public class TestController {
 
         //정보 가져오기
         String userMessage = body.get("message");
-        String chatRoomNum = "c6a4b025-d994-4357-b183-376361c17da0"; //초기세팅
+        String sessionId = body.get("sessionId");
 
         //유저 메세지 db에 저장
         //role
@@ -42,11 +40,11 @@ public class TestController {
         String userContent = userMessage;
 
         //db 저장
-        chatService.chatDataSave(userRole, userContent, chatRoomNum);
-        chatService.afterSummaryChatCount(chatRoomNum);
+        chatService.chatDataSave(userRole, userContent, sessionId);
+        chatService.afterSummaryChatCount(sessionId);
 
         //프롬프트에 최근 대화 합쳐서 api 보내기
-        String reply = chatService.sendChatApi(userMessage, chatRoomNum);
+        String reply = chatService.sendChatApi(userMessage, sessionId);
 
         //응답 메세지 db에 저장
         //role
@@ -56,8 +54,8 @@ public class TestController {
         String aiContent = reply;
 
         //db 저장
-        chatService.chatDataSave(aiRole, aiContent, chatRoomNum);
-        chatService.afterSummaryChatCount(chatRoomNum);
+        chatService.chatDataSave(aiRole, aiContent, sessionId);
+        chatService.afterSummaryChatCount(sessionId);
 
         return Map.of("reply", aiContent);
     }
@@ -65,18 +63,29 @@ public class TestController {
     //캐릭터 상세정보 페이지와 이어짐
     @GetMapping("/testCreateConversation")
     public String testCreateConversation() {
-        String response = conversationService.createConversation();
-        System.out.println(response);
-        return response;
+        return conversationService.createConversation();
+    }
+
+    //최근 10개 채팅방 출력
+    @GetMapping("/testGetConversationList")
+    public List<Conversation> testGetConversationList() {
+        return conversationService.conversationList();
     }
 
     //최근 10개 대화 출력
-    @GetMapping("/testFind")
-    public List<Message> testFind() {
-
-        String chatRoomNum = "chatRoomNum";
-        return chatService.requestRecentChat(chatRoomNum);
+    @GetMapping("/testGetMessageList")
+    public List<Message> testGetMessageList(@RequestParam String sessionId) {
+        return chatService.requestRecentChat(sessionId);
     }
+
+
+//    //최근 10개 대화 출력
+//    @GetMapping("/testFind")
+//    public List<Message> testFind() {
+//
+//        String sessionId = "e53e79df-f476-4245-a3fc-4ffd31b63df6"; //초기세팅
+//        return chatService.requestRecentChat(sessionId);
+//    }
 
     @PostConstruct
     public void logMongoInfo() {

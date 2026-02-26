@@ -26,16 +26,16 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
     //요약 후 대화 횟수 증가
     public UpdateResult afterSummaryChatCount(String chatRoomNum) {
 
-        Query newSummaryQuery = new Query(
+        Query query = new Query(
                 Criteria.where("sessionId").is(chatRoomNum)
                         .and("role").is("system")
                         .and("type").is("summary")
         );
 
-        Update summaryUpdate = new Update()
+        Update update = new Update()
                 .inc("sinceLastSummaryCount", 1);
 
-        return mongoTemplate.updateFirst(newSummaryQuery, summaryUpdate, Message.class);
+        return mongoTemplate.updateFirst(query, update, Message.class);
     }
 
     //최근 10개 대화 불러오기
@@ -98,6 +98,4 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 
         return mongoTemplate.updateFirst(newSummaryQuery, summaryUpdate, Message.class);
     }
-
-    //ChatRoom
 }

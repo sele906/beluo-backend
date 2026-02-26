@@ -83,6 +83,13 @@ public class SummaryService {
         //요약 프롬프트 출력
         String finishedSummary = openAiClient.chat(sendSummaryMessage);
 
+        //요약 확인 테스트
+        System.out.println("=========요약 확인 테스트=========");
+
+        System.out.println(finishedSummary);
+
+        System.out.println("==================");
+
         //요약 데이터 업데이트
         //요약 날짜를 10개 최근 대화 중 가장 최근 날짜로 수정
         Instant newLastSummarizedAt =

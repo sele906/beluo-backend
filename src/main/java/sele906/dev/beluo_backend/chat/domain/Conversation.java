@@ -23,6 +23,7 @@ public class Conversation {
     @Id
     private ObjectId id;
     private String sessionId;
+    private String conversationName;
     private Instant createdAt;
 
     private String characterName;
