@@ -1,4 +1,4 @@
-package sele906.dev.beluo_backend.chat.domain;
+package sele906.dev.beluo_backend.character.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,31 +7,26 @@ import lombok.Setter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import sele906.dev.beluo_backend.chat.domain.Message;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ser.std.ToStringSerializer;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "conversation")
-public class Conversation {
+@Document(collection = "character")
+public class Character {
+
     @Id
     private ObjectId id;
-    private String sessionId;
     private Instant createdAt;
 
-    private String conversationName;
-
-    private String characterId;
-    private String characterName;
     //private String characterProfile;
-    //private String userId;
-    private String userName;
-    //private String userProfile;
-
+    private String characterName;
+    private String personality;
+    private String firstMessage;
+    private List<String> tag;
 }

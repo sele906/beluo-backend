@@ -4,14 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import sele906.dev.beluo_backend.character.domain.Character;
+import sele906.dev.beluo_backend.character.repository.CharacterRepository;
 import sele906.dev.beluo_backend.chat.domain.Conversation;
 import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.chat.repository.conversation.ConversationRepository;
 import sele906.dev.beluo_backend.chat.repository.message.MessageRepository;
 import sele906.dev.beluo_backend.exception.DataAccessException;
+import sele906.dev.beluo_backend.exception.InvalidRequestException;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 //채팅방 초기상태 세팅하는 역할
@@ -23,20 +27,27 @@ public class ConversationService {
     private ConversationRepository conversationRepository;
 
     @Autowired
+    private CharacterRepository characterRepository;
+
+    @Autowired
     private MessageRepository messageRepository;
 
     //빈 채팅방 생성
     public String createConversation() {
+
+        Character character = characterRepository.findById("69a6a1701fa5f64e0fe0e334")
+                .orElseThrow(() -> new InvalidRequestException("캐릭터를 찾을 수 없습니다")); //초기세팅
 
         //conversation 데이터 생성
         Conversation c = new Conversation();
         c.setSessionId(UUID.randomUUID().toString());
         c.setCreatedAt(Instant.now());
 
-        //캐릭터 이름
-        c.setCharacterName("connor"); //초기세팅
+        //캐릭터
+        c.setCharacterId(String.valueOf(character.getId()));
+        c.setCharacterName(character.getCharacterName());
         //캐릭터 프로필 사진(나중에 추가)
-        //c.setCharacterProfile("");
+        //c.setCharacterProfile(character.getCharacterProfile());
 
         //유저 이름
         c.setUserName("userName"); //초기세팅
@@ -44,7 +55,7 @@ public class ConversationService {
         //c.setUserProfile("");
 
         //채팅방 이름
-        c.setConversationName(c.getCharacterName() + "와의 새 대화");
+        c.setConversationName(character.getCharacterName() + "와의 새 대화");
 
         //db에 저장
         try {
@@ -61,7 +72,7 @@ public class ConversationService {
         systemMessage.setType("system");
 
         //시스템 프롬프트 + 캐릭터 프롬프트
-        systemMessage.setContent("코너는 디트로이트 비컴 휴먼의 친절한 안드로이드이다"); //초기세팅
+        systemMessage.setContent(character.getPersonality()); //초기세팅
 
         //db 저장
         try {
@@ -96,7 +107,7 @@ public class ConversationService {
         m.setCreatedAt(Instant.now());
 
         //첫 메세지
-        m.setContent("안녕하세요, 저는 사이버라이프에서 만들어진 안드로이드 코너입니다"); //초기세팅
+        m.setContent(character.getFirstMessage());
 
         try {
             messageRepository.save(m);
@@ -112,11 +123,6 @@ public class ConversationService {
     //채팅방 리스트 불러오기
     public List<Conversation> conversationList() {
         List<Conversation> recentConversations = conversationRepository.requestRecentConversations();
-
-        //예외처리
-        if (recentConversations.isEmpty()) {
-            throw new DataAccessException("최근 채팅방 목록 확인 불가");
-        }
 
         return recentConversations;
     }
