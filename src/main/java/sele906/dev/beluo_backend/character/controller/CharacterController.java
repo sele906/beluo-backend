@@ -29,10 +29,11 @@ public class CharacterController {
 
     //최근 10개 캐릭터 출력
     @GetMapping("/list")
-    public String getCharacterList() {
-        return characterService.getCharacterList().toString();
+    public Map<String, Object> getCharacterList() {
+        return characterService.getCharacterList();
     }
 
+    //캐릭터 상세 페이지
     @GetMapping("/detail")
     public Character characterDetail(@RequestParam String id) {
         return characterService.getCharacterDetail(id);

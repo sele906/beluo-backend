@@ -29,7 +29,7 @@ public class Conversation {
 
     private String characterId;
     private String characterName;
-    //private String characterProfile;
+    private String characterThumbFilePath;
     //private String userId;
     private String userName;
     //private String userProfile;

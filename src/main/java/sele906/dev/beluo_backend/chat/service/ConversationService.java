@@ -14,9 +14,7 @@ import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.InvalidRequestException;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 //채팅방 초기상태 세팅하는 역할
 
@@ -33,9 +31,9 @@ public class ConversationService {
     private MessageRepository messageRepository;
 
     //빈 채팅방 생성
-    public String createConversation() {
+    public String createConversation(String characterId) {
 
-        Character character = characterRepository.findById("69a6a1701fa5f64e0fe0e334")
+        Character character = characterRepository.findById(characterId)
                 .orElseThrow(() -> new InvalidRequestException("캐릭터를 찾을 수 없습니다")); //초기세팅
 
         //conversation 데이터 생성
@@ -46,8 +44,7 @@ public class ConversationService {
         //캐릭터
         c.setCharacterId(String.valueOf(character.getId()));
         c.setCharacterName(character.getCharacterName());
-        //캐릭터 프로필 사진(나중에 추가)
-        //c.setCharacterProfile(character.getCharacterProfile());
+        c.setCharacterThumbFilePath(character.getCharacterThumbFilePath());
 
         //유저 이름
         c.setUserName("userName"); //초기세팅
@@ -109,21 +106,49 @@ public class ConversationService {
         //첫 메세지
         m.setContent(character.getFirstMessage());
 
+        //db에 저장
         try {
             messageRepository.save(m);
         } catch (Exception e) {
             throw new DataAccessException("메세지 저장 실패", e);
         }
 
-        //db에 저장
-
-        return "success";
+        return c.getSessionId();
     }
 
     //채팅방 리스트 불러오기
     public List<Conversation> conversationList() {
-        List<Conversation> recentConversations = conversationRepository.requestRecentConversations();
+        List<Conversation> recentConversations;
+        try {
+            recentConversations = conversationRepository.requestRecentConversations();
+        } catch (Exception e) {
+            throw new DataAccessException("채팅방 리스트 불러오기 실패", e);
+        }
 
-        return recentConversations;
+        return recentConversations != null ? recentConversations : List.of();
+    }
+
+    public Map<String, Object> getConversationDetail(String sessionId) {
+
+        Conversation conv = conversationRepository.findBySessionId(sessionId)
+                .orElseThrow(() -> new InvalidRequestException("대화방을 찾을 수 없습니다"));
+
+        List<Message> messages;
+
+        try {
+            messages = messageRepository.requestRecentChat(sessionId);
+        } catch (Exception e) {
+            throw new DataAccessException("대화방 정보 불러오기 실패", e);
+        }
+
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("sessionId", sessionId);
+        map.put("conversationName", conv.getConversationName());
+        map.put("characterName", conv.getCharacterName());
+        map.put("characterThumbFilePath", conv.getCharacterThumbFilePath());
+        map.put("messages", messages != null ? messages : List.of());
+
+        return map;
     }
 }
