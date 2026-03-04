@@ -21,10 +21,12 @@ import java.util.List;
 public class Character {
 
     @Id
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
     private Instant createdAt;
 
-    //private String characterProfile;
+    private String characterFilePath;
+    private String characterThumbFilePath;
     private String characterName;
     private String personality;
     private String firstMessage;

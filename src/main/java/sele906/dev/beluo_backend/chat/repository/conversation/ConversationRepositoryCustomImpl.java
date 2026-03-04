@@ -30,7 +30,8 @@ public class ConversationRepositoryCustomImpl implements ConversationRepositoryC
         query.fields()
                 .include("sessionId")
                 .include("conversationName")
-                .include("characterName");
+                .include("characterName")
+                .include("characterThumbFilePath");
 
         List<Conversation> requestRecentConversations = mongoTemplate.find(query, Conversation.class);
         Collections.reverse(requestRecentConversations);

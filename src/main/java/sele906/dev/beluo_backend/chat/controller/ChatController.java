@@ -52,9 +52,9 @@ public class ChatController {
     }
 
     //최근 10개 대화 출력
-    @GetMapping("/messages")
-    public List<Message> getMessageList(@RequestParam String sessionId) {
-        return chatService.requestRecentChat(sessionId);
-    }
+//    @GetMapping("/messages")
+//    public List<Message> getMessageList(@RequestParam String sessionId) {
+//        return chatService.requestRecentChat(sessionId);
+//    }
 
 }
