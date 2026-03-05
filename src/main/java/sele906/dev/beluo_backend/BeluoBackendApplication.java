@@ -2,7 +2,6 @@ package sele906.dev.beluo_backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.mongodb.autoconfigure.MongoAutoConfiguration;
 
 @SpringBootApplication
 public class BeluoBackendApplication {

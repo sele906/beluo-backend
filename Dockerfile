@@ -5,10 +5,8 @@ COPY . .
 RUN gradle build -x test
 
 # 2단계: 실행
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
-COPY --from=builder /app/build/libs/*.jar app.jar
-
+COPY --from=builder /app/build/libs/beluo-backend-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-
 ENTRYPOINT ["java","-jar","app.jar"]
