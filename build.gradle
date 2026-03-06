@@ -37,6 +37,7 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.json:json:20231013'
+	implementation 'com.cloudinary:cloudinary-http44:1.36.0'
 }
 
 tasks.named('test') {

@@ -31,7 +31,7 @@ public class ConversationRepositoryCustomImpl implements ConversationRepositoryC
                 .include("sessionId")
                 .include("conversationName")
                 .include("characterName")
-                .include("characterThumbFilePath");
+                .include("characterImgUrl");
 
         List<Conversation> requestRecentConversations = mongoTemplate.find(query, Conversation.class);
         Collections.reverse(requestRecentConversations);

@@ -44,7 +44,7 @@ public class ConversationService {
         //캐릭터
         c.setCharacterId(String.valueOf(character.getId()));
         c.setCharacterName(character.getCharacterName());
-        c.setCharacterThumbFilePath(character.getCharacterThumbFilePath());
+        c.setCharacterImgUrl(character.getCharacterImgUrl());
 
         //유저 이름
         c.setUserName("userName"); //초기세팅
@@ -146,7 +146,7 @@ public class ConversationService {
         map.put("sessionId", sessionId);
         map.put("conversationName", conv.getConversationName());
         map.put("characterName", conv.getCharacterName());
-        map.put("characterThumbFilePath", conv.getCharacterThumbFilePath());
+        map.put("characterImgUrl", conv.getCharacterImgUrl());
         map.put("messages", messages != null ? messages : List.of());
 
         return map;

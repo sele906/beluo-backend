@@ -29,7 +29,8 @@ public class Conversation {
 
     private String characterId;
     private String characterName;
-    private String characterThumbFilePath;
+    private String characterImgUrl;
+
     //private String userId;
     private String userName;
     //private String userProfile;
