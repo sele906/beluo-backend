@@ -1,11 +1,15 @@
 package sele906.dev.beluo_backend.character.service;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import sele906.dev.beluo_backend.character.domain.Character;
 import sele906.dev.beluo_backend.character.repository.CharacterRepository;
 import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.InvalidRequestException;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
@@ -13,33 +17,35 @@ import java.util.*;
 public class CharacterService {
 
     @Autowired
+    private Cloudinary cloudinary;
+
+    @Autowired
     private CharacterRepository characterRepository;
 
-    public String createCharacter() {
-        //character 데이터 생성
+    public String createCharacter(Character character, MultipartFile file) throws IOException {
+
         Character c = new Character();
         c.setCreatedAt(Instant.now());
 
-        c.setCharacterName("connor"); //초기세팅
-        c.setCharacterFilePath("/beluo/character/connor.jpg"); //초기세팅
-        c.setCharacterThumbFilePath("/beluo/character/thumb/connor.jpg"); //초기세팅
-        c.setPersonality("코너는 디트로이트 비컴 휴먼에 나오는 친절한 안드로이드이다"); //초기세팅
-        c.setFirstMessage("안녕하세요, 저는 사이버라이프에서 만들어진 안드로이드 코너입니다"); //초기세팅
+        c.setCharacterName(character.getCharacterName());
+        c.setSummary(character.getSummary());
+        c.setPersonality(character.getPersonality());
+        c.setFirstMessage(character.getFirstMessage());
+        c.setTag(character.getTag());
 
-        List<String> tag = new ArrayList<>(); //초기세팅
-        tag.add("game");
-        tag.add("android");
+        // 파일 처리
+        Map result = cloudinary.uploader().upload(
+                file.getBytes(),
+                ObjectUtils.asMap("folder", "character")
+        );
+        c.setCharacterImgUrl((String) result.get("secure_url"));
 
-        c.setTag(tag);
-
-        //db에 저장
         try {
-            characterRepository.save(c);
+            Character saved = characterRepository.save(c);
+            return saved.getId().toString();
         } catch (Exception e) {
             throw new DataAccessException("캐릭터 세팅 저장 실패", e);
         }
-
-        return "success";
     }
 
     public Map<String, Object> getCharacterList() {

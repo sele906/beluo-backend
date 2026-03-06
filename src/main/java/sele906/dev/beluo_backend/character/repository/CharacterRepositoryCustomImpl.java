@@ -29,7 +29,7 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
 
         query.fields()
                 .include("createdAt")
-                .include("characterFilePath")
+                .include("characterImgUrl")
                 .include("characterName")
                 .include("personality")
                 .include("tag");

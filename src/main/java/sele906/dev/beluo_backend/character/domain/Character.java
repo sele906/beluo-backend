@@ -25,9 +25,10 @@ public class Character {
     private ObjectId id;
     private Instant createdAt;
 
-    private String characterFilePath;
-    private String characterThumbFilePath;
+    private String characterImgUrl;
     private String characterName;
+
+    private String summary;
     private String personality;
     private String firstMessage;
     private List<String> tag;
