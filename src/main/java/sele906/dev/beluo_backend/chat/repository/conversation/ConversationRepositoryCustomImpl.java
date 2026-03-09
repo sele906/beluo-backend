@@ -22,9 +22,9 @@ public class ConversationRepositoryCustomImpl implements ConversationRepositoryC
     //채팅방 리스트 불러오기
     public List<Conversation> requestRecentConversations() {
         Query query = new Query(
-                Criteria.where("createdAt").lt(Instant.now())
+                Criteria.where("lastChatAt").lt(Instant.now())
         );
-        query.with(Sort.by(Sort.Direction.DESC, "createdAt"));
+        query.with(Sort.by(Sort.Direction.DESC, "lastChatAt"));
         query.limit(10);
 
         query.fields()
@@ -34,7 +34,6 @@ public class ConversationRepositoryCustomImpl implements ConversationRepositoryC
                 .include("characterImgUrl");
 
         List<Conversation> requestRecentConversations = mongoTemplate.find(query, Conversation.class);
-        Collections.reverse(requestRecentConversations);
 
         return requestRecentConversations;
     }

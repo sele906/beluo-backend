@@ -35,7 +35,7 @@ public class ChatController {
         chatService.afterSummaryChatCount(sessionId);
 
         //프롬프트에 최근 대화 합쳐서 api 보내기
-        String reply = chatService.sendChatApi(userMessage, sessionId);
+        String reply = chatService.sendChatApi(sessionId);
 
         //응답 메세지 db에 저장
         //role
