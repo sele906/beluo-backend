@@ -35,7 +35,6 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
                 .include("tag");
 
         List<Character> requestRecentCharacters = mongoTemplate.find(query, Character.class);
-        Collections.reverse(requestRecentCharacters);
 
         return requestRecentCharacters;
     }

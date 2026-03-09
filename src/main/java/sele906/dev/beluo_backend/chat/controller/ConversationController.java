@@ -20,13 +20,13 @@ public class ConversationController {
 
     //캐릭터 상세정보 페이지와 이어짐
     @GetMapping("/create")
-    public String testCreateConversation(@RequestParam String characterId) {
+    public String createConversation(@RequestParam String characterId) {
         return conversationService.createConversation(characterId);
     }
 
     //최근 10개 채팅방 출력
     @GetMapping("/list")
-    public List<Conversation> testGetConversationList() {
+    public List<Conversation> getConversationList() {
         return conversationService.conversationList();
     }
 
