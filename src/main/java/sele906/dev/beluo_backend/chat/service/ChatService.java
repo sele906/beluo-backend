@@ -7,7 +7,9 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import sele906.dev.beluo_backend.ai.client.OpenAiClient;
 import sele906.dev.beluo_backend.ai.prompt.service.PromptService;
+import sele906.dev.beluo_backend.chat.domain.Conversation;
 import sele906.dev.beluo_backend.chat.domain.Message;
+import sele906.dev.beluo_backend.chat.repository.conversation.ConversationRepository;
 import sele906.dev.beluo_backend.chat.repository.message.MessageRepository;
 import sele906.dev.beluo_backend.exception.AiResponseException;
 import sele906.dev.beluo_backend.exception.DataAccessException;
@@ -27,6 +29,9 @@ public class ChatService {
     private MessageRepository messageRepository;
 
     @Autowired
+    private ConversationRepository conversationRepository;
+
+    @Autowired
     private OpenAiClient openAiClient;
 
     @Autowired
@@ -35,7 +40,7 @@ public class ChatService {
     private static final AtomicInteger counter = new AtomicInteger(0);
 
     //채팅 api 실행
-    public String sendChatApi(String userMessage, String sessionId) {
+    public String sendChatApi(String sessionId) {
 
         //10번 테스트 제한
         if (counter.incrementAndGet() > 10) {
@@ -72,6 +77,11 @@ public class ChatService {
             m.setContent(content);
             m.setCreatedAt(Instant.now());
 
+            //대화 db에 최신 대화 시간 저장
+            Conversation conversation = conversationRepository.findBySessionId(sessionId).orElseThrow();
+            conversation.setLastChatAt(m.getCreatedAt());
+            conversationRepository.save(conversation);
+
             return messageRepository.save(m);
         } catch (Exception e) {
             throw new DataAccessException("메세지 저장 실패", e);
@@ -98,7 +108,12 @@ public class ChatService {
                 : Instant.now(); // before 없으면 현재 시각 기준
 
         int limit = 10;
-        List<Message> messages = messageRepository.requestChatBefore(sessionId, cursor, limit);
+        List<Message> messages;
+        try {
+            messages = messageRepository.requestChatBefore(sessionId, cursor, limit);
+        } catch (Exception e) {
+            throw new DataAccessException("메세지 불러오기 실패", e);
+        }
 
         Map<String, Object> result = new HashMap<>();
         result.put("messages", messages);

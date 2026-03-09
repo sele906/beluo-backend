@@ -24,6 +24,7 @@ public class Conversation {
     private ObjectId id;
     private String sessionId;
     private Instant createdAt;
+    private Instant lastChatAt;
 
     private String conversationName;
 

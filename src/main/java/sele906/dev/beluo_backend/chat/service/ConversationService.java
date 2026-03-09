@@ -40,6 +40,7 @@ public class ConversationService {
         Conversation c = new Conversation();
         c.setSessionId(UUID.randomUUID().toString());
         c.setCreatedAt(Instant.now());
+        c.setLastChatAt(Instant.now());
 
         //캐릭터
         c.setCharacterId(String.valueOf(character.getId()));
@@ -134,21 +135,12 @@ public class ConversationService {
         Conversation conv = conversationRepository.findBySessionId(sessionId)
                 .orElseThrow(() -> new InvalidRequestException("대화방을 찾을 수 없습니다"));
 
-//        List<Message> messages;
-//
-//        try {
-//            messages = messageRepository.requestRecentChat(sessionId);
-//        } catch (Exception e) {
-//            throw new DataAccessException("대화방 정보 불러오기 실패", e);
-//        }
-
         Map<String, Object> map = new HashMap<>();
 
         map.put("sessionId", sessionId);
         map.put("conversationName", conv.getConversationName());
         map.put("characterName", conv.getCharacterName());
         map.put("characterImgUrl", conv.getCharacterImgUrl());
-//        map.put("messages", messages != null ? messages : List.of());
 
         return map;
     }

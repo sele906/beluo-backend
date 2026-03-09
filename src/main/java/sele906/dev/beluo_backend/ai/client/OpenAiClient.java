@@ -35,7 +35,7 @@ public class OpenAiClient {
 
         Map<String, Object> body = Map.of(
                 "model", "gpt-4.1-mini",
-                "temperature", 0.5,
+                "temperature", 0.7,
                 "max_tokens", 150,
                 "messages", messages
         );
