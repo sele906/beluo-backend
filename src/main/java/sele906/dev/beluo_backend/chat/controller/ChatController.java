@@ -51,10 +51,13 @@ public class ChatController {
         return Map.of("reply", aiContent);
     }
 
-    //최근 10개 대화 출력
-//    @GetMapping("/messages")
-//    public List<Message> getMessageList(@RequestParam String sessionId) {
-//        return chatService.requestRecentChat(sessionId);
-//    }
+    //메세지 출력
+    @GetMapping("/messages")
+    public Map<String, Object> getMessageList(
+            @RequestParam String sessionId,
+            @RequestParam(required = false) String before
+    ) {
+        return chatService.requestRecentChat(sessionId, before);
+    }
 
 }

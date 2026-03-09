@@ -11,10 +11,10 @@ public interface MessageRepositoryCustom {
     //Chat
 
     //요약 후 대화 횟수 증가
-    UpdateResult afterSummaryChatCount(String chatRoomNum);
+    UpdateResult afterSummaryChatCount(String sessionId);
 
     //최근 10개 대화 불러오기
-    List<Message> requestRecentChat(String chatRoomNum);
+    List<Message> requestChatBefore(String sessionId, Instant before, int limit);
 
     //Summary
 

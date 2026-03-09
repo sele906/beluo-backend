@@ -35,7 +35,7 @@ public class ChatService {
     private static final AtomicInteger counter = new AtomicInteger(0);
 
     //채팅 api 실행
-    public String sendChatApi(String userMessage, String sesionId) {
+    public String sendChatApi(String userMessage, String sessionId) {
 
         //10번 테스트 제한
         if (counter.incrementAndGet() > 10) {
@@ -43,7 +43,7 @@ public class ChatService {
         }
 
         //프롬프트 작성
-        List<Map<String, String>> prompt = promptService.buildPrompt(sesionId);
+        List<Map<String, String>> prompt = promptService.buildPrompt(sessionId);
 
         //예외처리
         if (prompt.isEmpty()) {
@@ -64,10 +64,10 @@ public class ChatService {
     }
 
     //채팅 내용 db에 저장
-    public Message chatDataSave(String role, String content, String sesionId) {
+    public Message chatDataSave(String role, String content, String sessionId) {
         try {
             Message m = new Message();
-            m.setSessionId(sesionId);
+            m.setSessionId(sessionId);
             m.setRole(role);
             m.setContent(content);
             m.setCreatedAt(Instant.now());
@@ -79,10 +79,10 @@ public class ChatService {
     }
 
     //요약 후 실행된 대화 카운트
-    public void afterSummaryChatCount(String sesionId) {
+    public void afterSummaryChatCount(String sessionId) {
 
         //요약 후 대화 횟수 증가
-        UpdateResult result = messageRepository.afterSummaryChatCount(sesionId);
+        UpdateResult result = messageRepository.afterSummaryChatCount(sessionId);
 
         //예외처리
         if (result.getMatchedCount() == 0) {
@@ -90,19 +90,26 @@ public class ChatService {
         }
     }
 
-    //최근 10개 대화 불러오기
-    public List<Message> requestRecentChat(String sesionId) {
+    //무한 스크롤 대화 불러오기
+    public Map<String, Object> requestRecentChat(String sessionId, String before) {
 
-        //최근 10개 대화 불러오기
-        //무조건 리밋 걸고 나중에 인덱스 추가할것
-        List<Message> recentMessages = messageRepository.requestRecentChat(sesionId);
+        Instant cursor = (before != null && !before.isBlank())
+                ? Instant.parse(before)
+                : Instant.now(); // before 없으면 현재 시각 기준
 
-        //예외처리
-        if (recentMessages.isEmpty()) {
-            throw new DataAccessException("최근 대화 목록 확인 불가");
+        int limit = 10;
+        List<Message> messages = messageRepository.requestChatBefore(sessionId, cursor, limit);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("messages", messages);
+        result.put("hasMore", messages.size() == limit); // 10개면 더 있을 수 있음
+
+        // 다음 커서 - 가장 오래된 메시지의 createdAt
+        if (!messages.isEmpty()) {
+            result.put("nextCursor", messages.get(0).getCreatedAt().toString());
         }
 
-        return recentMessages;
+        return result;
     }
 
 }

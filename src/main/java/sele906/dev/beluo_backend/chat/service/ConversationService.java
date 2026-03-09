@@ -128,18 +128,19 @@ public class ConversationService {
         return recentConversations != null ? recentConversations : List.of();
     }
 
+    //빈 채팅방 정보 세팅
     public Map<String, Object> getConversationDetail(String sessionId) {
 
         Conversation conv = conversationRepository.findBySessionId(sessionId)
                 .orElseThrow(() -> new InvalidRequestException("대화방을 찾을 수 없습니다"));
 
-        List<Message> messages;
-
-        try {
-            messages = messageRepository.requestRecentChat(sessionId);
-        } catch (Exception e) {
-            throw new DataAccessException("대화방 정보 불러오기 실패", e);
-        }
+//        List<Message> messages;
+//
+//        try {
+//            messages = messageRepository.requestRecentChat(sessionId);
+//        } catch (Exception e) {
+//            throw new DataAccessException("대화방 정보 불러오기 실패", e);
+//        }
 
         Map<String, Object> map = new HashMap<>();
 
@@ -147,7 +148,7 @@ public class ConversationService {
         map.put("conversationName", conv.getConversationName());
         map.put("characterName", conv.getCharacterName());
         map.put("characterImgUrl", conv.getCharacterImgUrl());
-        map.put("messages", messages != null ? messages : List.of());
+//        map.put("messages", messages != null ? messages : List.of());
 
         return map;
     }

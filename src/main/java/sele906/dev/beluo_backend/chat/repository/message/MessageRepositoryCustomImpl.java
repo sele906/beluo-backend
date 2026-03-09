@@ -24,10 +24,10 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
     //Chat
 
     //요약 후 대화 횟수 증가
-    public UpdateResult afterSummaryChatCount(String chatRoomNum) {
+    public UpdateResult afterSummaryChatCount(String sessionId) {
 
         Query query = new Query(
-                Criteria.where("sessionId").is(chatRoomNum)
+                Criteria.where("sessionId").is(sessionId)
                         .and("role").is("system")
                         .and("type").is("summary")
         );
@@ -39,18 +39,21 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
     }
 
     //최근 10개 대화 불러오기
-    public List<Message> requestRecentChat(String chatRoomNum) {
+    @Override
+    public List<Message> requestChatBefore(String sessionId, Instant before, int limit) {
+
         Query query = new Query(
-                Criteria.where("sessionId").is(chatRoomNum)
+                Criteria.where("sessionId").is(sessionId)
                         .and("role").in("user", "assistant")
+                        .and("createdAt").lt(before)
         );
         query.with(Sort.by(Sort.Direction.DESC, "createdAt"));
-        query.limit(10);
+        query.limit(limit);
 
-        List<Message> recentMessages = mongoTemplate.find(query, Message.class);
-        Collections.reverse(recentMessages);
+        List<Message> messages = mongoTemplate.find(query, Message.class);
+        Collections.reverse(messages);
 
-        return recentMessages;
+        return messages;
     }
 
     //Summary
