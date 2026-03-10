@@ -1,7 +1,14 @@
 package sele906.dev.beluo_backend.auth.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
 public class TokenResponse {
-//    private String accessToken;
-//    private String refreshToken;
-//    private long accessTokenExpiresIn;
+    private String accessToken;
+    private String refreshToken;
 }
