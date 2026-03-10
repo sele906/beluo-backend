@@ -16,7 +16,10 @@ public class JwtService {
     private String secret;
 
     @Value("${jwt.access.token.expiration}")
-    private long expiration;
+    private long accessExpiration;
+
+    @Value("${jwt.refresh.token.expiration}")
+    private long refreshExpiration;
 
     // 비밀키 객체로 변환
     private SecretKey getKey() {
@@ -24,11 +27,20 @@ public class JwtService {
     }
 
     // 토큰 생성
-    public String generateToken(String userId) {
+    public String generateAccessToken(String userId) {
         return Jwts.builder()
                 .subject(userId) // 토큰 안에 userId 저장
                 .issuedAt(new Date()) // 발급 시간
-                .expiration(new Date(System.currentTimeMillis() + expiration)) // 만료 시간
+                .expiration(new Date(System.currentTimeMillis() + accessExpiration)) // 만료 시간
+                .signWith(getKey()) // 비밀키로 서명
+                .compact();
+    }
+
+    public String generateRefreshToken(String userId) {
+        return Jwts.builder()
+                .subject(userId) // 토큰 안에 userId 저장
+                .issuedAt(new Date()) // 발급 시간
+                .expiration(new Date(System.currentTimeMillis() + refreshExpiration)) // 만료 시간
                 .signWith(getKey()) // 비밀키로 서명
                 .compact();
     }
