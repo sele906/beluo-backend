@@ -97,10 +97,12 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(Authentication authentication, HttpServletResponse response) {
+    public ResponseEntity<?> logout(Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
 
-        String userId = authentication.getName();
-        authService.logout(userId);
+        authService.logout(authentication);
+
+        // 세션 무효화
+        request.getSession().invalidate();
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", "")
                 .httpOnly(true)

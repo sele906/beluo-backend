@@ -1,8 +1,8 @@
 package sele906.dev.beluo_backend.auth.service;
 
-import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sele906.dev.beluo_backend.auth.domain.User;
@@ -90,9 +90,17 @@ public class AuthService {
         return new TokenResponse(newAccessToken, newRefreshToken);
     }
 
-    public void logout(String userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataAccessException("존재하지 않는 사용자입니다"));
+    public void logout(Authentication authentication) {
+
+        User user;
+        if (authentication instanceof OAuth2AuthenticationToken oauth2Token) {
+            String email = (String) oauth2Token.getPrincipal().getAttributes().get("email");
+            user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new DataAccessException("존재하지 않는 사용자입니다"));
+        } else {
+            user = userRepository.findById(authentication.getName())
+                    .orElseThrow(() -> new DataAccessException("존재하지 않는 사용자입니다"));
+        }
 
         user.setRefreshToken(null);
 
