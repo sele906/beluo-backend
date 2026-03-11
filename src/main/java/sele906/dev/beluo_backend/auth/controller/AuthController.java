@@ -10,10 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sele906.dev.beluo_backend.auth.domain.User;
 import sele906.dev.beluo_backend.auth.dto.TokenResponse;
 import sele906.dev.beluo_backend.auth.repository.UserRepository;
@@ -29,22 +26,13 @@ import java.util.Map;
 public class AuthController {
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
     private AuthService authService;
 
     // 테스트 로그인 - 토큰 발급
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody User user, HttpServletResponse response) {
 
-        TokenResponse tokens = authService.login(body.get("email"), body.get("password"));
+        TokenResponse tokens = authService.login(user);
 
         // 쿠키에 토큰 담기
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
@@ -84,9 +72,9 @@ public class AuthController {
             }
         }
 
-        String newAccessToken = authService.refresh(refreshToken);
+        TokenResponse tokens = authService.refresh(refreshToken);
 
-        ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")
@@ -94,7 +82,17 @@ public class AuthController {
                 .maxAge(3600)
                 .build();
 
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(604800)
+                .build();
+
         response.addHeader("Set-Cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
+
         return ResponseEntity.ok(Map.of("message", "토큰 재발급 성공"));
     }
 
@@ -125,4 +123,11 @@ public class AuthController {
 
         return ResponseEntity.ok(Map.of("message", "로그아웃 성공"));
     }
+
+    @PostMapping("/join")
+    public ResponseEntity<?> join(@RequestBody User user) {
+        authService.join(user);
+        return ResponseEntity.ok(Map.of("message", "회원가입 완료"));
+    }
+
 }

@@ -1,15 +1,67 @@
 package sele906.dev.beluo_backend.auth.handler;
 
-//@Component
-//public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
-//
-//    @Override
-//    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
-//        AuthenticationSuccessHandler.super.onAuthenticationSuccess(request, response, chain, authentication);
-//    }
-//
-//    @Override
-//    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-//
-//    }
-//}
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
+import sele906.dev.beluo_backend.auth.domain.User;
+import sele906.dev.beluo_backend.auth.repository.UserRepository;
+import sele906.dev.beluo_backend.auth.service.JwtService;
+
+import java.io.IOException;
+
+@Component
+public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
+
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
+
+    public OAuth2SuccessHandler(JwtService jwtService, UserRepository userRepository) {
+        this.jwtService = jwtService;
+        this.userRepository = userRepository;
+    }
+
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        String email = (String) oAuth2User.getAttributes().get("email");
+
+        User user = userRepository.findByEmail(email).orElseThrow();
+
+        //JWT 발급
+        String accessToken = jwtService.generateAccessToken(user.getId());
+        String refreshToken = jwtService.generateRefreshToken(user.getId());
+
+        //DB에 refreshToken 저장
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        //쿠키 설정
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(3600)
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(604800)
+                .build();
+
+        response.addHeader("Set-Cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
+
+        //메인 페이지로 리다이렉트
+        response.sendRedirect("http://localhost:5173");
+    }
+}

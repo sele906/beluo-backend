@@ -19,12 +19,17 @@ public class User {
     private String email;
     private String password;
     private String name;
+    private Instant createdAt;
 
-    //private String profileImgUrl;
+    //private String userImgUrl;
 
     private String provider;
     private String providerId;
     private String role;
     private String refreshToken;
-    private Instant createdAt;
+
+    public User(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
 }

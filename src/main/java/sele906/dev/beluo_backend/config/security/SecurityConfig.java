@@ -5,22 +5,32 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import sele906.dev.beluo_backend.auth.filter.JwtAuthenticationFilter;
+import sele906.dev.beluo_backend.auth.handler.OAuth2FailureHandler;
+import sele906.dev.beluo_backend.auth.handler.OAuth2SuccessHandler;
+import sele906.dev.beluo_backend.auth.service.CustomOAuth2UserService;
 
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(CustomOAuth2UserService customOAuth2UserService, OAuth2SuccessHandler oAuth2SuccessHandler, OAuth2FailureHandler oAuth2FailureHandler, JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.customOAuth2UserService = customOAuth2UserService;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+        this.oAuth2FailureHandler = oAuth2FailureHandler;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
+
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -32,19 +42,19 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
-                .sessionManagement(s -> s.sessionCreationPolicy(STATELESS))  // 세션 미사용
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/api/test", "/api/testLogin", "/api/testMe").permitAll()  // 로그인은 누구나 접근 가능
-//                        .anyRequest().authenticated()               // 나머지는 토큰 필요
-//                )
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers("/api/auth/**", "/oauth2/**", "/login/**").permitAll()  // 로그인은 누구나 접근 가능
+                        .anyRequest().authenticated()               // 나머지는 토큰 필요
                 )
-//                .oauth2Login(oauth2 -> oauth2
-//                        .userInfoEndpoint(u -> u.userService(customOAuth2UserService))
-//                        .successHandler(oAuth2SuccessHandler)
-//                        .failureHandler(oAuth2FailureHandler)
+//                .authorizeHttpRequests(auth -> auth
+//                        .anyRequest().permitAll()
 //                )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(u -> u.userService(customOAuth2UserService))
+                        .failureHandler(oAuth2FailureHandler)
+                        .successHandler(oAuth2SuccessHandler)
+                        .defaultSuccessUrl("http://localhost:5173/oauth2/redirect", true)
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

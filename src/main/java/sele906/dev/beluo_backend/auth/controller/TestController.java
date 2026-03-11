@@ -29,6 +29,14 @@ public class TestController {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @GetMapping("/tmpPassword")
+    public String tmpPassword() {
+        return passwordEncoder.encode("1234");
+    }
+
     @PostConstruct
     public void logMongoInfo() {
         //테스트
