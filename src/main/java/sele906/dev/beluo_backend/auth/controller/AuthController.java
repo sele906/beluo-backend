@@ -38,7 +38,7 @@ public class AuthController {
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
                 .httpOnly(true)       // JS에서 접근 불가 (XSS 방어)
                 .secure(true)         // HTTPS에서만 전송
-                .sameSite("Lax")      // CSRF 방어
+                .sameSite("None")      // CSRF 방어
                 .path("/")            // 모든 경로에 쿠키 전송
                 .maxAge(3600)         // 1시간 (초 단위)
                 .build();
@@ -46,7 +46,7 @@ public class AuthController {
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
                 .httpOnly(true)       // JS에서 접근 불가 (XSS 방어)
                 .secure(true)         // HTTPS에서만 전송
-                .sameSite("Lax")      // CSRF 방어
+                .sameSite("None")      // CSRF 방어
                 .path("/")            // 모든 경로에 쿠키 전송
                 .maxAge(604800)         // 7일 (초 단위)
                 .build();
@@ -77,7 +77,7 @@ public class AuthController {
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Lax")
+                .sameSite("None")
                 .path("/")
                 .maxAge(3600)
                 .build();
@@ -85,7 +85,7 @@ public class AuthController {
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Lax")
+                .sameSite("None")
                 .path("/")
                 .maxAge(604800)
                 .build();
@@ -107,7 +107,7 @@ public class AuthController {
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", "")
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Lax")
+                .sameSite("None")
                 .path("/")
                 .maxAge(0)
                 .build();
@@ -115,7 +115,7 @@ public class AuthController {
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Lax")
+                .sameSite("None")
                 .path("/")
                 .maxAge(0)
                 .build();
