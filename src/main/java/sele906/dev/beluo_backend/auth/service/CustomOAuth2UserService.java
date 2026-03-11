@@ -36,8 +36,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         String email = (String) attributes.get("email");
         String name = (String) attributes.get("name");
 
-        System.out.println("attributes: " + attributes);
-
         //DB에서 찾거나 신규가입
         User user = userRepository.findByEmail(email)
                 .orElseGet(() -> {
@@ -50,8 +48,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                     newUser.setCreatedAt(Instant.now());
                     return userRepository.save(newUser);
                 });
-
-        System.out.println("user: " + user);
 
         return new DefaultOAuth2User(List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole())), attributes, "sub");
     }

@@ -1,5 +1,6 @@
 package sele906.dev.beluo_backend.config.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -18,6 +19,9 @@ import sele906.dev.beluo_backend.auth.service.CustomOAuth2UserService;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${app.frontend-url}")
+    private String url;
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
@@ -53,7 +57,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(u -> u.userService(customOAuth2UserService))
                         .failureHandler(oAuth2FailureHandler)
                         .successHandler(oAuth2SuccessHandler)
-                        .defaultSuccessUrl("http://localhost:5173/oauth2/redirect", true)
+                        .defaultSuccessUrl(url + "/oauth2/redirect", true)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

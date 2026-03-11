@@ -3,6 +3,7 @@ package sele906.dev.beluo_backend.auth.handler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -16,6 +17,9 @@ import java.io.IOException;
 
 @Component
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
+
+    @Value("${app.frontend-url}")
+    private String url;
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
@@ -62,6 +66,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
         //메인 페이지로 리다이렉트
-        response.sendRedirect("http://localhost:5173");
+        response.sendRedirect(url);
     }
 }
