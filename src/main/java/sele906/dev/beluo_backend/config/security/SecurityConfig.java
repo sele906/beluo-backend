@@ -46,13 +46,14 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/oauth2/**", "/login/**").permitAll()  // 로그인은 누구나 접근 가능
-                        .anyRequest().authenticated()               // 나머지는 토큰 필요
-                )
 //                .authorizeHttpRequests(auth -> auth
-//                        .anyRequest().permitAll()
+//                        .requestMatchers("/api/auth/**", "/oauth2/**", "/login/**").permitAll()  // 로그인은 누구나 접근 가능
+//                        .anyRequest().authenticated()               // 나머지는 토큰 필요
+//                       .requestMatchers("/admin/**").hasRole("ADMIN")
 //                )
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()
+                )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(u -> u.userService(customOAuth2UserService))
                         .failureHandler(oAuth2FailureHandler)

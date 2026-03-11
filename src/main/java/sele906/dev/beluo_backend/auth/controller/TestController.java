@@ -37,6 +37,16 @@ public class TestController {
         return passwordEncoder.encode("1234");
     }
 
+    @GetMapping("/test")
+    public String test(Authentication authentication) {
+
+        System.out.println("auth type = " + authentication.getClass());
+        System.out.println("name = " + authentication.getName());
+        System.out.println("principal = " + authentication.getPrincipal());
+
+        return "ok";
+    }
+
     @PostConstruct
     public void logMongoInfo() {
         //테스트
