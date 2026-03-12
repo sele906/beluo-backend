@@ -3,7 +3,10 @@ package sele906.dev.beluo_backend.chat.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import sele906.dev.beluo_backend.auth.domain.User;
+import sele906.dev.beluo_backend.auth.repository.UserRepository;
 import sele906.dev.beluo_backend.character.domain.Character;
 import sele906.dev.beluo_backend.character.repository.CharacterRepository;
 import sele906.dev.beluo_backend.chat.domain.Conversation;
@@ -28,13 +31,19 @@ public class ConversationService {
     private CharacterRepository characterRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private MessageRepository messageRepository;
 
     //빈 채팅방 생성
-    public String createConversation(String characterId) {
+    public String createConversation(String characterId, String userId) {
 
         Character character = characterRepository.findById(characterId)
-                .orElseThrow(() -> new InvalidRequestException("캐릭터를 찾을 수 없습니다")); //초기세팅
+                .orElseThrow(() -> new InvalidRequestException("캐릭터를 찾을 수 없습니다"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataAccessException("사용자를 찾을 수 없습니다"));
 
         //conversation 데이터 생성
         Conversation c = new Conversation();
@@ -47,8 +56,11 @@ public class ConversationService {
         c.setCharacterName(character.getCharacterName());
         c.setCharacterImgUrl(character.getCharacterImgUrl());
 
-        //유저 이름
-        c.setUserName("userName"); //초기세팅
+        //유저
+        c.setUserId(user.getId());
+        c.setUserEmail(user.getEmail());
+        c.setUserName(user.getName());
+
         //유저 프로필 사진(나중에 추가)
         //c.setUserProfile("");
 
@@ -70,7 +82,7 @@ public class ConversationService {
         systemMessage.setType("system");
 
         //시스템 프롬프트 + 캐릭터 프롬프트
-        systemMessage.setContent(character.getPersonality()); //초기세팅
+        systemMessage.setContent(character.getPersonality());
 
         //db 저장
         try {
@@ -114,19 +126,23 @@ public class ConversationService {
             throw new DataAccessException("메세지 저장 실패", e);
         }
 
+        characterRepository.increaseConvCount(c.getCharacterId());
+
         return c.getSessionId();
     }
 
     //채팅방 리스트 불러오기
-    public List<Conversation> conversationList() {
-        List<Conversation> recentConversations;
+    public List<Conversation> conversationList(String userId) {
+
+        if (userId == null) {
+            return List.of();
+        }
+
         try {
-            recentConversations = conversationRepository.requestRecentConversations();
+            return conversationRepository.requestRecentConversations(userId);
         } catch (Exception e) {
             throw new DataAccessException("채팅방 리스트 불러오기 실패", e);
         }
-
-        return recentConversations != null ? recentConversations : List.of();
     }
 
     //빈 채팅방 정보 세팅
@@ -141,6 +157,10 @@ public class ConversationService {
         map.put("conversationName", conv.getConversationName());
         map.put("characterName", conv.getCharacterName());
         map.put("characterImgUrl", conv.getCharacterImgUrl());
+
+//        map.put("userId", conv.getUserId());
+//        map.put("userEmail", conv.getUserEmail());
+//        map.put("userName", conv.getUserName());
 
         return map;
     }

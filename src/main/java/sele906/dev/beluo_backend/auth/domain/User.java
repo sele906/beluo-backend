@@ -20,13 +20,13 @@ public class User {
     private String password;
     private String name;
     private Instant createdAt;
+    private String role;
+    private String refreshToken;
 
     //private String userImgUrl;
 
     private String provider;
     private String providerId;
-    private String role;
-    private String refreshToken;
 
     public User(String email, String password) {
         this.email = email;

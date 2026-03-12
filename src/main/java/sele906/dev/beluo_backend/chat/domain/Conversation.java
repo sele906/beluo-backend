@@ -32,7 +32,8 @@ public class Conversation {
     private String characterName;
     private String characterImgUrl;
 
-    //private String userId;
+    private String userId;
+    private String userEmail;
     private String userName;
     //private String userProfile;
 

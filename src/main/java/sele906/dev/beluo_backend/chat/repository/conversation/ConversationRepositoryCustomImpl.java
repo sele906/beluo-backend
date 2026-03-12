@@ -20,9 +20,10 @@ public class ConversationRepositoryCustomImpl implements ConversationRepositoryC
     private MongoTemplate mongoTemplate;
 
     //채팅방 리스트 불러오기
-    public List<Conversation> requestRecentConversations() {
+    public List<Conversation> requestRecentConversations(String userId) {
         Query query = new Query(
-                Criteria.where("lastChatAt").lt(Instant.now())
+                Criteria.where("userId").is(userId)
+                        .and("lastChatAt").lt(Instant.now())
         );
         query.with(Sort.by(Sort.Direction.DESC, "lastChatAt"));
         query.limit(10);

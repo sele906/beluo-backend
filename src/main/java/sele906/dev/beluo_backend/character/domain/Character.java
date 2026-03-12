@@ -32,4 +32,9 @@ public class Character {
     private String personality;
     private String firstMessage;
     private List<String> tag;
+
+    private String userId;
+    private boolean isPublic;
+    private int convCount;
+    private int likeCount;
 }
