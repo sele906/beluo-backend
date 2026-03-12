@@ -20,9 +20,6 @@ import sele906.dev.beluo_backend.auth.service.CustomOAuth2UserService;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${app.frontend-url}")
-    private String url;
-
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
@@ -47,7 +44,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/oauth2/**", "/login/**").permitAll()  // 로그인은 누구나 접근 가능
+                        .requestMatchers("/api/test", "/api/auth/**", "/oauth2/**", "/login/**").permitAll()  // 로그인은 누구나 접근 가능
                         .anyRequest().authenticated()               // 나머지는 토큰 필요
 //                       .requestMatchers("/admin/**").hasRole("ADMIN")
                 )
@@ -58,7 +55,6 @@ public class SecurityConfig {
                         .userInfoEndpoint(u -> u.userService(customOAuth2UserService))
                         .failureHandler(oAuth2FailureHandler)
                         .successHandler(oAuth2SuccessHandler)
-                        .defaultSuccessUrl(url + "/oauth2/redirect", true)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

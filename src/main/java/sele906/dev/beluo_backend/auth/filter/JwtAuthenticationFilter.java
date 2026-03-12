@@ -6,6 +6,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
@@ -42,9 +43,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 토큰 유효성 검사
         if (token != null && jwtService.isValid(token)) {
             String userId = jwtService.extractUserId(token);
+            String role = jwtService.extractRole(token);
+
+            //role 추가
+            SimpleGrantedAuthority authority =
+                    new SimpleGrantedAuthority("ROLE_" + role);
 
             // 스프링 시큐리티에 인증되었다고 알려주기
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userId, null, List.of());
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(
+                            userId,
+                            null,
+                            List.of(authority)
+                    );
+
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
 

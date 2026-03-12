@@ -1,5 +1,6 @@
 package sele906.dev.beluo_backend.auth.service;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -27,9 +28,10 @@ public class JwtService {
     }
 
     // 토큰 생성
-    public String generateAccessToken(String userId) {
+    public String generateAccessToken(String userId, String role) {
         return Jwts.builder()
                 .subject(userId) // 토큰 안에 userId 저장
+                .claim("role", role) //role 가져오기
                 .issuedAt(new Date()) // 발급 시간
                 .expiration(new Date(System.currentTimeMillis() + accessExpiration)) // 만료 시간
                 .signWith(getKey()) // 비밀키로 서명
@@ -53,6 +55,17 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    // 토큰에서 role 꺼내기
+    public String extractRole(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(getKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return claims.get("role", String.class);
     }
 
     //토큰이 유효한지 확인

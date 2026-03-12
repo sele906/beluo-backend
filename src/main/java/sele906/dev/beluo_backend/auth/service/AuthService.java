@@ -37,7 +37,7 @@ public class AuthService {
         }
 
         //JWT 발급
-        String accessToken = jwtService.generateAccessToken(u.getId());
+        String accessToken = jwtService.generateAccessToken(u.getId(), u.getRole());
         String refreshToken = jwtService.generateRefreshToken(u.getId());
 
         //user db에 저장
@@ -75,7 +75,7 @@ public class AuthService {
         }
 
         //JWT 발급
-        String newAccessToken = jwtService.generateAccessToken(userId);
+        String newAccessToken = jwtService.generateAccessToken(userId, user.getRole());
         String newRefreshToken = jwtService.generateRefreshToken(userId);
 
         //user db에 저장
@@ -92,15 +92,10 @@ public class AuthService {
 
     public void logout(Authentication authentication) {
 
-        User user;
-        if (authentication instanceof OAuth2AuthenticationToken oauth2Token) {
-            String email = (String) oauth2Token.getPrincipal().getAttributes().get("email");
-            user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new DataAccessException("존재하지 않는 사용자입니다"));
-        } else {
-            user = userRepository.findById(authentication.getName())
-                    .orElseThrow(() -> new DataAccessException("존재하지 않는 사용자입니다"));
-        }
+        String userId = authentication.getName();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataAccessException("존재하지 않는 사용자입니다"));
 
         user.setRefreshToken(null);
 

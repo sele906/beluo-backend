@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -38,7 +39,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         User user = userRepository.findByEmail(email).orElseThrow();
 
         //JWT 발급
-        String accessToken = jwtService.generateAccessToken(user.getId());
+        String accessToken = jwtService.generateAccessToken(user.getId(), user.getRole());
         String refreshToken = jwtService.generateRefreshToken(user.getId());
 
         //DB에 refreshToken 저장
@@ -65,7 +66,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         response.addHeader("Set-Cookie", accessCookie.toString());
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
-        //메인 페이지로 리다이렉트
-        response.sendRedirect(url);
+        //OAuth 세션 정리
+        SecurityContextHolder.clearContext();
+
+        //리다이렉트
+        response.sendRedirect(url + "/oauth2/redirect");
     }
 }

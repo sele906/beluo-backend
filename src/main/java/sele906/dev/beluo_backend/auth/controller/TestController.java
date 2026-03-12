@@ -43,6 +43,7 @@ public class TestController {
         System.out.println("auth type = " + authentication.getClass());
         System.out.println("name = " + authentication.getName());
         System.out.println("principal = " + authentication.getPrincipal());
+        System.out.println("role = " + authentication.getAuthorities()); // ROLE_USER
 
         return "ok";
     }
