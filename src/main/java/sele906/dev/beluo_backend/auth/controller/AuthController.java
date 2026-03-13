@@ -39,7 +39,6 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")
-                .domain(".beluo.site")
                 .path("/")
                 .maxAge(3600)
                 .build();
@@ -48,7 +47,6 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")
-                .domain(".beluo.site")
                 .path("/")
                 .maxAge(604800)
                 .build();
@@ -80,7 +78,6 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")
-                .domain(".beluo.site")
                 .path("/")
                 .maxAge(3600)
                 .build();
@@ -89,7 +86,6 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")
-                .domain(".beluo.site")
                 .path("/")
                 .maxAge(604800)
                 .build();
@@ -103,7 +99,9 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
 
-        authService.logout(authentication);
+        if (authentication != null) {
+            authService.logout(authentication);
+        }
 
         // 세션 무효화
         request.getSession().invalidate();
@@ -112,7 +110,6 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")
-                .domain(".beluo.site")
                 .path("/")
                 .maxAge(0)
                 .build();
@@ -121,7 +118,6 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")
-                .domain(".beluo.site")
                 .path("/")
                 .maxAge(0)
                 .build();

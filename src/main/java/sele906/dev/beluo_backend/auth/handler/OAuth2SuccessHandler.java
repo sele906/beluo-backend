@@ -51,7 +51,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")
-                .domain(".beluo.site")
                 .path("/")
                 .maxAge(3600)
                 .build();
@@ -60,7 +59,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")
-                .domain(".beluo.site")
                 .path("/")
                 .maxAge(604800)
                 .build();
