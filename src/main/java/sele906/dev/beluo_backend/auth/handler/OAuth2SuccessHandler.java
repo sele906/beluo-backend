@@ -50,7 +50,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("None")
+                .sameSite("Lax")
+                .domain(".beluo.site")
                 .path("/")
                 .maxAge(3600)
                 .build();
@@ -58,7 +59,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("None")
+                .sameSite("Lax")
+                .domain(".beluo.site")
                 .path("/")
                 .maxAge(604800)
                 .build();
