@@ -3,6 +3,7 @@ package sele906.dev.beluo_backend.character.controller;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,12 +57,29 @@ public class CharacterController {
     @GetMapping("/detail")
     public Map<String, Object> characterDetail(@RequestParam String id, Authentication auth) {
 
-        if (auth == null) {
-            throw new InvalidRequestException("로그인이 필요합니다");
-        }
+        String userId = null;
 
-        String userId = auth.getName();
+        if (auth != null) {
+            userId = auth.getName();
+        }
 
         return characterService.getCharacterDetail(id, userId);
     }
+
+    //좋아요 처리
+    @PostMapping("{id}/like")
+    public ResponseEntity<Void> addLike(@PathVariable String id, Authentication auth) {
+        if (auth == null) return ResponseEntity.status(401).build();
+        characterService.addLike(auth.getName(), id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("{id}/like")
+    public void cancelLike(@PathVariable String id, Authentication auth) {
+        if (auth != null) {
+            characterService.cancelLike(auth.getName(), id);
+        }
+    }
+
+
 }

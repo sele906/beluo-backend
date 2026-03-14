@@ -69,7 +69,15 @@ public class CharacterService {
             List<Character> likedCharacters = List.of();
 
             if (userId != null) {
-                likedCharacters = characterRepository.requestRecentCharacters(); // 임시
+                List<String> characterIds = likeRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
+                        .map(Like::getCharacterId)
+                        .toList();
+                Map<String, Character> characterMap = characterRepository.findAllById(characterIds).stream()
+                        .collect(java.util.stream.Collectors.toMap(c -> c.getId().toString(), c -> c));
+                likedCharacters = characterIds.stream()
+                        .filter(characterMap::containsKey)
+                        .map(characterMap::get)
+                        .toList();
             }
 
             Map<String, Object> response = new HashMap<>();
