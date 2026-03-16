@@ -9,7 +9,7 @@ public interface CharacterRepositoryCustom {
 
     List<Character> requestPopularCharacters(List<String> blockedIds);
 
-    List<Character> requestLikedCharacters(String userId);
+    List<Character> requestLikedCharacters(List<String> characterIds);
 
     void increaseConvCount(String characterId);
 
@@ -18,4 +18,12 @@ public interface CharacterRepositoryCustom {
     void increaseLikeCount(String characterId);
 
     void decreaseLikeCount(String characterId);
+
+    //마이페이지
+
+    List<Character> requestCreatedCharacters(String userId);
+
+    List<Character> createdCharacters(String userId);
+
+    List<Character> requestBlockedCharacters(List<String> characterIds);
 }

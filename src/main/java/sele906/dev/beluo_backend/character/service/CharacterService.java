@@ -77,6 +77,7 @@ public class CharacterService {
 
         try {
 
+            //차단된 캐릭터 거르기
             List<String> blockedIds = List.of();
             if (userId != null) {
                 blockedIds = blockedRepository.findByUserId(userId).stream()
@@ -90,12 +91,17 @@ public class CharacterService {
             List<Character> likedCharacters = List.of();
 
             if (userId != null) {
+
+                //차단된 캐릭터 거르기
                 List<String> finalBlockedIds = blockedIds;
                 List<String> characterIds = likeRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
                         .map(Like::getCharacterId)
                         .filter(id -> !finalBlockedIds.contains(id))
+                        .limit(10)
                         .toList();
-                Map<String, Character> characterMap = characterRepository.findAllById(characterIds).stream()
+
+                //관심있는 캐릭터 리스트 출력
+                Map<String, Character> characterMap = characterRepository.requestLikedCharacters(characterIds).stream()
                         .collect(java.util.stream.Collectors.toMap(c -> c.getId().toString(), c -> c));
                 likedCharacters = characterIds.stream()
                         .filter(characterMap::containsKey)
@@ -118,64 +124,30 @@ public class CharacterService {
     //캐릭터 상세정보
     public Map<String, Object> getCharacterDetail(String id, String userId) {
 
-        Character character = characterRepository.findById(id)
-                .orElseThrow(() -> new InvalidRequestException("캐릭터를 찾을 수 없습니다"));
+        try {
+            Character character = characterRepository.findById(id)
+                    .orElseThrow(() -> new InvalidRequestException("캐릭터를 찾을 수 없습니다"));
 
-        User author = userRepository.findById(character.getUserId())
-                .orElseThrow(() -> new InvalidRequestException("작성자 정보를 찾을 수 없습니다"));
+            User author = userRepository.findById(character.getUserId())
+                    .orElseThrow(() -> new InvalidRequestException("작성자 정보를 찾을 수 없습니다"));
 
-        boolean liked = false;
+            boolean liked = false;
 
-        if (userId != null) {
-            liked = likeRepository.existsByUserIdAndCharacterId(userId, id);
+            if (userId != null) {
+                liked = likeRepository.existsByUserIdAndCharacterId(userId, id);
+            }
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("character", character);
+            result.put("author", Map.of("name", author.getName()));
+            result.put("liked", liked);
+
+            return result;
+
+        } catch (InvalidRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DataAccessException("캐릭터 상세정보 불러오기 실패", e);
         }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("character", character);
-        result.put("author", Map.of("name", author.getName()));
-        result.put("liked", liked);
-
-        return result;
-    }
-
-    //좋아요 추가
-    public void addLike(String userId, String characterId) {
-
-        boolean liked = likeRepository.existsByUserIdAndCharacterId(userId, characterId);
-
-        if (liked) {
-            return;
-        }
-
-        Like like = new Like();
-        like.setUserId(userId);
-        like.setCharacterId(characterId);
-        like.setCreatedAt(Instant.now());
-
-        likeRepository.save(like);
-        characterRepository.increaseLikeCount(characterId);
-    }
-
-    //좋아요 취소
-    public void cancelLike(String userId, String characterId) {
-
-        boolean liked = likeRepository.existsByUserIdAndCharacterId(userId, characterId);
-
-        if (!liked) {
-            return;
-        }
-
-        likeRepository.deleteByUserIdAndCharacterId(userId, characterId);
-        characterRepository.decreaseLikeCount(characterId);
-    }
-
-    //좋아요 여부 확인
-    public boolean isLiked(String userId, String characterId) {
-        return likeRepository.existsByUserIdAndCharacterId(userId, characterId);
-    }
-
-    //좋아요 리스트
-    public List<Like> likeList(String userId) {
-        return likeRepository.findByUserId(userId);
     }
 }

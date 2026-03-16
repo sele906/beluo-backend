@@ -5,7 +5,7 @@ import sele906.dev.beluo_backend.user.domain.User;
 
 import java.util.Optional;
 
-public interface UserRepository extends MongoRepository<User, String> {
+public interface UserRepository extends MongoRepository<User, String>, UserRepositoryCustom {
     Optional<User> findByProviderAndProviderId(String provider, String providerId);
     Optional<User> findByEmail(String email);
 }

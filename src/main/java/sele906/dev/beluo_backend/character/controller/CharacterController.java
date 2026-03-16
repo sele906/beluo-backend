@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import sele906.dev.beluo_backend.character.domain.Character;
 import sele906.dev.beluo_backend.character.service.CharacterService;
+import sele906.dev.beluo_backend.character.service.LikeService;
 import sele906.dev.beluo_backend.exception.InvalidRequestException;
 
 import java.io.IOException;
@@ -65,21 +66,4 @@ public class CharacterController {
 
         return characterService.getCharacterDetail(id, userId);
     }
-
-    //좋아요 처리
-    @PostMapping("{id}/like")
-    public ResponseEntity<Void> addLike(@PathVariable String id, Authentication auth) {
-        if (auth == null) return ResponseEntity.status(401).build();
-        characterService.addLike(auth.getName(), id);
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("{id}/like")
-    public void cancelLike(@PathVariable String id, Authentication auth) {
-        if (auth != null) {
-            characterService.cancelLike(auth.getName(), id);
-        }
-    }
-
-
 }

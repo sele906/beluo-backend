@@ -22,10 +22,13 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
     @Override
     public List<Character> requestRecentCharacters(List<String> blockedIds) {
         Criteria criteria = Criteria.where("isPublic").is(true);
+
+        //차단된 캐릭터 제외
         if (blockedIds != null && !blockedIds.isEmpty()) {
             List<ObjectId> blockedObjectIds = blockedIds.stream().map(ObjectId::new).collect(Collectors.toList());
             criteria = criteria.and("_id").nin(blockedObjectIds);
         }
+
         Query query = new Query(criteria);
         query.with(Sort.by(Sort.Direction.DESC, "createdAt"));
         query.limit(10);
@@ -42,11 +45,15 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
 
     @Override
     public List<Character> requestPopularCharacters(List<String> blockedIds) {
+
         Criteria criteria = Criteria.where("isPublic").is(true);
+
+        //차단된 캐릭터 제외
         if (blockedIds != null && !blockedIds.isEmpty()) {
             List<ObjectId> blockedObjectIds = blockedIds.stream().map(ObjectId::new).collect(Collectors.toList());
             criteria = criteria.and("_id").nin(blockedObjectIds);
         }
+
         Query query = new Query(criteria);
         query.with(Sort.by(Sort.Direction.DESC, "convCount"));
         query.limit(10);
@@ -62,8 +69,23 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
     }
 
     @Override
-    public List<Character> requestLikedCharacters(String userId) {
-        return List.of(); //like 컬렉션 만들어야함
+    public List<Character> requestLikedCharacters(List<String> characterIds) {
+
+        if (characterIds == null || characterIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<ObjectId> objectIds = characterIds.stream().map(ObjectId::new).collect(Collectors.toList());
+        Query query = new Query(Criteria.where("_id").in(objectIds));
+
+        query.fields()
+                .include("createdAt")
+                .include("characterImgUrl")
+                .include("characterName")
+                .include("personality")
+                .include("tag");
+
+        return mongoTemplate.find(query, Character.class);
     }
 
     public void increaseConvCount(String characterId) {
@@ -97,5 +119,57 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
         Update update = new Update().inc("likeCount", -1);
 
         mongoTemplate.updateFirst(query, update, Character.class);
+    }
+
+    public List<Character> requestCreatedCharacters(String userId) {
+
+        Criteria criteria = Criteria.where("userId").is(userId);
+
+        Query query = new Query(criteria);
+        query.with(Sort.by(Sort.Direction.DESC, "createdAt"));
+        query.limit(10);
+
+        query.fields()
+                .include("createdAt")
+                .include("characterImgUrl")
+                .include("characterName")
+                .include("personality")
+                .include("tag");
+
+        return mongoTemplate.find(query, Character.class);
+    }
+
+    public List<Character> createdCharacters(String userId) {
+
+        Criteria criteria = Criteria.where("userId").is(userId);
+
+        Query query = new Query(criteria);
+        query.with(Sort.by(Sort.Direction.DESC, "createdAt"));
+        //무한 스크롤??
+
+        query.fields()
+                .include("characterImgUrl")
+                .include("characterName")
+                .include("personality");
+
+        return mongoTemplate.find(query, Character.class);
+    }
+
+    @Override
+    public List<Character> requestBlockedCharacters(List<String> characterIds) {
+
+        if (characterIds == null || characterIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<ObjectId> objectIds = characterIds.stream().map(ObjectId::new).collect(Collectors.toList());
+        Query query = new Query(Criteria.where("_id").in(objectIds));
+
+        query.fields()
+                .include("characterImgUrl")
+                .include("characterName")
+                .include("personality");
+
+        return mongoTemplate.find(query, Character.class);
     }
 }
