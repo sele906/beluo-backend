@@ -10,7 +10,6 @@ import sele906.dev.beluo_backend.chat.domain.Conversation;
 import sele906.dev.beluo_backend.chat.domain.Message;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -20,11 +19,12 @@ public class ConversationRepositoryCustomImpl implements ConversationRepositoryC
     private MongoTemplate mongoTemplate;
 
     //채팅방 리스트 불러오기
-    public List<Conversation> requestRecentConversations(String userId) {
-        Query query = new Query(
-                Criteria.where("userId").is(userId)
-                        .and("lastChatAt").lt(Instant.now())
-        );
+    public List<Conversation> requestRecentConversations(String userId, List<String> blockedIds) {
+        Criteria criteria = Criteria.where("userId").is(userId).and("lastChatAt").lt(Instant.now());
+        if (blockedIds != null && !blockedIds.isEmpty()) {
+            criteria = criteria.and("characterId").nin(blockedIds);
+        }
+        Query query = new Query(criteria);
         query.with(Sort.by(Sort.Direction.DESC, "lastChatAt"));
         query.limit(10);
 

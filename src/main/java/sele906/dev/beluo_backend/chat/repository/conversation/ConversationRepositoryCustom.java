@@ -5,5 +5,5 @@ import sele906.dev.beluo_backend.chat.domain.Conversation;
 import java.util.List;
 
 public interface ConversationRepositoryCustom {
-    List<Conversation> requestRecentConversations(String userId);
+    List<Conversation> requestRecentConversations(String userId, List<String> blockedIds);
 }

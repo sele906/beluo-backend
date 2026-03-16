@@ -2,12 +2,11 @@ package sele906.dev.beluo_backend.auth.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import sele906.dev.beluo_backend.auth.domain.User;
+import sele906.dev.beluo_backend.user.domain.User;
 import sele906.dev.beluo_backend.auth.dto.TokenResponse;
-import sele906.dev.beluo_backend.auth.repository.UserRepository;
+import sele906.dev.beluo_backend.user.repository.UserRepository;
 import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.InvalidRequestException;
 
@@ -114,6 +113,9 @@ public class AuthService {
         u.setName(user.getName());
         u.setCreatedAt(Instant.now());
 
+        //프로필 사진 없으면 구글 프로필 사진으로 대체
+        u.setUserImgUrl("https://res.cloudinary.com/dncvqdlih/image/upload/v1773631077/bird_by7z1h.jpg"); //초기 세팅
+
         System.out.println("유저 정보: " + u);
 
         try {
@@ -122,6 +124,4 @@ public class AuthService {
             throw new DataAccessException("회원가입 실패", e);
         }
     }
-
-
 }

@@ -2,7 +2,6 @@ package sele906.dev.beluo_backend.auth.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
@@ -10,8 +9,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import sele906.dev.beluo_backend.auth.domain.User;
-import sele906.dev.beluo_backend.auth.repository.UserRepository;
+import sele906.dev.beluo_backend.user.domain.User;
+import sele906.dev.beluo_backend.user.repository.UserRepository;
 import sele906.dev.beluo_backend.auth.service.JwtService;
 
 import java.io.IOException;

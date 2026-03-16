@@ -10,8 +10,8 @@ import org.springframework.stereotype.Repository;
 import sele906.dev.beluo_backend.character.domain.Character;
 import org.springframework.data.mongodb.core.query.Update;
 
-import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom {
@@ -20,10 +20,13 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
     private MongoTemplate mongoTemplate;
 
     @Override
-    public List<Character> requestRecentCharacters() {
-        Query query = new Query(
-                Criteria.where("isPublic").is(true)
-        );
+    public List<Character> requestRecentCharacters(List<String> blockedIds) {
+        Criteria criteria = Criteria.where("isPublic").is(true);
+        if (blockedIds != null && !blockedIds.isEmpty()) {
+            List<ObjectId> blockedObjectIds = blockedIds.stream().map(ObjectId::new).collect(Collectors.toList());
+            criteria = criteria.and("_id").nin(blockedObjectIds);
+        }
+        Query query = new Query(criteria);
         query.with(Sort.by(Sort.Direction.DESC, "createdAt"));
         query.limit(10);
 
@@ -38,10 +41,13 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
     }
 
     @Override
-    public List<Character> requestPopularCharacters() {
-        Query query = new Query(
-                Criteria.where("isPublic").is(true)
-        );
+    public List<Character> requestPopularCharacters(List<String> blockedIds) {
+        Criteria criteria = Criteria.where("isPublic").is(true);
+        if (blockedIds != null && !blockedIds.isEmpty()) {
+            List<ObjectId> blockedObjectIds = blockedIds.stream().map(ObjectId::new).collect(Collectors.toList());
+            criteria = criteria.and("_id").nin(blockedObjectIds);
+        }
+        Query query = new Query(criteria);
         query.with(Sort.by(Sort.Direction.DESC, "convCount"));
         query.limit(10);
 

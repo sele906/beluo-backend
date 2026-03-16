@@ -35,6 +35,6 @@ public class Conversation {
     private String userId;
     private String userEmail;
     private String userName;
-    //private String userProfile;
+    private String userImgUrl;
 
 }

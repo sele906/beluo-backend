@@ -4,12 +4,16 @@ import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import sele906.dev.beluo_backend.character.domain.Blocked;
 import sele906.dev.beluo_backend.character.domain.Character;
+import sele906.dev.beluo_backend.character.repository.BlockedRepository;
 import sele906.dev.beluo_backend.character.repository.CharacterRepository;
 import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.InvalidRequestException;
 import sele906.dev.beluo_backend.character.domain.Like;
 import sele906.dev.beluo_backend.character.repository.LikeRepository;
+import sele906.dev.beluo_backend.user.domain.User;
+import sele906.dev.beluo_backend.user.repository.UserRepository;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -25,7 +29,13 @@ public class CharacterService {
     private CharacterRepository characterRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private LikeRepository likeRepository;
+
+    @Autowired
+    private BlockedRepository blockedRepository;
 
     public String createCharacter(Character character, MultipartFile file, String userId) throws IOException {
 
@@ -39,14 +49,18 @@ public class CharacterService {
         c.setTag(character.getTag());
 
         // 파일 처리
+        if (file == null || file.isEmpty()) {
+            throw new InvalidRequestException("이미지 파일이 없습니다");
+        }
+
         Map result = cloudinary.uploader().upload(
                 file.getBytes(),
                 ObjectUtils.asMap("folder", "character")
         );
         c.setCharacterImgUrl((String) result.get("secure_url"));
 
-        //유저
         c.setUserId(userId);
+
         c.setPublic(true);
         c.setLikeCount(0);
         c.setConvCount(0);
@@ -63,14 +77,23 @@ public class CharacterService {
 
         try {
 
-            List<Character> recentCharacters = characterRepository.requestRecentCharacters();
-            List<Character> popularCharacters = characterRepository.requestPopularCharacters();
+            List<String> blockedIds = List.of();
+            if (userId != null) {
+                blockedIds = blockedRepository.findByUserId(userId).stream()
+                        .map(Blocked::getCharacterId)
+                        .toList();
+            }
+
+            List<Character> recentCharacters = characterRepository.requestRecentCharacters(blockedIds);
+            List<Character> popularCharacters = characterRepository.requestPopularCharacters(blockedIds);
 
             List<Character> likedCharacters = List.of();
 
             if (userId != null) {
+                List<String> finalBlockedIds = blockedIds;
                 List<String> characterIds = likeRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
                         .map(Like::getCharacterId)
+                        .filter(id -> !finalBlockedIds.contains(id))
                         .toList();
                 Map<String, Character> characterMap = characterRepository.findAllById(characterIds).stream()
                         .collect(java.util.stream.Collectors.toMap(c -> c.getId().toString(), c -> c));
@@ -98,6 +121,9 @@ public class CharacterService {
         Character character = characterRepository.findById(id)
                 .orElseThrow(() -> new InvalidRequestException("캐릭터를 찾을 수 없습니다"));
 
+        User author = userRepository.findById(character.getUserId())
+                .orElseThrow(() -> new InvalidRequestException("작성자 정보를 찾을 수 없습니다"));
+
         boolean liked = false;
 
         if (userId != null) {
@@ -106,6 +132,7 @@ public class CharacterService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("character", character);
+        result.put("author", Map.of("name", author.getName()));
         result.put("liked", liked);
 
         return result;

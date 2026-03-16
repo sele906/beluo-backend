@@ -1,6 +1,5 @@
 package sele906.dev.beluo_backend.auth.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -9,8 +8,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import sele906.dev.beluo_backend.auth.domain.User;
-import sele906.dev.beluo_backend.auth.repository.UserRepository;
+import sele906.dev.beluo_backend.user.domain.User;
+import sele906.dev.beluo_backend.user.repository.UserRepository;
 
 import java.time.Instant;
 import java.util.List;
@@ -35,6 +34,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         String googleId = (String) attributes.get("sub");
         String email = (String) attributes.get("email");
         String name = (String) attributes.get("name");
+        String picture = (String) attributes.get("picture");
 
         //DB에서 찾거나 신규가입
         User user = userRepository.findByEmail(email)
@@ -45,6 +45,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                     newUser.setProvider("google");
                     newUser.setProviderId(googleId);
                     newUser.setRole("USER");
+                    newUser.setUserImgUrl(picture);
                     newUser.setCreatedAt(Instant.now());
                     return userRepository.save(newUser);
                 });

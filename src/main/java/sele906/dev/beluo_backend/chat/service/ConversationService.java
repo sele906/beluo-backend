@@ -1,13 +1,12 @@
 package sele906.dev.beluo_backend.chat.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import sele906.dev.beluo_backend.auth.domain.User;
-import sele906.dev.beluo_backend.auth.repository.UserRepository;
+import sele906.dev.beluo_backend.user.domain.User;
+import sele906.dev.beluo_backend.user.repository.UserRepository;
+import sele906.dev.beluo_backend.character.domain.Blocked;
 import sele906.dev.beluo_backend.character.domain.Character;
+import sele906.dev.beluo_backend.character.repository.BlockedRepository;
 import sele906.dev.beluo_backend.character.repository.CharacterRepository;
 import sele906.dev.beluo_backend.chat.domain.Conversation;
 import sele906.dev.beluo_backend.chat.domain.Message;
@@ -36,6 +35,9 @@ public class ConversationService {
     @Autowired
     private MessageRepository messageRepository;
 
+    @Autowired
+    private BlockedRepository blockedRepository;
+
     //빈 채팅방 생성
     public String createConversation(String characterId, String userId) {
 
@@ -62,7 +64,7 @@ public class ConversationService {
         c.setUserName(user.getName());
 
         //유저 프로필 사진(나중에 추가)
-        //c.setUserProfile("");
+        c.setUserImgUrl(user.getUserImgUrl());
 
         //채팅방 이름
         c.setConversationName(character.getCharacterName() + "와의 새 대화");
@@ -139,7 +141,10 @@ public class ConversationService {
         }
 
         try {
-            return conversationRepository.requestRecentConversations(userId);
+            List<String> blockedIds = blockedRepository.findByUserId(userId).stream()
+                    .map(Blocked::getCharacterId)
+                    .toList();
+            return conversationRepository.requestRecentConversations(userId, blockedIds);
         } catch (Exception e) {
             throw new DataAccessException("채팅방 리스트 불러오기 실패", e);
         }
@@ -158,9 +163,10 @@ public class ConversationService {
         map.put("characterName", conv.getCharacterName());
         map.put("characterImgUrl", conv.getCharacterImgUrl());
 
-//        map.put("userId", conv.getUserId());
-//        map.put("userEmail", conv.getUserEmail());
-//        map.put("userName", conv.getUserName());
+        map.put("userId", conv.getUserId());
+        map.put("userEmail", conv.getUserEmail());
+        map.put("userName", conv.getUserName());
+        map.put("userImgUrl", conv.getUserImgUrl());
 
         return map;
     }

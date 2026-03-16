@@ -4,21 +4,14 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import sele906.dev.beluo_backend.auth.domain.User;
+import sele906.dev.beluo_backend.user.domain.User;
 import sele906.dev.beluo_backend.auth.dto.TokenResponse;
-import sele906.dev.beluo_backend.auth.repository.UserRepository;
 import sele906.dev.beluo_backend.auth.service.AuthService;
-import sele906.dev.beluo_backend.auth.service.JwtService;
-import sele906.dev.beluo_backend.exception.DataAccessException;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -133,5 +126,4 @@ public class AuthController {
         authService.join(user);
         return ResponseEntity.ok(Map.of("message", "회원가입 완료"));
     }
-
 }

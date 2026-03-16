@@ -34,6 +34,7 @@ public class Character {
     private List<String> tag;
 
     private String userId;
+
     private boolean isPublic;
     private int convCount;
     private int likeCount;

@@ -1,4 +1,4 @@
-package sele906.dev.beluo_backend.auth.domain;
+package sele906.dev.beluo_backend.user.domain;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -23,7 +23,7 @@ public class User {
     private String role;
     private String refreshToken;
 
-    //private String userImgUrl;
+    private String userImgUrl;
 
     private String provider;
     private String providerId;
