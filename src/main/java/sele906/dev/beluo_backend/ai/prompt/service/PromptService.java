@@ -46,7 +46,7 @@ public class PromptService {
         if (systemPrompt != null) {
             promptMessage.add(Map.of(
                     "role", systemPrompt.getRole(),
-                    "content", systemPrompt.getContent()
+                    "content", """PROMPT_REMOVED""" + systemPrompt.getContent() //캐릭터 프롬프트
             ));
         }
 

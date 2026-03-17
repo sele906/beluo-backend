@@ -1,5 +1,6 @@
 package sele906.dev.beluo_backend.config.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,7 +64,16 @@ public class SecurityConfig {
                         .failureHandler(oAuth2FailureHandler)
                         .successHandler(oAuth2SuccessHandler)
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            if (request.getRequestURI().startsWith("/api/")) { // API 요청은 OAuth 리다이렉트 대신 401 반환
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                            } else {
+                                response.sendRedirect("/login"); // 일반 페이지는 기존대로 OAuth 리다이렉트
+                            }
+                        })
+                );
 
         return http.build();
     }

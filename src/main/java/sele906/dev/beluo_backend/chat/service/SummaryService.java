@@ -70,15 +70,19 @@ public class SummaryService {
         //요약 프롬프트 작성
         sendSummaryMessage.add(Map.of(
                 "role", "system",
-                "content", """PROMPT_REMOVED""" + content
+                "content", """PROMPT_REMOVED""" + (content != null ? content : "없음")
         ));
 
+        StringBuilder conversation = new StringBuilder();
         for (Message m : recentMessagesToSummarize) {
-            sendSummaryMessage.add(Map.of(
-                    "role", m.getRole(),
-                    "content", m.getContent()
-            ));
+            String speaker = m.getRole().equals("user") ? "유저" : "캐릭터";
+            conversation.append(speaker).append(": ").append(m.getContent()).append("\n");
         }
+
+        sendSummaryMessage.add(Map.of(
+                "role", "user",
+                "content", "요약할 대화:\n" + conversation
+        ));
 
         //요약 프롬프트 출력
         String finishedSummary = openAiClient.chat(sendSummaryMessage);

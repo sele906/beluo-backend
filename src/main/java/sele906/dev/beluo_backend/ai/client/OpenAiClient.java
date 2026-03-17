@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
@@ -34,10 +35,10 @@ public class OpenAiClient {
     public String chat(List<Map<String, String>> messages) {
 
         Map<String, Object> body = Map.of(
-                "model", "gpt-4.1-mini",
-                "temperature", 0.7,
-                "max_tokens", 150,
-                "messages", messages
+            "model", "gpt-5-mini",
+            "max_completion_tokens", 1000,
+            "reasoning_effort", "low",
+            "messages", messages
         );
 
         Map response = webClient.post()
@@ -45,7 +46,17 @@ public class OpenAiClient {
                 .bodyValue(body)
                 .retrieve()
                 .bodyToMono(Map.class)
+                .doOnError(e -> {
+                    if (e instanceof WebClientResponseException ex) {
+                        System.out.println("API 에러 상태코드: " + ex.getStatusCode());
+                        System.out.println("API 에러 바디: " + ex.getResponseBodyAsString());
+                    } else {
+                        System.out.println("API 에러: " + e.getMessage());
+                    }
+                })
                 .block(Duration.ofSeconds(25));
+
+        System.out.println("response: " + response);
 
         if (response == null) {
             throw new RuntimeException("OpenAI 응답이 없습니다.");

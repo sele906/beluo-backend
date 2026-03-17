@@ -37,7 +37,7 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
                 .include("createdAt")
                 .include("characterImgUrl")
                 .include("characterName")
-                .include("personality")
+                .include("summary")
                 .include("tag");
 
         return mongoTemplate.find(query, Character.class);
@@ -62,7 +62,7 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
                 .include("createdAt")
                 .include("characterImgUrl")
                 .include("characterName")
-                .include("personality")
+                .include("summary")
                 .include("tag");
 
         return mongoTemplate.find(query, Character.class);
@@ -82,7 +82,7 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
                 .include("createdAt")
                 .include("characterImgUrl")
                 .include("characterName")
-                .include("personality")
+                .include("summary")
                 .include("tag");
 
         return mongoTemplate.find(query, Character.class);
@@ -133,7 +133,7 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
                 .include("createdAt")
                 .include("characterImgUrl")
                 .include("characterName")
-                .include("personality")
+                .include("summary")
                 .include("tag");
 
         return mongoTemplate.find(query, Character.class);
@@ -150,7 +150,7 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
         query.fields()
                 .include("characterImgUrl")
                 .include("characterName")
-                .include("personality");
+                .include("summary");
 
         return mongoTemplate.find(query, Character.class);
     }
@@ -168,7 +168,7 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
         query.fields()
                 .include("characterImgUrl")
                 .include("characterName")
-                .include("personality");
+                .include("summary");
 
         return mongoTemplate.find(query, Character.class);
     }
