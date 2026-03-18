@@ -10,8 +10,6 @@ public interface BlockedRepository extends MongoRepository<Blocked, String> {
 
     List<Blocked> findByUserId(String userId);
 
-    boolean existsByUserIdAndCharacterId(String userId, String characterId);
-
     void deleteByUserIdAndCharacterId(String userId, String characterId);
 
     List<Blocked> findByUserIdOrderByCreatedAtDesc(String userId);

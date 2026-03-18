@@ -11,6 +11,7 @@ import sele906.dev.beluo_backend.character.domain.Character;
 import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Repository
@@ -174,6 +175,31 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
     }
 
     @Override
+    public List<Character> searchCharacters(String keyword, List<String> blockedIds) {
+
+        Criteria criteria = Criteria.where("isPublic").is(true)
+                .and("$text").is(Map.of("$search", keyword));
+
+        if (blockedIds != null && !blockedIds.isEmpty()) {
+            List<ObjectId> blockedObjectIds = blockedIds.stream().map(ObjectId::new).collect(Collectors.toList());
+            criteria = criteria.and("_id").nin(blockedObjectIds);
+        }
+
+        Query query = new Query(criteria);
+        query.with(Sort.by(Sort.Direction.DESC, "createdAt"));
+        query.limit(20);
+
+        query.fields()
+                .include("createdAt")
+                .include("characterImgUrl")
+                .include("characterName")
+                .include("summary")
+                .include("tag");
+
+        return mongoTemplate.find(query, Character.class);
+    }
+
+    @Override
     public void updateByIdAndUserId(String id, String userId, Character character) {
 
         Query query = new Query(
@@ -182,7 +208,7 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
         );
 
         Update update = new Update()
-                .set("name", character.getCharacterName())
+                .set("characterName", character.getCharacterName())
                 .set("characterImgUrl", character.getCharacterImgUrl())
                 .set("summary", character.getSummary())
                 .set("personality", character.getPersonality())

@@ -53,8 +53,11 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         Update update = new Update()
                 .set("name", user.getName())
-                .set("password", user.getPassword())
                 .set("userImgUrl", user.getUserImgUrl());
+
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            update.set("password", user.getPassword());
+        }
 
         mongoTemplate.updateFirst(query, update, User.class);
     }

@@ -24,6 +24,45 @@ public class CharacterController {
     @Autowired
     private CharacterService characterService;
 
+    //캐릭터 overview
+    @GetMapping
+    public Map<String, Object> getCharacterOverviewList(Authentication auth) {
+
+        String userId = null;
+
+        if (auth != null) {
+            userId = auth.getName();
+        }
+
+        return characterService.getCharacterOverviewList(userId);
+    }
+
+    //캐릭터 검색
+    @GetMapping("/list")
+    public Map<String, Object> getCharacterList(@RequestParam String keyword, Authentication auth) {
+
+        String userId = null;
+
+        if (auth != null) {
+            userId = auth.getName();
+        }
+
+        return characterService.getCharacterList(userId, keyword);
+    }
+
+    //캐릭터 요약 상세 페이지
+    @GetMapping("/{id}/summary")
+    public Map<String, Object> characterSummaryDetail(@PathVariable String id, Authentication auth) {
+
+        String userId = null;
+
+        if (auth != null) {
+            userId = auth.getName();
+        }
+
+        return characterService.getCharacterSummaryDetail(id, userId);
+    }
+
     //캐릭터 생성
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String createCharacter(
@@ -39,31 +78,5 @@ public class CharacterController {
         String userId = auth.getName();
 
         return characterService.createCharacter(character, file, userId);
-    }
-
-    //최근 10개 캐릭터 출력
-    @GetMapping("/list")
-    public Map<String, Object> getCharacterList(Authentication auth) {
-
-        String userId = null;
-
-        if (auth != null) {
-            userId = auth.getName();
-        }
-
-        return characterService.getCharacterList(userId);
-    }
-
-    //캐릭터 요약 상세 페이지
-    @GetMapping("/{id}/summary")
-    public Map<String, Object> characterSummaryDetail(@PathVariable String id, Authentication auth) {
-
-        String userId = null;
-
-        if (auth != null) {
-            userId = auth.getName();
-        }
-
-        return characterService.getCharacterSummaryDetail(id, userId);
     }
 }

@@ -18,6 +18,7 @@ import sele906.dev.beluo_backend.user.repository.UserRepository;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class CharacterService {
@@ -37,47 +38,78 @@ public class CharacterService {
     @Autowired
     private BlockedRepository blockedRepository;
 
-    public String createCharacter(Character character, MultipartFile file, String userId) throws IOException {
+    @Autowired
+    private CharacterCacheService characterCacheService;
 
-        Character c = new Character();
-        c.setCreatedAt(Instant.now());
-
-        c.setCharacterName(character.getCharacterName());
-        c.setSummary(character.getSummary());
-        c.setPersonality(character.getPersonality());
-        c.setFirstMessage(character.getFirstMessage());
-        c.setTag(character.getTag());
-
-        // 파일 처리
-        if (file == null || file.isEmpty()) {
-            throw new InvalidRequestException("이미지 파일이 없습니다");
-        }
-
-        Map result = cloudinary.uploader().upload(
-                file.getBytes(),
-                ObjectUtils.asMap("folder", "character")
-        );
-        c.setCharacterImgUrl((String) result.get("secure_url"));
-
-        c.setUserId(userId);
-
-        c.setPublic(true);
-        c.setLikeCount(0);
-        c.setConvCount(0);
+    //캐릭터 overview
+    public Map<String, Object> getCharacterOverviewList(String userId) {
 
         try {
-            Character saved = characterRepository.save(c);
-            return saved.getId().toString();
+            // 1단계: blocked, likeList 병렬 실행
+            CompletableFuture<List<String>> blockedFuture = CompletableFuture.supplyAsync(() -> {
+                if (userId == null) return List.of();
+                return blockedRepository.findByUserId(userId).stream()
+                        .map(Blocked::getCharacterId)
+                        .toList();
+            });
+
+            CompletableFuture<List<String>> likeIdsFuture = CompletableFuture.supplyAsync(() -> {
+                if (userId == null) return List.of();
+                return likeRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
+                        .map(Like::getCharacterId)
+                        .toList();
+            });
+
+            CompletableFuture.allOf(blockedFuture, likeIdsFuture).join();
+            List<String> blockedIds = blockedFuture.get();
+            List<String> likeIds = likeIdsFuture.get();
+
+            // 2단계: recent(캐시), popular(캐시), likedCharacters 병렬 실행
+            CompletableFuture<List<Character>> recentFuture = CompletableFuture.supplyAsync(() -> {
+                List<String> finalBlockedIds = blockedIds;
+                return characterCacheService.getRecentCharacters().stream()
+                        .filter(c -> !finalBlockedIds.contains(c.getId().toString()))
+                        .toList();
+            });
+
+            CompletableFuture<List<Character>> popularFuture = CompletableFuture.supplyAsync(() -> {
+                List<String> finalBlockedIds = blockedIds;
+                return characterCacheService.getPopularCharacters().stream()
+                        .filter(c -> !finalBlockedIds.contains(c.getId().toString()))
+                        .toList();
+            });
+
+            CompletableFuture<List<Character>> likedFuture = CompletableFuture.supplyAsync(() -> {
+                if (userId == null) return List.of();
+                List<String> characterIds = likeIds.stream()
+                        .filter(id -> !blockedIds.contains(id))
+                        .limit(10)
+                        .toList();
+                Map<String, Character> characterMap = characterRepository.requestLikedCharacters(characterIds).stream()
+                        .collect(java.util.stream.Collectors.toMap(c -> c.getId().toString(), c -> c));
+                return characterIds.stream()
+                        .filter(characterMap::containsKey)
+                        .map(characterMap::get)
+                        .toList();
+            });
+
+            CompletableFuture.allOf(recentFuture, popularFuture, likedFuture).join();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("recent", recentFuture.get());
+            response.put("popular", popularFuture.get());
+            response.put("liked", likedFuture.get());
+
+            return response;
+
         } catch (Exception e) {
-            throw new DataAccessException("캐릭터 세팅 저장 실패", e);
+            throw new DataAccessException("캐릭터 리스트 불러오기 실패", e);
         }
     }
 
-    public Map<String, Object> getCharacterList(String userId) {
-
+    //캐릭터 검색
+    public Map<String, Object> getCharacterList(String userId, String keyword) {
         try {
-
-            //차단된 캐릭터 거르기
             List<String> blockedIds = List.of();
             if (userId != null) {
                 blockedIds = blockedRepository.findByUserId(userId).stream()
@@ -85,39 +117,14 @@ public class CharacterService {
                         .toList();
             }
 
-            List<Character> recentCharacters = characterRepository.requestRecentCharacters(blockedIds);
-            List<Character> popularCharacters = characterRepository.requestPopularCharacters(blockedIds);
-
-            List<Character> likedCharacters = List.of();
-
-            if (userId != null) {
-
-                //차단된 캐릭터 거르기
-                List<String> finalBlockedIds = blockedIds;
-                List<String> characterIds = likeRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
-                        .map(Like::getCharacterId)
-                        .filter(id -> !finalBlockedIds.contains(id))
-                        .limit(10)
-                        .toList();
-
-                //관심있는 캐릭터 리스트 출력
-                Map<String, Character> characterMap = characterRepository.requestLikedCharacters(characterIds).stream()
-                        .collect(java.util.stream.Collectors.toMap(c -> c.getId().toString(), c -> c));
-                likedCharacters = characterIds.stream()
-                        .filter(characterMap::containsKey)
-                        .map(characterMap::get)
-                        .toList();
-            }
+            List<Character> characters = characterRepository.searchCharacters(keyword, blockedIds);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("recent", recentCharacters);
-            response.put("popular", popularCharacters);
-            response.put("liked", likedCharacters);
-
+            response.put("characters", characters);
             return response;
 
         } catch (Exception e) {
-            throw new DataAccessException("캐릭터 리스트 불러오기 실패", e);
+            throw new DataAccessException("캐릭터 목록 불러오기 실패", e);
         }
     }
 
@@ -150,4 +157,43 @@ public class CharacterService {
             throw new DataAccessException("캐릭터 상세정보 불러오기 실패", e);
         }
     }
+
+    //캐릭터 추가하기
+    public String createCharacter(Character character, MultipartFile file, String userId) throws IOException {
+
+        Character c = new Character();
+        c.setCreatedAt(Instant.now());
+
+        c.setCharacterName(character.getCharacterName());
+        c.setSummary(character.getSummary());
+        c.setPersonality(character.getPersonality());
+        c.setFirstMessage(character.getFirstMessage());
+        c.setTag(character.getTag());
+
+        // 파일 처리
+        if (file == null || file.isEmpty()) {
+            throw new InvalidRequestException("이미지 파일이 없습니다");
+        }
+
+        Map result = cloudinary.uploader().upload(
+                file.getBytes(),
+                ObjectUtils.asMap("folder", "character")
+        );
+        c.setCharacterImgUrl((String) result.get("secure_url"));
+
+        c.setUserId(userId);
+
+        c.setPublic(true); //캐릭터 공개여부 //초기 세팅
+        c.setLikeCount(0);
+        c.setConvCount(0);
+
+        try {
+            Character saved = characterRepository.save(c);
+            return saved.getId().toString();
+        } catch (Exception e) {
+            throw new DataAccessException("캐릭터 세팅 저장 실패", e);
+        }
+    }
+
+
 }

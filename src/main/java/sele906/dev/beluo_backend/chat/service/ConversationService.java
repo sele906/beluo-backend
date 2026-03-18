@@ -63,7 +63,7 @@ public class ConversationService {
         c.setUserEmail(user.getEmail());
         c.setUserName(user.getName());
 
-        //유저 프로필 사진(나중에 추가)
+        //유저 프로필 사진
         c.setUserImgUrl(user.getUserImgUrl());
 
         //채팅방 이름

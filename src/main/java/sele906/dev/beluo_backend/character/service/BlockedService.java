@@ -3,9 +3,7 @@ package sele906.dev.beluo_backend.character.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sele906.dev.beluo_backend.character.domain.Blocked;
-import sele906.dev.beluo_backend.character.domain.Like;
 import sele906.dev.beluo_backend.character.repository.BlockedRepository;
-import sele906.dev.beluo_backend.character.repository.CharacterRepository;
 import sele906.dev.beluo_backend.exception.DataAccessException;
 
 import java.time.Instant;

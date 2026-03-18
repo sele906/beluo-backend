@@ -28,4 +28,6 @@ public interface CharacterRepositoryCustom {
     List<Character> requestBlockedCharacters(List<String> characterIds);
 
     void updateByIdAndUserId(String id, String userId, Character character);
+
+    List<Character> searchCharacters(String keyword, List<String> blockedIds);
 }

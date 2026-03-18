@@ -2,7 +2,9 @@ package sele906.dev.beluo_backend.mypage.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import io.jsonwebtoken.security.Password;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import sele906.dev.beluo_backend.character.domain.Blocked;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class MyPageService {
@@ -29,60 +32,59 @@ public class MyPageService {
     private Cloudinary cloudinary;
 
     @Autowired
-    UserRepository userRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    CharacterRepository characterRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    LikeRepository likeRepository;
+    private CharacterRepository characterRepository;
 
     @Autowired
-    BlockedRepository blockedRepository;
+    private LikeRepository likeRepository;
+
+    @Autowired
+    private BlockedRepository blockedRepository;
 
     public Map<String, Object> overView(String userId) {
 
         try {
+            // 1단계: blocked, likeList, user, createdCharacters 병렬 실행
+            CompletableFuture<List<String>> blockedFuture = CompletableFuture.supplyAsync(() ->
+                    blockedRepository.findByUserId(userId).stream()
+                            .map(Blocked::getCharacterId)
+                            .toList());
+
+            CompletableFuture<List<String>> likeIdsFuture = CompletableFuture.supplyAsync(() ->
+                    likeRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
+                            .map(Like::getCharacterId)
+                            .toList());
+
+            CompletableFuture<User> userFuture = CompletableFuture.supplyAsync(() ->
+                    userRepository.userOverview(userId));
+
+            CompletableFuture<List<Character>> createdFuture = CompletableFuture.supplyAsync(() ->
+                    characterRepository.requestCreatedCharacters(userId));
+
+            CompletableFuture.allOf(blockedFuture, likeIdsFuture, userFuture, createdFuture).join();
+            List<String> blockedIds = blockedFuture.get();
+            List<String> likeIds = likeIdsFuture.get();
+
+            // 2단계: likedCharacters 조회
+            List<String> characterIds = likeIds.stream()
+                    .filter(id -> !blockedIds.contains(id))
+                    .limit(10)
+                    .toList();
+            Map<String, Character> characterMap = characterRepository.requestLikedCharacters(characterIds).stream()
+                    .collect(java.util.stream.Collectors.toMap(c -> c.getId().toString(), c -> c));
+            List<Character> likedCharacters = characterIds.stream()
+                    .filter(characterMap::containsKey)
+                    .map(characterMap::get)
+                    .toList();
+
             Map<String, Object> map = new HashMap<>();
-
-            //차단된 캐릭터 거르기
-            List<String> blockedIds = List.of();
-            if (userId != null) {
-                blockedIds = blockedRepository.findByUserId(userId).stream()
-                        .map(Blocked::getCharacterId)
-                        .toList();
-            }
-
-            //사용자 정보
-            User user = userRepository.userOverview(userId);
-
-            //내가 만든 캐릭터
-            List<Character> createdCharacters = characterRepository.requestCreatedCharacters(userId);
-
-            //내가 관심있는 캐릭터
-            List<Character> likedCharacters = new ArrayList<>();
-
-            if (userId != null) {
-
-                //차단된 캐릭터 거르기
-                List<String> finalBlockedIds = blockedIds;
-                List<String> characterIds = likeRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
-                        .map(Like::getCharacterId)
-                        .filter(id -> !finalBlockedIds.contains(id))
-                        .limit(10)
-                        .toList();
-
-                //관심있는 캐릭터 리스트 출력
-                Map<String, Character> characterMap = characterRepository.requestLikedCharacters(characterIds).stream()
-                        .collect(java.util.stream.Collectors.toMap(c -> c.getId().toString(), c -> c));
-                likedCharacters = characterIds.stream()
-                        .filter(characterMap::containsKey)
-                        .map(characterMap::get)
-                        .toList();
-            }
-
-            map.put("info", user);
-            map.put("created", createdCharacters);
+            map.put("info", userFuture.get());
+            map.put("created", createdFuture.get());
             map.put("liked", likedCharacters);
 
             return map;
@@ -210,7 +212,7 @@ public class MyPageService {
             c.setCharacterImgUrl(character.getCharacterImgUrl());
         }
 
-        c.setPublic(c.isPublic());
+        c.setPublic(character.isPublic()); //캐릭터 공개여부
 
         try {
             characterRepository.updateByIdAndUserId(characterId, userId, c);
@@ -222,8 +224,12 @@ public class MyPageService {
     public void getProfileEdit(String userId, User user, MultipartFile file) throws IOException {
         User u = new User();
         u.setName(user.getName());
-        u.setPassword(user.getPassword());
         u.setUserImgUrl(user.getUserImgUrl());
+
+        // 비밀번호 처리
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            u.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
 
         // 파일 처리
         if (file != null && !file.isEmpty()) {
