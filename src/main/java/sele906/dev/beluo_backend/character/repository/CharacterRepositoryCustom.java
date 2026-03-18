@@ -26,4 +26,6 @@ public interface CharacterRepositoryCustom {
     List<Character> createdCharacters(String userId);
 
     List<Character> requestBlockedCharacters(List<String> characterIds);
+
+    void updateByIdAndUserId(String id, String userId, Character character);
 }

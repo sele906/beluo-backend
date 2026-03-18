@@ -54,9 +54,9 @@ public class CharacterController {
         return characterService.getCharacterList(userId);
     }
 
-    //캐릭터 상세 페이지
-    @GetMapping("/detail")
-    public Map<String, Object> characterDetail(@RequestParam String id, Authentication auth) {
+    //캐릭터 요약 상세 페이지
+    @GetMapping("/{id}/summary")
+    public Map<String, Object> characterSummaryDetail(@PathVariable String id, Authentication auth) {
 
         String userId = null;
 
@@ -64,6 +64,6 @@ public class CharacterController {
             userId = auth.getName();
         }
 
-        return characterService.getCharacterDetail(id, userId);
+        return characterService.getCharacterSummaryDetail(id, userId);
     }
 }

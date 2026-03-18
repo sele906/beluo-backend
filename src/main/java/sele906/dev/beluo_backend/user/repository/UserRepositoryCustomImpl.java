@@ -5,6 +5,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 import sele906.dev.beluo_backend.character.domain.Character;
 import sele906.dev.beluo_backend.user.domain.User;
@@ -37,8 +38,24 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .include("userImgUrl")
                 .include("email")
                 .include("name")
+                .include("provider")
                 .include("createdAt");
 
         return mongoTemplate.findOne(query, User.class);
+    }
+
+    @Override
+    public void updateById(String userId, User user) {
+
+        Query query = new Query(
+                Criteria.where("_id").is(userId)
+        );
+
+        Update update = new Update()
+                .set("name", user.getName())
+                .set("password", user.getPassword())
+                .set("userImgUrl", user.getUserImgUrl());
+
+        mongoTemplate.updateFirst(query, update, User.class);
     }
 }

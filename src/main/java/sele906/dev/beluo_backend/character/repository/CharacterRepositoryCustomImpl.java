@@ -172,4 +172,24 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
 
         return mongoTemplate.find(query, Character.class);
     }
+
+    @Override
+    public void updateByIdAndUserId(String id, String userId, Character character) {
+
+        Query query = new Query(
+                Criteria.where("_id").is(id)
+                        .and("userId").is(userId)
+        );
+
+        Update update = new Update()
+                .set("name", character.getCharacterName())
+                .set("characterImgUrl", character.getCharacterImgUrl())
+                .set("summary", character.getSummary())
+                .set("personality", character.getPersonality())
+                .set("firstMessage", character.getFirstMessage())
+                .set("tag", character.getTag())
+                .set("isPublic", character.isPublic());
+
+        mongoTemplate.updateFirst(query, update, Character.class);
+    }
 }

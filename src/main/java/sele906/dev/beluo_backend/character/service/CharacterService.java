@@ -121,8 +121,8 @@ public class CharacterService {
         }
     }
 
-    //캐릭터 상세정보
-    public Map<String, Object> getCharacterDetail(String id, String userId) {
+    //캐릭터 요약 상세정보
+    public Map<String, Object> getCharacterSummaryDetail(String id, String userId) {
 
         try {
             Character character = characterRepository.findById(id)

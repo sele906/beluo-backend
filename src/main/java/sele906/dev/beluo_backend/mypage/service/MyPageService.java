@@ -1,7 +1,10 @@
 package sele906.dev.beluo_backend.mypage.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import sele906.dev.beluo_backend.character.domain.Blocked;
 import sele906.dev.beluo_backend.character.domain.Like;
 import sele906.dev.beluo_backend.character.repository.BlockedRepository;
@@ -13,6 +16,7 @@ import sele906.dev.beluo_backend.user.domain.User;
 import sele906.dev.beluo_backend.user.repository.UserRepository;
 import sele906.dev.beluo_backend.character.domain.Character;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +24,9 @@ import java.util.Map;
 
 @Service
 public class MyPageService {
+
+    @Autowired
+    private Cloudinary cloudinary;
 
     @Autowired
     UserRepository userRepository;
@@ -159,6 +166,80 @@ public class MyPageService {
                     .toList();
         } catch (Exception e) {
             throw new DataAccessException("차단된 캐릭터 목록 불러오기 실패", e);
+        }
+    }
+
+    //캐릭터 상세정보
+    public Character getCharacterDetail(String id) {
+        try {
+            Character character = characterRepository.findById(id)
+                    .orElseThrow(() -> new InvalidRequestException("캐릭터를 찾을 수 없습니다"));
+
+            return character;
+        } catch (Exception e) {
+            throw new DataAccessException("캐릭터 상세정보 불러오기 실패");
+        }
+    }
+
+    public void getCharacterDelete(String id, String userId) {
+
+        try {
+            characterRepository.deleteByIdAndUserId(id, userId);
+        } catch (Exception e) {
+            throw new DataAccessException("캐릭터 삭제 실패", e);
+        }
+    }
+
+    public void getCharacterEdit(String characterId, Character character, MultipartFile file, String userId) throws IOException {
+
+        Character c = new Character();
+        c.setCharacterName(character.getCharacterName());
+        c.setSummary(character.getSummary());
+        c.setPersonality(character.getPersonality());
+        c.setFirstMessage(character.getFirstMessage());
+        c.setTag(character.getTag());
+
+        // 파일 처리
+        if (file != null && !file.isEmpty()) {
+            Map result = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap("folder", "character")
+            );
+            c.setCharacterImgUrl((String) result.get("secure_url"));
+        } else {
+            c.setCharacterImgUrl(character.getCharacterImgUrl());
+        }
+
+        c.setPublic(c.isPublic());
+
+        try {
+            characterRepository.updateByIdAndUserId(characterId, userId, c);
+        } catch (Exception e) {
+            throw new DataAccessException("캐릭터 업데이트 실패", e);
+        }
+    }
+
+    public void getProfileEdit(String userId, User user, MultipartFile file) throws IOException {
+        User u = new User();
+        u.setName(user.getName());
+        u.setPassword(user.getPassword());
+        u.setUserImgUrl(user.getUserImgUrl());
+
+        // 파일 처리
+        if (file != null && !file.isEmpty()) {
+            Map result = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap("folder", "character")
+            );
+            u.setUserImgUrl((String) result.get("secure_url"));
+        } else {
+            u.setUserImgUrl(user.getUserImgUrl());
+        }
+
+        try {
+            userRepository.updateById(userId, u);
+        } catch (Exception e) {
+            throw new DataAccessException("캐릭터 업데이트 실패", e);
         }
     }
 }
