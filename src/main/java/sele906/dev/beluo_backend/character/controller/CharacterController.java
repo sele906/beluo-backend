@@ -67,7 +67,7 @@ public class CharacterController {
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String createCharacter(
             @RequestPart("character") Character character,
-            @RequestPart("file") MultipartFile file,
+            @RequestPart(value = "file", required = false) MultipartFile file,
             Authentication auth
     ) throws IOException {
 

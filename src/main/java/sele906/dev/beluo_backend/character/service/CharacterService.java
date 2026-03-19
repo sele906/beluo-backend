@@ -171,15 +171,17 @@ public class CharacterService {
         c.setTag(character.getTag());
 
         // 파일 처리
-        if (file == null || file.isEmpty()) {
-            throw new InvalidRequestException("이미지 파일이 없습니다");
+        if (file != null && !file.isEmpty()) {
+            Map result = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap("folder", "character")
+            );
+            c.setCharacterImgUrl((String) result.get("secure_url"));
+        } else {
+            c.setCharacterImgUrl(null);
         }
 
-        Map result = cloudinary.uploader().upload(
-                file.getBytes(),
-                ObjectUtils.asMap("folder", "character")
-        );
-        c.setCharacterImgUrl((String) result.get("secure_url"));
+
 
         c.setUserId(userId);
 
