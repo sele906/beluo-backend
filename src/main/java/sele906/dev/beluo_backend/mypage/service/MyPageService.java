@@ -204,7 +204,7 @@ public class MyPageService {
             // like, blocked 데이터 hard delete
             likeRepository.deleteByCharacterId(id);
             blockedRepository.deleteByCharacterId(id);
-            // conversation, message는 유저의 대화 기록이므로 유지
+            // conversation, message는 다른 유저의 대화 기록이므로 유지
             // 홈 화면 캐시 즉시 제거
             characterCacheService.evictCache();
         } catch (Exception e) {

@@ -69,7 +69,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         Query query = new Query(Criteria.where("_id").is(userId));
         Update update = new Update()
                 .set("email", "deleted_" + userId)
-                .set("name", "탈퇴한 사용자")
+                .set("name", "익명의 사용자")
                 .unset("password")
                 .unset("userImgUrl")
                 .unset("refreshToken")

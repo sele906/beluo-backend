@@ -9,5 +9,7 @@ public interface ConversationRepositoryCustom {
 
     void anonymizeByUserId(String userId);
 
+    void anonymizeOneByUserId(String sessionId, String userId);
+
     void updateConversationName(String sessionId, String conversationName);
 }

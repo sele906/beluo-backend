@@ -56,4 +56,15 @@ public class ConversationController {
         String conversationName = body.get("conversationName");
         conversationService.editConversationName(sessionId, conversationName);
     }
+
+    //채팅방 삭제
+    @DeleteMapping("/delete/{id}")
+    public void converstaionDelete(@PathVariable String id, Authentication auth) {
+        String userId = null;
+
+        if (auth != null) {
+            userId = auth.getName();
+        }
+        conversationService.converstaionDelete(id, userId);
+    }
 }

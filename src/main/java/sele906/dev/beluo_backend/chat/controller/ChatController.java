@@ -60,4 +60,8 @@ public class ChatController {
         return chatService.requestRecentChat(sessionId, before);
     }
 
+//    POST /api/chat/send     → 유저 메시지 저장 + 첫 AI 답변 반환
+//    POST /api/chat/regenerate  → 같은 컨텍스트로 AI 답변 1개 더 반환
+//    POST /api/chat/confirm  → 선택된 답변 DB 저장
+
 }

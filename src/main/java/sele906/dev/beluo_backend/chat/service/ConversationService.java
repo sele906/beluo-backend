@@ -2,6 +2,8 @@ package sele906.dev.beluo_backend.chat.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import sele906.dev.beluo_backend.user.domain.User;
 import sele906.dev.beluo_backend.user.repository.UserRepository;
 import sele906.dev.beluo_backend.character.domain.Blocked;
@@ -176,6 +178,15 @@ public class ConversationService {
             conversationRepository.updateConversationName(sessionId, conversationName);
         } catch (Exception e) {
             throw new DataAccessException("채팅방 이름 변경에 실패했습니다");
+        }
+    }
+
+    //채팅방 삭제
+    public void converstaionDelete(String sessionId, String userId) {
+        try {
+            conversationRepository.anonymizeOneByUserId(sessionId, userId);
+        } catch (Exception e) {
+            throw new DataAccessException("채팅방 삭제에 실패했습니다");
         }
     }
 }

@@ -45,10 +45,21 @@ public class ConversationRepositoryCustomImpl implements ConversationRepositoryC
         Query query = new Query(Criteria.where("userId").is(userId));
         Update update = new Update()
                 .set("userId", "deleted_" + userId)
-                .set("userName", "탈퇴한 사용자")
+                .set("userName", "익명의 사용자")
                 .unset("userEmail")
                 .unset("userImgUrl");
         mongoTemplate.updateMulti(query, update, Conversation.class);
+    }
+
+    @Override
+    public void anonymizeOneByUserId(String sessionId, String userId) {
+        Query query = new Query(Criteria.where("userId").is(userId).and("sessionId").is(sessionId));
+        Update update = new Update()
+                .set("userId", "deleted_" + userId)
+                .set("userName", "익명의 사용자")
+                .unset("userEmail")
+                .unset("userImgUrl");
+        mongoTemplate.updateFirst(query, update, Conversation.class);
     }
 
 
