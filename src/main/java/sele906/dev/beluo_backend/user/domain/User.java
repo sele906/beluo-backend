@@ -27,6 +27,7 @@ public class User {
 
     private String provider;
     private String providerId;
+    private Instant deletedAt;
 
     public User(String email, String password) {
         this.email = email;

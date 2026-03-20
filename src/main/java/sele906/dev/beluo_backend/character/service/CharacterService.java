@@ -85,7 +85,7 @@ public class CharacterService {
                         .filter(id -> !blockedIds.contains(id))
                         .limit(10)
                         .toList();
-                Map<String, Character> characterMap = characterRepository.requestLikedCharacters(characterIds).stream()
+                Map<String, Character> characterMap = characterRepository.findLikedCharacters(characterIds).stream()
                         .collect(java.util.stream.Collectors.toMap(c -> c.getId().toString(), c -> c));
                 return characterIds.stream()
                         .filter(characterMap::containsKey)
@@ -181,16 +181,15 @@ public class CharacterService {
             c.setCharacterImgUrl(null);
         }
 
-
-
         c.setUserId(userId);
 
-        c.setPublic(true); //캐릭터 공개여부 //초기 세팅
+        c.setPublic(character.isPublic());
         c.setLikeCount(0);
         c.setConvCount(0);
 
         try {
             Character saved = characterRepository.save(c);
+            characterCacheService.evictCache();
             return saved.getId().toString();
         } catch (Exception e) {
             throw new DataAccessException("캐릭터 세팅 저장 실패", e);

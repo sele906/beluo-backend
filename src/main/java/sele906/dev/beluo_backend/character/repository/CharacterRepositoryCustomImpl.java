@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import sele906.dev.beluo_backend.character.domain.Character;
 import org.springframework.data.mongodb.core.query.Update;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,8 +22,8 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
     private MongoTemplate mongoTemplate;
 
     @Override
-    public List<Character> requestRecentCharacters(List<String> blockedIds) {
-        Criteria criteria = Criteria.where("isPublic").is(true);
+    public List<Character> findRecentCharacters(List<String> blockedIds) {
+        Criteria criteria = Criteria.where("isPublic").is(true).and("deletedAt").isNull();
 
         //차단된 캐릭터 제외
         if (blockedIds != null && !blockedIds.isEmpty()) {
@@ -45,9 +46,9 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
     }
 
     @Override
-    public List<Character> requestPopularCharacters(List<String> blockedIds) {
+    public List<Character> findPopularCharacters(List<String> blockedIds) {
 
-        Criteria criteria = Criteria.where("isPublic").is(true);
+        Criteria criteria = Criteria.where("isPublic").is(true).and("deletedAt").isNull();
 
         //차단된 캐릭터 제외
         if (blockedIds != null && !blockedIds.isEmpty()) {
@@ -70,14 +71,14 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
     }
 
     @Override
-    public List<Character> requestLikedCharacters(List<String> characterIds) {
+    public List<Character> findLikedCharacters(List<String> characterIds) {
 
         if (characterIds == null || characterIds.isEmpty()) {
             return List.of();
         }
 
         List<ObjectId> objectIds = characterIds.stream().map(ObjectId::new).collect(Collectors.toList());
-        Query query = new Query(Criteria.where("_id").in(objectIds));
+        Query query = new Query(Criteria.where("_id").in(objectIds).and("deletedAt").isNull());
 
         query.fields()
                 .include("createdAt")
@@ -122,9 +123,9 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
         mongoTemplate.updateFirst(query, update, Character.class);
     }
 
-    public List<Character> requestCreatedCharacters(String userId) {
+    public List<Character> findRecentCreatedCharacters(String userId) {
 
-        Criteria criteria = Criteria.where("userId").is(userId);
+        Criteria criteria = Criteria.where("userId").is(userId).and("deletedAt").isNull();
 
         Query query = new Query(criteria);
         query.with(Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -140,9 +141,9 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
         return mongoTemplate.find(query, Character.class);
     }
 
-    public List<Character> createdCharacters(String userId) {
+    public List<Character> findCreatedCharacters(String userId) {
 
-        Criteria criteria = Criteria.where("userId").is(userId);
+        Criteria criteria = Criteria.where("userId").is(userId).and("deletedAt").isNull();
 
         Query query = new Query(criteria);
         query.with(Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -157,14 +158,14 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
     }
 
     @Override
-    public List<Character> requestBlockedCharacters(List<String> characterIds) {
+    public List<Character> findBlockedCharacters(List<String> characterIds) {
 
         if (characterIds == null || characterIds.isEmpty()) {
             return List.of();
         }
 
         List<ObjectId> objectIds = characterIds.stream().map(ObjectId::new).collect(Collectors.toList());
-        Query query = new Query(Criteria.where("_id").in(objectIds));
+        Query query = new Query(Criteria.where("_id").in(objectIds).and("deletedAt").isNull());
 
         query.fields()
                 .include("characterImgUrl")
@@ -178,6 +179,7 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
     public List<Character> searchCharacters(String keyword, List<String> blockedIds) {
 
         Criteria criteria = Criteria.where("isPublic").is(true)
+                .and("deletedAt").isNull()
                 .and("$text").is(Map.of("$search", keyword));
 
         if (blockedIds != null && !blockedIds.isEmpty()) {
@@ -197,6 +199,25 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
                 .include("tag");
 
         return mongoTemplate.find(query, Character.class);
+    }
+
+    @Override
+    public void softDeleteByUserId(String userId) {
+        Query query = new Query(
+                Criteria.where("userId").is(userId).and("deletedAt").isNull()
+        );
+        Update update = new Update().set("deletedAt", Instant.now());
+        mongoTemplate.updateMulti(query, update, Character.class);
+    }
+
+    @Override
+    public void softDeleteByIdAndUserId(String id, String userId) {
+        Query query = new Query(
+                Criteria.where("_id").is(new ObjectId(id))
+                        .and("userId").is(userId)
+        );
+        Update update = new Update().set("deletedAt", Instant.now());
+        mongoTemplate.updateFirst(query, update, Character.class);
     }
 
     @Override

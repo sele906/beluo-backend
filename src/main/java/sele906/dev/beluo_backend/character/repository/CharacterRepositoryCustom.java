@@ -5,11 +5,11 @@ import sele906.dev.beluo_backend.character.domain.Character;
 import java.util.List;
 
 public interface CharacterRepositoryCustom {
-    List<Character> requestRecentCharacters(List<String> blockedIds);
+    List<Character> findRecentCharacters(List<String> blockedIds);
 
-    List<Character> requestPopularCharacters(List<String> blockedIds);
+    List<Character> findPopularCharacters(List<String> blockedIds);
 
-    List<Character> requestLikedCharacters(List<String> characterIds);
+    List<Character> findLikedCharacters(List<String> characterIds);
 
     void increaseConvCount(String characterId);
 
@@ -21,13 +21,17 @@ public interface CharacterRepositoryCustom {
 
     //마이페이지
 
-    List<Character> requestCreatedCharacters(String userId);
+    List<Character> findRecentCreatedCharacters(String userId);
 
-    List<Character> createdCharacters(String userId);
+    List<Character> findCreatedCharacters(String userId);
 
-    List<Character> requestBlockedCharacters(List<String> characterIds);
+    List<Character> findBlockedCharacters(List<String> characterIds);
 
     void updateByIdAndUserId(String id, String userId, Character character);
+
+    void softDeleteByIdAndUserId(String id, String userId);
+
+    void softDeleteByUserId(String userId);
 
     List<Character> searchCharacters(String keyword, List<String> blockedIds);
 }

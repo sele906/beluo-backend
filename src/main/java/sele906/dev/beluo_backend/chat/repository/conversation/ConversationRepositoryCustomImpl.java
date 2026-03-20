@@ -5,6 +5,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 import sele906.dev.beluo_backend.chat.domain.Conversation;
 import sele906.dev.beluo_backend.chat.domain.Message;
@@ -19,7 +20,7 @@ public class ConversationRepositoryCustomImpl implements ConversationRepositoryC
     private MongoTemplate mongoTemplate;
 
     //채팅방 리스트 불러오기
-    public List<Conversation> requestRecentConversations(String userId, List<String> blockedIds) {
+    public List<Conversation> findRecentConversations(String userId, List<String> blockedIds) {
         Criteria criteria = Criteria.where("userId").is(userId).and("lastChatAt").lt(Instant.now());
         if (blockedIds != null && !blockedIds.isEmpty()) {
             criteria = criteria.and("characterId").nin(blockedIds);
@@ -38,5 +39,25 @@ public class ConversationRepositoryCustomImpl implements ConversationRepositoryC
 
         return requestRecentConversations;
     }
+
+    @Override
+    public void anonymizeByUserId(String userId) {
+        Query query = new Query(Criteria.where("userId").is(userId));
+        Update update = new Update()
+                .set("userId", "deleted_" + userId)
+                .set("userName", "탈퇴한 사용자")
+                .unset("userEmail")
+                .unset("userImgUrl");
+        mongoTemplate.updateMulti(query, update, Conversation.class);
+    }
+
+
+    @Override
+    public void updateConversationName(String sessionId, String conversationName) {
+        Query query = new Query(Criteria.where("sessionId").is(sessionId));
+        Update update = new Update().set("conversationName", conversationName);
+        mongoTemplate.updateFirst(query, update, Conversation.class);
+    }
+
 
 }

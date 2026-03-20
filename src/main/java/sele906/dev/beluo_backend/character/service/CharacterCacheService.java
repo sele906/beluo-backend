@@ -18,12 +18,12 @@ public class CharacterCacheService {
 
     @Cacheable("recentCharacters")
     public List<Character> getRecentCharacters() {
-        return characterRepository.requestRecentCharacters(List.of());
+        return characterRepository.findRecentCharacters(List.of());
     }
 
     @Cacheable("popularCharacters")
     public List<Character> getPopularCharacters() {
-        return characterRepository.requestPopularCharacters(List.of());
+        return characterRepository.findPopularCharacters(List.of());
     }
 
     @CacheEvict(value = {"recentCharacters", "popularCharacters"}, allEntries = true)

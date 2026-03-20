@@ -4,6 +4,7 @@ import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
@@ -32,7 +33,9 @@ public class Character {
 
     private String userId;
 
+    @JsonProperty("isPublic")
     private boolean isPublic;
     private int convCount;
     private int likeCount;
+    private Instant deletedAt;
 }

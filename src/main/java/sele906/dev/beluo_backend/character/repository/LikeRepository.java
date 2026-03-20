@@ -11,5 +11,9 @@ public interface LikeRepository extends MongoRepository<Like, String> {
 
     void deleteByUserIdAndCharacterId(String userId, String characterId);
 
+    void deleteByCharacterId(String characterId);
+
+    void deleteByUserId(String userId);
+
     List<Like> findByUserIdOrderByCreatedAtDesc(String userId);
 }

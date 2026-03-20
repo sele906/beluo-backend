@@ -12,5 +12,9 @@ public interface BlockedRepository extends MongoRepository<Blocked, String> {
 
     void deleteByUserIdAndCharacterId(String userId, String characterId);
 
+    void deleteByCharacterId(String characterId);
+
+    void deleteByUserId(String userId);
+
     List<Blocked> findByUserIdOrderByCreatedAtDesc(String userId);
 }

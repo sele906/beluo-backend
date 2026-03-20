@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 import sele906.dev.beluo_backend.character.domain.Character;
 import sele906.dev.beluo_backend.user.domain.User;
 
+import java.time.Instant;
+
 @Repository
 public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
@@ -59,6 +61,20 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
             update.set("password", user.getPassword());
         }
 
+        mongoTemplate.updateFirst(query, update, User.class);
+    }
+
+    @Override
+    public void anonymizeById(String userId) {
+        Query query = new Query(Criteria.where("_id").is(userId));
+        Update update = new Update()
+                .set("email", "deleted_" + userId)
+                .set("name", "탈퇴한 사용자")
+                .unset("password")
+                .unset("userImgUrl")
+                .unset("refreshToken")
+                .unset("providerId")
+                .set("deletedAt", Instant.now());
         mongoTemplate.updateFirst(query, update, User.class);
     }
 }

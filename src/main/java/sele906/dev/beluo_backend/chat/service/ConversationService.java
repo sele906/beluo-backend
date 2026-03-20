@@ -134,7 +134,7 @@ public class ConversationService {
     }
 
     //채팅방 리스트 불러오기
-    public List<Conversation> conversationList(String userId) {
+    public List<Conversation> getConversationList(String userId) {
 
         if (userId == null) {
             return List.of();
@@ -144,7 +144,7 @@ public class ConversationService {
             List<String> blockedIds = blockedRepository.findByUserId(userId).stream()
                     .map(Blocked::getCharacterId)
                     .toList();
-            return conversationRepository.requestRecentConversations(userId, blockedIds);
+            return conversationRepository.findRecentConversations(userId, blockedIds);
         } catch (Exception e) {
             throw new DataAccessException("채팅방 리스트 불러오기 실패", e);
         }
@@ -169,5 +169,13 @@ public class ConversationService {
         map.put("userImgUrl", conv.getUserImgUrl());
 
         return map;
+    }
+
+    public void editConversationName(String sessionId, String conversationName) {
+        try {
+            conversationRepository.updateConversationName(sessionId, conversationName);
+        } catch (Exception e) {
+            throw new DataAccessException("채팅방 이름 변경에 실패했습니다");
+        }
     }
 }

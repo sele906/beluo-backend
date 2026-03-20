@@ -6,4 +6,6 @@ public interface UserRepositoryCustom {
     User userOverview(String userId);
     User userDetail(String userId);
     void updateById(String userId, User user);
+
+    void anonymizeById(String userId);
 }

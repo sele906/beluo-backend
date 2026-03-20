@@ -1,16 +1,21 @@
 package sele906.dev.beluo_backend.auth.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import sele906.dev.beluo_backend.user.domain.User;
 import sele906.dev.beluo_backend.auth.dto.TokenResponse;
 import sele906.dev.beluo_backend.user.repository.UserRepository;
 import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.InvalidRequestException;
 
+import java.io.IOException;
 import java.time.Instant;
+import java.util.Map;
 
 @Service
 public class AuthService {
@@ -23,6 +28,9 @@ public class AuthService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private Cloudinary cloudinary;
 
     public TokenResponse login(User user) {
 
@@ -105,7 +113,7 @@ public class AuthService {
         }
     }
 
-    public void join(User user) {
+    public void join(User user, MultipartFile file) throws IOException {
 
         User u = new User();
         u.setEmail(user.getEmail());
@@ -113,10 +121,16 @@ public class AuthService {
         u.setName(user.getName());
         u.setCreatedAt(Instant.now());
 
-        //프로필 사진 없으면 구글 프로필 사진으로 대체
-        u.setUserImgUrl("https://res.cloudinary.com/dncvqdlih/image/upload/v1773631077/bird_by7z1h.jpg"); //초기 세팅
-
-        System.out.println("유저 정보: " + u);
+        // 프로필 사진 업로드
+        if (file != null && !file.isEmpty()) {
+            Map result = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap("folder", "profile")
+            );
+            u.setUserImgUrl((String) result.get("secure_url"));
+        } else {
+            u.setUserImgUrl(null);
+        }
 
         try {
             userRepository.save(u);

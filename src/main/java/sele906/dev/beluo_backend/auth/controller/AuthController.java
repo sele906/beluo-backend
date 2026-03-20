@@ -4,14 +4,17 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import sele906.dev.beluo_backend.user.domain.User;
 import sele906.dev.beluo_backend.auth.dto.TokenResponse;
 import sele906.dev.beluo_backend.auth.service.AuthService;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -121,9 +124,12 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "로그아웃 성공"));
     }
 
-    @PostMapping("/join")
-    public ResponseEntity<?> join(@RequestBody User user) {
-        authService.join(user);
+    @PostMapping(value = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> join(
+            @RequestPart("user") User user,
+            @RequestPart(value = "file", required = false) MultipartFile file
+    ) throws IOException {
+        authService.join(user, file);
         return ResponseEntity.ok(Map.of("message", "회원가입 완료"));
     }
 }
