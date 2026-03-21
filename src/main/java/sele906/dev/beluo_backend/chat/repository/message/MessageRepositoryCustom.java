@@ -26,4 +26,6 @@ public interface MessageRepositoryCustom {
 
     //요약할 데이터 업데이트
     UpdateResult summaryDataUpdate(String sessionId, String finishedSummary, Instant newLastSummarizedAt);
+
+    void updateMessage(String sessionId, String messageId, String content);
 }

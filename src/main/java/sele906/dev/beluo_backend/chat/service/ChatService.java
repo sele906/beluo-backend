@@ -127,4 +127,11 @@ public class ChatService {
         return result;
     }
 
+    public void chatEdit(String sessionId, String messageId, String content) {
+        try {
+            messageRepository.updateMessage(sessionId, messageId, content);
+        } catch (Exception e) {
+            throw new DataAccessException("메세지 수정에 실패했습니다.");
+        }
+    }
 }

@@ -18,7 +18,7 @@ import java.util.Date;
 @Document(collection = "message")
 public class Message {
     @Id
-    private ObjectId id;
+    private String id;
     private String sessionId;
     private String role; // system | user | assistant
     private String content;

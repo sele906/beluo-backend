@@ -31,13 +31,13 @@ public class ChatController {
         String userContent = userMessage;
 
         //유저 메세지 db 저장
-        chatService.chatDataSave(userRole, userContent, sessionId);
+        Message savedUserMessage = chatService.chatDataSave(userRole, userContent, sessionId);
         chatService.afterSummaryChatCount(sessionId);
 
         //프롬프트에 최근 대화 합쳐서 api 보내기 (ai 답변은 저장 X, confirm에서 저장)
         String reply = chatService.sendChatApi(sessionId);
 
-        return Map.of("reply", reply);
+        return Map.of("reply", reply, "userMessageId", savedUserMessage.getId());
     }
 
     //다시 생성 (db 저장 없이 ai 답변만 생성, db 마지막이 유저 메세지라 컨텍스트 동일)
@@ -50,16 +50,17 @@ public class ChatController {
 
     //선택된 답변 DB 저장
     @PostMapping("/confirm")
-    public void chatConfirm(@RequestBody Map<String, String> body) {
+    public Map<String, String> chatConfirm(@RequestBody Map<String, String> body) {
 
         String sessionId = body.get("sessionId");
         String aiRole = "assistant";
-        String reply = body.get("reply");
-        String aiContent = reply;
+        String aiContent = body.get("reply");
 
         //ai 메세지 db 저장
-        chatService.chatDataSave(aiRole, aiContent, sessionId);
+        Message savedAiMessage = chatService.chatDataSave(aiRole, aiContent, sessionId);
         chatService.afterSummaryChatCount(sessionId);
+
+        return Map.of("messageId", savedAiMessage.getId());
     }
 
     //메세지 출력
@@ -69,6 +70,16 @@ public class ChatController {
             @RequestParam(required = false) String before
     ) {
         return chatService.requestRecentChat(sessionId, before);
+    }
+
+    //메세지 수정
+    @PatchMapping("/edit")
+    public void chatEdit(@RequestBody Map<String, String> body) {
+        String messageId = body.get("chatId");
+        String sessionId = body.get("sessionId");
+        String content = body.get("content");
+
+        chatService.chatEdit(sessionId, messageId, content);
     }
 
 }

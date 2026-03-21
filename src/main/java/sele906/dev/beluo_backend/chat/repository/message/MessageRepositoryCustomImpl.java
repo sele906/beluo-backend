@@ -60,13 +60,13 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 
     //요약 데이터 가져오기
     public Message summaryMessage(String sessionId) {
-        Query summaryQuery = new Query(
+        Query query = new Query(
                 Criteria.where("sessionId").is(sessionId)
                         .and("role").is("system")
                         .and("type").is("summary")
         );
 
-        return mongoTemplate.findOne(summaryQuery, Message.class);
+        return mongoTemplate.findOne(query, Message.class);
     }
 
     //요약할 최근 대화
@@ -86,19 +86,33 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 
     //요약할 데이터 업데이트
     public UpdateResult summaryDataUpdate(String sessionId, String finishedSummary, Instant newLastSummarizedAt) {
-        Query newSummaryQuery = new Query(
+        Query query = new Query(
                 Criteria.where("sessionId").is(sessionId)
                         .and("role").is("system")
                         .and("type").is("summary")
         );
 
-        Update summaryUpdate = new Update()
+        Update update = new Update()
                 .set("content", finishedSummary)
                 .set("lastSummarizedAt", newLastSummarizedAt)
                 .set("sinceLastSummaryCount", 1)
                 .set("isSummarizing", false)
                 .inc("summaryVersion", 1);
 
-        return mongoTemplate.updateFirst(newSummaryQuery, summaryUpdate, Message.class);
+        return mongoTemplate.updateFirst(query, update, Message.class);
+    }
+
+    //메세지 편집
+    @Override
+    public void updateMessage(String sessionId, String messageId, String content) {
+        Query query = new Query(
+                Criteria.where("_id").is(messageId)
+                        .and("sessionId").is(sessionId)
+        );
+
+        Update update = new Update()
+                .set("content", content);
+
+        mongoTemplate.updateFirst(query, update, Message.class);
     }
 }
