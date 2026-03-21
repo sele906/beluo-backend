@@ -30,25 +30,36 @@ public class ChatController {
         //content
         String userContent = userMessage;
 
-        //db 저장
+        //유저 메세지 db 저장
         chatService.chatDataSave(userRole, userContent, sessionId);
         chatService.afterSummaryChatCount(sessionId);
 
-        //프롬프트에 최근 대화 합쳐서 api 보내기
+        //프롬프트에 최근 대화 합쳐서 api 보내기 (ai 답변은 저장 X, confirm에서 저장)
         String reply = chatService.sendChatApi(sessionId);
 
-        //응답 메세지 db에 저장
-        //role
-        String aiRole = "assistant";
+        return Map.of("reply", reply);
+    }
 
-        //content
+    //다시 생성 (db 저장 없이 ai 답변만 생성, db 마지막이 유저 메세지라 컨텍스트 동일)
+    @PostMapping("/regenerate")
+    public Map<String, String> chatRegenerate(@RequestBody Map<String, String> body) {
+        String sessionId = body.get("sessionId");
+        String reply = chatService.sendChatApi(sessionId);
+        return Map.of("reply", reply);
+    }
+
+    //선택된 답변 DB 저장
+    @PostMapping("/confirm")
+    public void chatConfirm(@RequestBody Map<String, String> body) {
+
+        String sessionId = body.get("sessionId");
+        String aiRole = "assistant";
+        String reply = body.get("reply");
         String aiContent = reply;
 
-        //db 저장
+        //ai 메세지 db 저장
         chatService.chatDataSave(aiRole, aiContent, sessionId);
         chatService.afterSummaryChatCount(sessionId);
-
-        return Map.of("reply", aiContent);
     }
 
     //메세지 출력
@@ -59,9 +70,5 @@ public class ChatController {
     ) {
         return chatService.requestRecentChat(sessionId, before);
     }
-
-//    POST /api/chat/send     → 유저 메시지 저장 + 첫 AI 답변 반환
-//    POST /api/chat/regenerate  → 같은 컨텍스트로 AI 답변 1개 더 반환
-//    POST /api/chat/confirm  → 선택된 답변 DB 저장
 
 }
