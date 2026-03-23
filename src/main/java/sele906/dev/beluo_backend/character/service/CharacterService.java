@@ -230,6 +230,9 @@ public class CharacterService {
         String raw = response.trim();
         int start = raw.indexOf('{');
         int end = raw.lastIndexOf('}');
+        if (start == -1 || end == -1) {
+            throw new DataAccessException("personalityJson 응답 형식 오류: " + raw);
+        }
         String jsonOnly = raw.substring(start, end + 1);
 
         try {

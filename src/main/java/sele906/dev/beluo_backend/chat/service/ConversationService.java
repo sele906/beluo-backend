@@ -89,9 +89,11 @@ public class ConversationService {
         systemMessage.setCreatedAt(Instant.now());
         systemMessage.setType("system");
 
-        //시스템 프롬프트 + 캐릭터 프롬프트
+        //시스템 프롬프트 + 캐릭터 프롬프트 (null 필드 제외)
         try {
-            systemMessage.setContent(objectMapper.writeValueAsString(character.getPersonalityJson()));
+            ObjectMapper nonNullMapper = objectMapper.copy()
+                    .setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
+            systemMessage.setContent(nonNullMapper.writeValueAsString(character.getPersonalityJson()));
         } catch (Exception e) {
             throw new DataAccessException("캐릭터 설정 직렬화 실패", e);
         }
@@ -128,8 +130,12 @@ public class ConversationService {
         m.setRole("assistant");
         m.setCreatedAt(Instant.now());
 
-        //첫 메세지
-        m.setContent(character.getFirstMessage());
+        //첫 메세지 ({{char}}, {{user}} 치환)
+        String firstMessage = character.getFirstMessage() != null ? character.getFirstMessage() : "";
+        firstMessage = firstMessage
+                .replace("{{char}}", character.getCharacterName() != null ? character.getCharacterName() : "")
+                .replace("{{user}}", user.getName() != null ? user.getName() : "");
+        m.setContent(firstMessage);
 
         //db에 저장
         try {

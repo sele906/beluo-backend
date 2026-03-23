@@ -49,5 +49,6 @@ public class PersonalityJson {
         private String tone;
         private String formality;
         private List<String> quirks;
+        private List<String> sentenceEndings; // 예: ["~까?", "~하지?", "~잖아"]
     }
 }

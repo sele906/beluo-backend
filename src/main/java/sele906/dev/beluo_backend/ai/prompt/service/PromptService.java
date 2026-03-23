@@ -8,7 +8,9 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import sele906.dev.beluo_backend.ai.prompt.repository.PromptRepository;
+import sele906.dev.beluo_backend.chat.domain.Conversation;
 import sele906.dev.beluo_backend.chat.domain.Message;
+import sele906.dev.beluo_backend.chat.repository.conversation.ConversationRepository;
 import sele906.dev.beluo_backend.chat.service.SummaryService;
 import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.PromptBuildException;
@@ -29,6 +31,9 @@ public class PromptService {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ConversationRepository conversationRepository;
 
     //최종 프롬프트
     public List<Map<String, String>> buildPrompt(String sessionId) {
@@ -97,6 +102,15 @@ public class PromptService {
             throw new PromptBuildException("시스템 프롬프트 확인 불가");
         }
 
+        // {{char}}, {{user}} 변수 치환
+        Conversation conversation = conversationRepository.findBySessionId(sessionId)
+                .orElseThrow(() -> new PromptBuildException("대화방 확인 불가"));
+
+        String content = systemMessage.getContent()
+                .replace("{{char}}", conversation.getCharacterName() != null ? conversation.getCharacterName() : "")
+                .replace("{{user}}", conversation.getUserName() != null ? conversation.getUserName() : "");
+
+        systemMessage.setContent(content);
         return systemMessage;
     }
 

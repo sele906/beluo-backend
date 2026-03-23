@@ -36,7 +36,7 @@ public class OpenAiClient {
 
         Map<String, Object> body = Map.of(
             "model", "gpt-5-mini",
-            "max_completion_tokens", 500,
+            "max_completion_tokens", 1500,
             "reasoning_effort", "low",
             "messages", messages
         );
@@ -77,8 +77,8 @@ public class OpenAiClient {
 
         Map<String, Object> body = Map.of(
                 "model", "gpt-5-mini",
-                "max_completion_tokens", 600,
-                "reasoning_effort", "high",
+                "max_completion_tokens", 2000,
+                "reasoning_effort", "medium",
                 "messages", messages
         );
 
@@ -118,7 +118,7 @@ public class OpenAiClient {
 
         Map<String, Object> body = Map.of(
                 "model", "gpt-5-mini",
-                "max_completion_tokens", 1000,
+                "max_completion_tokens", 2000,
                 "reasoning_effort", "medium",
                 "messages", List.of(personality)
         );
