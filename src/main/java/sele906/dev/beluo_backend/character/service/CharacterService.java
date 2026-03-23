@@ -4,10 +4,13 @@ import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import sele906.dev.beluo_backend.ai.client.OpenAiClient;
 import sele906.dev.beluo_backend.character.domain.Blocked;
 import sele906.dev.beluo_backend.character.domain.Character;
+import sele906.dev.beluo_backend.character.domain.PersonalityJson;
 import sele906.dev.beluo_backend.character.repository.BlockedRepository;
 import sele906.dev.beluo_backend.character.repository.CharacterRepository;
+import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.InvalidRequestException;
 import sele906.dev.beluo_backend.character.domain.Like;
@@ -15,6 +18,7 @@ import sele906.dev.beluo_backend.character.repository.LikeRepository;
 import sele906.dev.beluo_backend.user.domain.User;
 import sele906.dev.beluo_backend.user.repository.UserRepository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
@@ -25,6 +29,9 @@ public class CharacterService {
 
     @Autowired
     private Cloudinary cloudinary;
+
+    @Autowired
+    private OpenAiClient openAiClient;
 
     @Autowired
     private CharacterRepository characterRepository;
@@ -40,6 +47,9 @@ public class CharacterService {
 
     @Autowired
     private CharacterCacheService characterCacheService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     //캐릭터 overview
     public Map<String, Object> getCharacterOverviewList(String userId) {
@@ -181,6 +191,9 @@ public class CharacterService {
             c.setCharacterImgUrl(null);
         }
 
+        //성격 json으로 변환
+        c.setPersonalityJson(createPersonality(character.getPersonality()));
+
         c.setUserId(userId);
 
         c.setPublic(character.isPublic());
@@ -193,6 +206,36 @@ public class CharacterService {
             return saved.getId().toString();
         } catch (Exception e) {
             throw new DataAccessException("캐릭터 세팅 저장 실패", e);
+        }
+    }
+
+    //캐릭터 성격 json으로 정리
+    public PersonalityJson createPersonality(String personalityString) {
+
+        //예외처리
+        if (personalityString == null) {
+            throw new DataAccessException("캐릭터 성격 확인 불가");
+        }
+
+        //json 변환 프롬프트 작성
+        Map<String, String> personalityJsonPrompt =  Map.of(
+                "role", "system",
+                "content", """PROMPT_REMOVED""" + personalityString + "}"
+        );
+
+        //캐릭터 프롬프트 출력
+        String response = openAiClient.personality(personalityJsonPrompt);
+
+        // 응답에서 JSON만 추출
+        String raw = response.trim();
+        int start = raw.indexOf('{');
+        int end = raw.lastIndexOf('}');
+        String jsonOnly = raw.substring(start, end + 1);
+
+        try {
+            return objectMapper.readValue(jsonOnly, PersonalityJson.class);
+        } catch (Exception e) {
+            throw new DataAccessException("personalityJson 파싱 실패", e);
         }
     }
 

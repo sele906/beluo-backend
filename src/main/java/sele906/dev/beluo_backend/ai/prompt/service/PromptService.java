@@ -1,5 +1,6 @@
 package sele906.dev.beluo_backend.ai.prompt.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -26,6 +27,9 @@ public class PromptService {
     @Autowired
     private PromptRepository promptRepository;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     //최종 프롬프트
     public List<Map<String, String>> buildPrompt(String sessionId) {
 
@@ -51,14 +55,12 @@ public class PromptService {
         }
 
         //요약 프롬프트 > 최종 프롬프트에 결합
-        if (summaryPrompt != null) {
+        if (summaryPrompt != null && !summaryPrompt.isEmpty()) {
             System.out.println("summaryPrompt: " + summaryPrompt);
-            if (!summaryPrompt.isEmpty()) {
-                promptMessage.add(Map.of(
-                        "role", "system",
-                        "content", """PROMPT_REMOVED""" + summaryPrompt
-                ));
-            }
+            promptMessage.add(Map.of(
+                    "role", "system",
+                    "content", buildSummaryInstruction(summaryPrompt)
+            ));
         }
 
         //최근 대화 프롬프트 > 최종 프롬프트에 결합
@@ -175,5 +177,29 @@ public class PromptService {
         System.out.println("==================");
 
         return recentMessages;
+    }
+
+    private String buildSummaryInstruction(String summaryJson) {
+        try {
+            Map<String, Object> summary = objectMapper.readValue(summaryJson, Map.class);
+
+            Map<String, Object> emotionalState = (Map<String, Object>) summary.get("emotionalState");
+            String conversationSummary = (String) summary.get("conversationSummary");
+            String relationshipPhase = (String) summary.get("relationshipPhase");
+
+            if (emotionalState == null) {
+                return "다음은 이전 대화 요약이다. 반드시 반영하여 답변하라.\n\n" + summaryJson;
+            }
+
+            int affection = (int) emotionalState.getOrDefault("affection", 0);
+            int trust = (int) emotionalState.getOrDefault("trust", 0);
+            int hostility = (int) emotionalState.getOrDefault("hostility", 0);
+            int comfort = (int) emotionalState.getOrDefault("comfort", 0);
+
+            return """PROMPT_REMOVED""".formatted(affection, trust, hostility, comfort, relationshipPhase, conversationSummary);
+        } catch (Exception e) {
+            // JSON 파싱 실패 시 텍스트 그대로 사용 (이전 포맷 호환)
+            return "다음은 이전 대화에서 형성된 관계와 감정에 대한 요약이다. 반드시 이 내용을 반영하여 캐릭터의 말투, 태도, 감정이 자연스럽게 이어지도록 답변하라.\n\n" + summaryJson;
+        }
     }
 }

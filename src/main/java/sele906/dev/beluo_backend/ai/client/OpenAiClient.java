@@ -36,9 +36,91 @@ public class OpenAiClient {
 
         Map<String, Object> body = Map.of(
             "model", "gpt-5-mini",
-            "max_completion_tokens", 1000,
+            "max_completion_tokens", 500,
             "reasoning_effort", "low",
             "messages", messages
+        );
+
+        Map response = webClient.post()
+                .uri("/chat/completions")
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .doOnError(e -> {
+                    if (e instanceof WebClientResponseException ex) {
+                        System.out.println("API 에러 상태코드: " + ex.getStatusCode());
+                        System.out.println("API 에러 바디: " + ex.getResponseBodyAsString());
+                    } else {
+                        System.out.println("API 에러: " + e.getMessage());
+                    }
+                })
+                .block(Duration.ofSeconds(25));
+
+        System.out.println("response: " + response);
+
+        if (response == null) {
+            throw new RuntimeException("OpenAI 응답이 없습니다.");
+        }
+
+        List<Map> choices = (List<Map>) response.get("choices");
+
+        if (choices == null || choices.isEmpty()) {
+            throw new RuntimeException("OpenAI choices가 없습니다.");
+        }
+
+        Map message = (Map) choices.get(0).get("message");
+
+        return (String) message.get("content");
+    }
+
+    public String summary(List<Map<String, String>> messages) {
+
+        Map<String, Object> body = Map.of(
+                "model", "gpt-5-mini",
+                "max_completion_tokens", 600,
+                "reasoning_effort", "high",
+                "messages", messages
+        );
+
+        Map response = webClient.post()
+                .uri("/chat/completions")
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .doOnError(e -> {
+                    if (e instanceof WebClientResponseException ex) {
+                        System.out.println("API 에러 상태코드: " + ex.getStatusCode());
+                        System.out.println("API 에러 바디: " + ex.getResponseBodyAsString());
+                    } else {
+                        System.out.println("API 에러: " + e.getMessage());
+                    }
+                })
+                .block(Duration.ofSeconds(25));
+
+        System.out.println("response: " + response);
+
+        if (response == null) {
+            throw new RuntimeException("OpenAI 응답이 없습니다.");
+        }
+
+        List<Map> choices = (List<Map>) response.get("choices");
+
+        if (choices == null || choices.isEmpty()) {
+            throw new RuntimeException("OpenAI choices가 없습니다.");
+        }
+
+        Map message = (Map) choices.get(0).get("message");
+
+        return (String) message.get("content");
+    }
+
+    public String personality(Map<String, String> personality) {
+
+        Map<String, Object> body = Map.of(
+                "model", "gpt-5-mini",
+                "max_completion_tokens", 1000,
+                "reasoning_effort", "medium",
+                "messages", List.of(personality)
         );
 
         Map response = webClient.post()

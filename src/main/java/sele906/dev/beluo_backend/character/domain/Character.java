@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -28,6 +29,7 @@ public class Character {
 
     private String summary;
     private String personality;
+    private PersonalityJson personalityJson;
     private String firstMessage;
     private List<String> tag;
 

@@ -43,9 +43,9 @@ public class ChatService {
     public String sendChatApi(String sessionId) {
 
         //10번 테스트 제한
-        if (counter.incrementAndGet() > 10) {
-            return "오늘 테스트는 여기까지! 🛑";
-        }
+//        if (counter.incrementAndGet() > 10) {
+//            return "오늘 테스트는 여기까지! 🛑";
+//        }
 
         //프롬프트 작성
         List<Map<String, String>> prompt = promptService.buildPrompt(sessionId);

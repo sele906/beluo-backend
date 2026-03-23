@@ -6,7 +6,12 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import sele906.dev.beluo_backend.ai.client.OpenAiClient;
+import sele906.dev.beluo_backend.character.domain.Character;
+import sele906.dev.beluo_backend.character.domain.PersonalityJson;
+import sele906.dev.beluo_backend.character.repository.CharacterRepository;
+import sele906.dev.beluo_backend.chat.domain.Conversation;
 import sele906.dev.beluo_backend.chat.domain.Message;
+import sele906.dev.beluo_backend.chat.repository.conversation.ConversationRepository;
 import sele906.dev.beluo_backend.chat.repository.message.MessageRepository;
 import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.SummaryException;
@@ -30,6 +35,12 @@ public class SummaryService {
     @Autowired
     private MessageRepository messageRepository;
 
+    @Autowired
+    private ConversationRepository conversationRepository;
+
+    @Autowired
+    private CharacterRepository characterRepository;
+
     //요약 채팅 api 실행
     public String summarizeChat(String sessionId) {
         //사용자 몰렸을 때 동시 중복 기능 실행 방지
@@ -49,6 +60,18 @@ public class SummaryService {
         String content = summaryMessage.getContent();
         Instant lastSummarizedAt = summaryMessage.getLastSummarizedAt();
 
+        // 캐릭터 성격 정보 조회
+        Conversation conversationInfo = conversationRepository.findBySessionId(sessionId)
+                .orElseThrow(() -> new DataAccessException("대화방 확인 불가"));
+        Character character = characterRepository.findById(conversationInfo.getCharacterId())
+                .orElseThrow(() -> new DataAccessException("캐릭터 확인 불가"));
+        PersonalityJson p = character.getPersonalityJson();
+
+        String personalityType = (p != null && p.getPersonality() != null) ? p.getPersonality().getType() : "알 수 없음";
+        String traits = (p != null && p.getPersonality() != null) ? p.getPersonality().getTraits().toString() : "[]";
+        int emotionalOpenness = (p != null && p.getPersonality() != null) ? p.getPersonality().getEmotionalOpenness() : 5;
+        String tone = (p != null && p.getSpeechStyle() != null) ? p.getSpeechStyle().getTone() : "알 수 없음";
+
         //요약할 최근 대화
         List<Message> recentMessagesToSummarize = messageRepository.recentMessagesToSummarize(sessionId, lastSummarizedAt);
 
@@ -67,10 +90,14 @@ public class SummaryService {
 
         System.out.println("==================");
 
+        String previousSummary = (content != null && !content.isEmpty())
+                ? content
+                : "없음 (초기 상태, 모든 감정 수치는 캐릭터 성격에 맞게 초기화)";
+
         //요약 프롬프트 작성
         sendSummaryMessage.add(Map.of(
                 "role", "system",
-                "content", """PROMPT_REMOVED""" + (content != null ? content : "없음")
+                "content", """PROMPT_REMOVED""".formatted(personalityType, traits, emotionalOpenness, tone, previousSummary)
         ));
 
         StringBuilder conversation = new StringBuilder();
@@ -85,7 +112,7 @@ public class SummaryService {
         ));
 
         //요약 프롬프트 출력
-        String finishedSummary = openAiClient.chat(sendSummaryMessage);
+        String finishedSummary = openAiClient.summary(sendSummaryMessage);
 
         //요약 확인 테스트
         System.out.println("=========요약 확인 테스트=========");

@@ -40,3 +40,4 @@ out/
 .env
 .env.*
 install.cmd
+CLAUDE.md

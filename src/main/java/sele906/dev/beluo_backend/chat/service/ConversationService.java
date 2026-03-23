@@ -17,6 +17,7 @@ import sele906.dev.beluo_backend.chat.repository.message.MessageRepository;
 import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.InvalidRequestException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.*;
 
@@ -36,6 +37,9 @@ public class ConversationService {
 
     @Autowired
     private MessageRepository messageRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private BlockedRepository blockedRepository;
@@ -86,7 +90,11 @@ public class ConversationService {
         systemMessage.setType("system");
 
         //시스템 프롬프트 + 캐릭터 프롬프트
-        systemMessage.setContent(character.getPersonality());
+        try {
+            systemMessage.setContent(objectMapper.writeValueAsString(character.getPersonalityJson()));
+        } catch (Exception e) {
+            throw new DataAccessException("캐릭터 설정 직렬화 실패", e);
+        }
 
         //db 저장
         try {
