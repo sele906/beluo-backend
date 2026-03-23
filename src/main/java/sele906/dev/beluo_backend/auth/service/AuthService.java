@@ -129,7 +129,7 @@ public class AuthService {
             );
             u.setUserImgUrl((String) result.get("secure_url"));
         } else {
-            u.setUserImgUrl(null);
+            u.setUserImgUrl("https://res.cloudinary.com/dncvqdlih/image/upload/v1774283989/blank_user_t5mdgv.jpg");
         }
 
         try {
