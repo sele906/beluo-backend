@@ -10,13 +10,12 @@ import sele906.dev.beluo_backend.character.domain.Character;
 import sele906.dev.beluo_backend.character.domain.PersonalityJson;
 import sele906.dev.beluo_backend.character.repository.BlockedRepository;
 import sele906.dev.beluo_backend.character.repository.CharacterRepository;
-import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.InvalidRequestException;
 import sele906.dev.beluo_backend.character.domain.Like;
 import sele906.dev.beluo_backend.character.repository.LikeRepository;
 import sele906.dev.beluo_backend.user.domain.User;
-import sele906.dev.beluo_backend.user.repository.UserRepository;
+import sele906.dev.beluo_backend.user.repository.user.UserRepository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;

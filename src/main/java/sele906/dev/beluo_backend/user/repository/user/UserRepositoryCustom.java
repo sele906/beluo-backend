@@ -1,4 +1,4 @@
-package sele906.dev.beluo_backend.user.repository;
+package sele906.dev.beluo_backend.user.repository.user;
 
 import sele906.dev.beluo_backend.user.domain.User;
 

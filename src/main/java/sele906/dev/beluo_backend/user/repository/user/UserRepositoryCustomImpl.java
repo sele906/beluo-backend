@@ -1,13 +1,11 @@
-package sele906.dev.beluo_backend.user.repository;
+package sele906.dev.beluo_backend.user.repository.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
-import sele906.dev.beluo_backend.character.domain.Character;
 import sele906.dev.beluo_backend.user.domain.User;
 
 import java.time.Instant;

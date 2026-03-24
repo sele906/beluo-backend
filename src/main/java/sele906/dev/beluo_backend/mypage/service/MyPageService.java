@@ -2,7 +2,6 @@ package sele906.dev.beluo_backend.mypage.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import io.jsonwebtoken.security.Password;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,11 +18,10 @@ import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.InvalidRequestException;
 import sele906.dev.beluo_backend.chat.repository.conversation.ConversationRepository;
 import sele906.dev.beluo_backend.user.domain.User;
-import sele906.dev.beluo_backend.user.repository.UserRepository;
+import sele906.dev.beluo_backend.user.repository.user.UserRepository;
 import sele906.dev.beluo_backend.character.domain.Character;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

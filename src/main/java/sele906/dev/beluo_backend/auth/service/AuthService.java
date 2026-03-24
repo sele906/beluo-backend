@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import sele906.dev.beluo_backend.user.domain.User;
 import sele906.dev.beluo_backend.auth.dto.TokenResponse;
-import sele906.dev.beluo_backend.user.repository.UserRepository;
+import sele906.dev.beluo_backend.user.repository.user.UserRepository;
 import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.InvalidRequestException;
 

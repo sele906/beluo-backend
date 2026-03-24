@@ -2,10 +2,8 @@ package sele906.dev.beluo_backend.chat.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import sele906.dev.beluo_backend.user.domain.User;
-import sele906.dev.beluo_backend.user.repository.UserRepository;
+import sele906.dev.beluo_backend.user.repository.user.UserRepository;
 import sele906.dev.beluo_backend.character.domain.Blocked;
 import sele906.dev.beluo_backend.character.domain.Character;
 import sele906.dev.beluo_backend.character.repository.BlockedRepository;

@@ -1,9 +1,12 @@
 package sele906.dev.beluo_backend.chat.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.chat.service.ChatService;
+import sele906.dev.beluo_backend.exception.InvalidRequestException;
+import sele906.dev.beluo_backend.user.service.ChatCountService;
 
 import java.util.List;
 import java.util.Map;
@@ -15,9 +18,24 @@ public class ChatController {
     @Autowired
     private ChatService chatService;
 
+    @Autowired
+    private ChatCountService chatCountService;
+
     //메세지 보내기
     @PostMapping("/send")
-    public Map<String, String> chatSend(@RequestBody Map<String, String> body) {
+    public Map<String, String> chatSend(@RequestBody Map<String, String> body, Authentication auth) {
+
+        //유저 챗 카운트
+        String userId = null;
+
+        if (auth != null) {
+            userId = auth.getName();
+        }
+
+        if (chatCountService.chatLimit(userId)) {
+            throw new InvalidRequestException("최대 채팅 횟수가 50회를 초과하였습니다");
+        }
+        chatCountService.chatCountSave(userId);
 
         //정보 가져오기
         String userMessage = body.get("message");
@@ -42,9 +60,24 @@ public class ChatController {
 
     //다시 생성 (db 저장 없이 ai 답변만 생성, db 마지막이 유저 메세지라 컨텍스트 동일)
     @PostMapping("/regenerate")
-    public Map<String, String> chatRegenerate(@RequestBody Map<String, String> body) {
+    public Map<String, String> chatRegenerate(@RequestBody Map<String, String> body, Authentication auth) {
+
+        //유저 챗 카운트
+        String userId = null;
+
+        if (auth != null) {
+            userId = auth.getName();
+        }
+
+        if (chatCountService.chatLimit(userId)) {
+            throw new InvalidRequestException("최대 채팅 횟수가 50회를 초과하였습니다");
+        }
+        chatCountService.chatCountSave(userId);
+
+        //답변 재생성
         String sessionId = body.get("sessionId");
         String reply = chatService.sendChatApi(sessionId);
+
         return Map.of("reply", reply);
     }
 

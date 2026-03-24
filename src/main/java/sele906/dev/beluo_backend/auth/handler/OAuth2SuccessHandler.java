@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import sele906.dev.beluo_backend.user.domain.User;
-import sele906.dev.beluo_backend.user.repository.UserRepository;
+import sele906.dev.beluo_backend.user.repository.user.UserRepository;
 import sele906.dev.beluo_backend.auth.service.JwtService;
 
 import java.io.IOException;
