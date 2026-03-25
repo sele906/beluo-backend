@@ -77,8 +77,6 @@ public class ChatService {
             reply = claudeClient.chat(promptData);
         }
 
-        //
-
         //예외처리
         if (reply == null) {
             throw new AiResponseException("API 응답 확인 불가");
