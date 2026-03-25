@@ -309,8 +309,6 @@ public class MyPageService {
             throw new InvalidRequestException("유효하지 않은 모델입니다");
         }
 
-        System.out.println("AIModel update: " + model);
-
         try {
             userRepository.updateAiModel(userId, model);
         } catch (Exception e) {
@@ -322,7 +320,6 @@ public class MyPageService {
         try {
             User u = userRepository.findById(userId)
                     .orElseThrow(() -> new DataAccessException("유저 확인 불가"));
-            System.out.println("AIModel: " + u.getAiModel());
             return u.getAiModel();
         } catch (Exception e) {
             new DataAccessException("모델 확인 불가");

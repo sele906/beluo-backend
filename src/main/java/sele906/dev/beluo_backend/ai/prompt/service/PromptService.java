@@ -131,21 +131,22 @@ public class PromptService {
         //요약 이후 대화가 10개 쌓였으면 대화 요약 실행
         if (sinceLastSummaryCount > 10 && !summaryMessage.getIsSummarizing()) {
 
-            String finishedSummary = summaryService.summarizeChat(sessionId);
+            try {
+                String finishedSummary = summaryService.summarizeChat(sessionId);
 
-            //테스트
-            System.out.println("=========완성된 새로운 요약 프롬프트=========");
+                //테스트
+                System.out.println("=========완성된 새로운 요약 프롬프트=========");
+                System.out.println("finishedSummary: " + finishedSummary);
+                System.out.println("==================");
 
-            System.out.println("finishedSummary: " + finishedSummary);
-
-            System.out.println("==================");
-
-            //예외처리
-            if (finishedSummary == null) {
-                throw new PromptBuildException("요약 응답 확인 불가");
-            } else {
-                return finishedSummary;
+                if (finishedSummary != null) {
+                    return finishedSummary;
+                }
+            } catch (Exception e) {
+                System.out.println("요약 실패, 기존 요약으로 폴백: " + e.getMessage());
             }
+
+            return content; // 요약 실패 시 기존 요약으로 폴백
 
         } else {
             return content;

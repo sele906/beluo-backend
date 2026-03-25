@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.netty.http.client.HttpClient;
 import sele906.dev.beluo_backend.ai.prompt.dto.PromptData;
+import sele906.dev.beluo_backend.exception.AiResponseException;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -47,31 +49,12 @@ public class OpenAiClient {
             "messages", messages
         );
 
-        Map response = webClient.post()
-                .uri("/chat/completions")
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .doOnError(e -> {
-                    if (e instanceof WebClientResponseException ex) {
-                        System.out.println("API 에러 상태코드: " + ex.getStatusCode());
-                        System.out.println("API 에러 바디: " + ex.getResponseBodyAsString());
-                    } else {
-                        System.out.println("API 에러: " + e.getMessage());
-                    }
-                })
-                .block(Duration.ofSeconds(25));
-
-        System.out.println("response: " + response);
-
-        if (response == null) {
-            throw new RuntimeException("OpenAI 응답이 없습니다.");
-        }
+        Map response = callOpenAi(body);
 
         List<Map> choices = (List<Map>) response.get("choices");
 
         if (choices == null || choices.isEmpty()) {
-            throw new RuntimeException("OpenAI choices가 없습니다.");
+            throw new AiResponseException("OpenAI 응답 확인 불가");
         }
 
         Map message = (Map) choices.get(0).get("message");
@@ -84,35 +67,16 @@ public class OpenAiClient {
         Map<String, Object> body = Map.of(
                 "model", "gpt-5-mini",
                 "max_completion_tokens", 2000,
-                "reasoning_effort", "medium",
+                "reasoning_effort", "low",
                 "messages", messages
         );
 
-        Map response = webClient.post()
-                .uri("/chat/completions")
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .doOnError(e -> {
-                    if (e instanceof WebClientResponseException ex) {
-                        System.out.println("API 에러 상태코드: " + ex.getStatusCode());
-                        System.out.println("API 에러 바디: " + ex.getResponseBodyAsString());
-                    } else {
-                        System.out.println("API 에러: " + e.getMessage());
-                    }
-                })
-                .block(Duration.ofSeconds(25));
-
-        System.out.println("response: " + response);
-
-        if (response == null) {
-            throw new RuntimeException("OpenAI 응답이 없습니다.");
-        }
+        Map response = callOpenAi(body);
 
         List<Map> choices = (List<Map>) response.get("choices");
 
         if (choices == null || choices.isEmpty()) {
-            throw new RuntimeException("OpenAI choices가 없습니다.");
+            throw new AiResponseException("OpenAI 응답 확인 불가");
         }
 
         Map message = (Map) choices.get(0).get("message");
@@ -125,39 +89,46 @@ public class OpenAiClient {
         Map<String, Object> body = Map.of(
                 "model", "gpt-5-mini",
                 "max_completion_tokens", 2000,
-                "reasoning_effort", "medium",
+                "reasoning_effort", "low",
                 "messages", List.of(personality)
         );
 
-        Map response = webClient.post()
-                .uri("/chat/completions")
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .doOnError(e -> {
-                    if (e instanceof WebClientResponseException ex) {
-                        System.out.println("API 에러 상태코드: " + ex.getStatusCode());
-                        System.out.println("API 에러 바디: " + ex.getResponseBodyAsString());
-                    } else {
-                        System.out.println("API 에러: " + e.getMessage());
-                    }
-                })
-                .block(Duration.ofSeconds(25));
-
-        System.out.println("response: " + response);
-
-        if (response == null) {
-            throw new RuntimeException("OpenAI 응답이 없습니다.");
-        }
+        Map response = callOpenAi(body);
 
         List<Map> choices = (List<Map>) response.get("choices");
 
         if (choices == null || choices.isEmpty()) {
-            throw new RuntimeException("OpenAI choices가 없습니다.");
+            throw new AiResponseException("OpenAI 응답 확인 불가");
         }
 
         Map message = (Map) choices.get(0).get("message");
 
         return (String) message.get("content");
+    }
+
+    private Map callOpenAi(Map<String, Object> body) {
+        try {
+            Map response = webClient.post()
+                    .uri("/chat/completions")
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .doOnError(e -> {
+                        if (e instanceof WebClientResponseException ex) {
+                            System.out.println("API 에러 상태코드: " + ex.getStatusCode());
+                            System.out.println("API 에러 바디: " + ex.getResponseBodyAsString());
+                        } else {
+                            System.out.println("API 에러: " + e.getMessage());
+                        }
+                    })
+                    .block(Duration.ofSeconds(25));
+
+            if (response == null) {
+                throw new AiResponseException("AI 응답 시간이 초과됐어요. 잠시 후 다시 시도해 주세요.");
+            }
+            return response;
+        } catch (WebClientRequestException | IllegalStateException e) {
+            throw new AiResponseException("AI 응답 시간이 초과됐어요. 잠시 후 다시 시도해 주세요.");
+        }
     }
 }

@@ -94,16 +94,21 @@ public class OpenRouterClient {
                 "messages", messages
         );
 
-        Map response = webClient.post()
-                .uri("/chat/completions")
-                .bodyValue(body)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, res ->
-                        res.bodyToMono(String.class)
-                                .map(err -> new RuntimeException(err))
-                )
-                .bodyToMono(Map.class)
-                .block(Duration.ofSeconds(35));
+        Map response;
+        try {
+            response = webClient.post()
+                    .uri("/chat/completions")
+                    .bodyValue(body)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, res ->
+                            res.bodyToMono(String.class)
+                                    .map(err -> new RuntimeException(err))
+                    )
+                    .bodyToMono(Map.class)
+                    .block(Duration.ofSeconds(35));
+        } catch (IllegalStateException e) {
+            throw new AiResponseException("AI 응답 시간이 초과됐어요. 잠시 후 다시 시도해 주세요.");
+        }
 
         if (response == null) {
             throw new RuntimeException("응답이 없습니다.");

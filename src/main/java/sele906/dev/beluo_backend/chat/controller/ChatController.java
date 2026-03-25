@@ -54,6 +54,7 @@ public class ChatController {
 
         //프롬프트에 최근 대화 합쳐서 api 보내기 (ai 답변은 저장 X, confirm에서 저장)
         String reply = chatService.sendChatApi(sessionId, userId);
+        //실패하면 유저 메세지 db에서 삭제하는 로직 있어야 할듯
 
         return Map.of("reply", reply, "userMessageId", savedUserMessage.getId());
     }

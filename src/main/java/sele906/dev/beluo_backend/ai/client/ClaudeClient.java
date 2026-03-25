@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.netty.http.client.HttpClient;
 import sele906.dev.beluo_backend.ai.prompt.dto.PromptData;
@@ -49,29 +50,32 @@ public class ClaudeClient {
         body.put("system", systemContent);
         body.put("messages", promptData.getRecentMessages());
 
-        Map response = webClient.post()
-                .uri("/messages")
-                .bodyValue(body)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, res ->
-                        res.bodyToMono(String.class)
-                                .map(err -> new RuntimeException(err))
-                )
-                .bodyToMono(Map.class)
-                .doOnError(e -> {
-                    if (e instanceof WebClientResponseException ex) {
-                        System.out.println("API 에러 상태코드: " + ex.getStatusCode());
-                        System.out.println("API 에러 바디: " + ex.getResponseBodyAsString());
-                    } else {
-                        System.out.println("API 에러: " + e.getMessage());
-                    }
-                })
-                .block(Duration.ofSeconds(35));
-
-        System.out.println("response: " + response);
+        Map response;
+        try {
+            response = webClient.post()
+                    .uri("/messages")
+                    .bodyValue(body)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, res ->
+                            res.bodyToMono(String.class)
+                                    .map(err -> new RuntimeException(err))
+                    )
+                    .bodyToMono(Map.class)
+                    .doOnError(e -> {
+                        if (e instanceof WebClientResponseException ex) {
+                            System.out.println("API 에러 상태코드: " + ex.getStatusCode());
+                            System.out.println("API 에러 바디: " + ex.getResponseBodyAsString());
+                        } else {
+                            System.out.println("API 에러: " + e.getMessage());
+                        }
+                    })
+                    .block(Duration.ofSeconds(35));
+        } catch (WebClientRequestException | IllegalStateException e) {
+            throw new AiResponseException("AI 응답 시간이 초과됐어요. 잠시 후 다시 시도해 주세요.");
+        }
 
         if (response == null) {
-            throw new AiResponseException("Claude 응답이 없습니다.");
+            throw new AiResponseException("AI 응답 시간이 초과됐어요. 잠시 후 다시 시도해 주세요.");
         }
 
         // Claude 응답 구조: { "content": [{ "type": "text", "text": "..." }] }
