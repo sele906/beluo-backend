@@ -163,6 +163,32 @@ public class MyPageController {
         return myPageService.blocked(userId);
     }
 
+    //기존 모델 설정 불러오기
+    @GetMapping("/model")
+    public String model(Authentication auth) {
+
+        String userId = null;
+
+        if (auth != null) {
+            userId = auth.getName();
+        }
+
+        return myPageService.getModel(userId);
+    }
+
+    //모델 설정
+    @PostMapping("/model")
+    public void model(@RequestBody String body, Authentication auth) {
+
+        String userId = null;
+
+        if (auth != null) {
+            userId = auth.getName();
+        }
+
+        myPageService.model(body, userId);
+    }
+
     //문의사항
     @PostMapping("/inquiry")
     public void submitInquiry(@RequestBody Map<String, String> body, Authentication auth) {

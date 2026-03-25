@@ -29,7 +29,7 @@ public class ChatCountService {
 
     public boolean chatLimit(String userId) {
         try {
-            return chatCountRepository.countTodayChats(userId) >= 10;
+            return chatCountRepository.countTodayChats(userId) >= 50;
         } catch (Exception e) {
             throw new DataAccessException("채팅횟수 제한에 실패했습니다.");
         }

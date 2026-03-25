@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import sele906.dev.beluo_backend.ai.prompt.dto.PromptData;
 import sele906.dev.beluo_backend.ai.prompt.repository.PromptRepository;
 import sele906.dev.beluo_backend.chat.domain.Conversation;
 import sele906.dev.beluo_backend.chat.domain.Message;
@@ -36,9 +37,10 @@ public class PromptService {
     private ConversationRepository conversationRepository;
 
     //최종 프롬프트
-    public List<Map<String, String>> buildPrompt(String sessionId) {
+    public PromptData buildPrompt(String sessionId) {
 
-        List<Map<String, String>> promptMessage = new ArrayList<>();
+        List<Map<String, String>> systemMessages = new ArrayList<>();
+        List<Map<String, String>> recentMessages = new ArrayList<>();
 
         //시스템 프롬프트 함수
         Message systemPrompt = buildSystemPrompt(sessionId);
@@ -49,46 +51,37 @@ public class PromptService {
         //최근 대화 프롬프트 함수
         List<Message> recentMessagePrompt = buildRecentMessagePrompt(sessionId);
 
-        //최종 결합
-
-        //시스템 프롬프트 > 최종 프롬프트에 결합
+        //시스템 프롬프트 결합
         if (systemPrompt != null) {
-            promptMessage.add(Map.of(
+            systemMessages.add(Map.of(
                     "role", systemPrompt.getRole(),
-                    "content", """PROMPT_REMOVED""" + systemPrompt.getContent() //캐릭터 프롬프트
+                    "content", """PROMPT_REMOVED""" + systemPrompt.getContent()
             ));
         }
 
-        //요약 프롬프트 > 최종 프롬프트에 결합
+        //요약 프롬프트 결합
         if (summaryPrompt != null && !summaryPrompt.isEmpty()) {
             System.out.println("summaryPrompt: " + summaryPrompt);
-            promptMessage.add(Map.of(
+            systemMessages.add(Map.of(
                     "role", "system",
                     "content", buildSummaryInstruction(summaryPrompt)
             ));
         }
 
-        //최근 대화 프롬프트 > 최종 프롬프트에 결합
-        if (!recentMessagePrompt.isEmpty()) {
-            for (Message m : recentMessagePrompt) {
-                promptMessage.add(Map.of(
-                        "role", m.getRole(),
-                        "content", m.getContent()
-                ));
-            }
+        //최근 대화 결합
+        for (Message m : recentMessagePrompt) {
+            recentMessages.add(Map.of(
+                    "role", m.getRole(),
+                    "content", m.getContent()
+            ));
         }
 
-        //테스트용
-        //최종 프롬프트 출력
         System.out.println("=========완성된 최종 프롬프트=========");
-
-        for (Map p : promptMessage) {
-            System.out.println(p.toString());
-        }
-
+        systemMessages.forEach(p -> System.out.println(p.toString()));
+        recentMessages.forEach(p -> System.out.println(p.toString()));
         System.out.println("==================");
 
-        return promptMessage;
+        return new PromptData(systemMessages, recentMessages);
     }
 
 

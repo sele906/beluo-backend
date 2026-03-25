@@ -24,6 +24,7 @@ public class User {
     private String refreshToken;
 
     private String userImgUrl;
+    private String aiModel = "free";
 
     private String provider;
     private String providerId;

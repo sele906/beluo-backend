@@ -63,6 +63,13 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     }
 
     @Override
+    public void updateAiModel(String userId, String aiModel) {
+        Query query = new Query(Criteria.where("_id").is(userId));
+        Update update = new Update().set("aiModel", aiModel);
+        mongoTemplate.updateFirst(query, update, User.class);
+    }
+
+    @Override
     public void anonymizeById(String userId) {
         Query query = new Query(Criteria.where("_id").is(userId));
         Update update = new Update()

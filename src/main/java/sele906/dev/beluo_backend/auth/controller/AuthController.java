@@ -24,7 +24,7 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    // 테스트 로그인 - 토큰 발급
+    // 로그인 > 토큰 발급
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user, HttpServletResponse response) {
 

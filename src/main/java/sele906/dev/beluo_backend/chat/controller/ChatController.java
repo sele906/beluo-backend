@@ -53,7 +53,7 @@ public class ChatController {
         chatService.afterSummaryChatCount(sessionId);
 
         //프롬프트에 최근 대화 합쳐서 api 보내기 (ai 답변은 저장 X, confirm에서 저장)
-        String reply = chatService.sendChatApi(sessionId);
+        String reply = chatService.sendChatApi(sessionId, userId);
 
         return Map.of("reply", reply, "userMessageId", savedUserMessage.getId());
     }
@@ -76,7 +76,7 @@ public class ChatController {
 
         //답변 재생성
         String sessionId = body.get("sessionId");
-        String reply = chatService.sendChatApi(sessionId);
+        String reply = chatService.sendChatApi(sessionId, userId);
 
         return Map.of("reply", reply);
     }

@@ -288,14 +288,42 @@ public class MyPageService {
     }
 
     public void submitInquiry(String userId, String content) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new InvalidRequestException("사용자를 찾을 수 없습니다"));
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new InvalidRequestException("사용자를 찾을 수 없습니다"));
 
-        SimpleMailMessage mail = new SimpleMailMessage();
-        mail.setTo("seunga906@gmail.com");
-        mail.setSubject("[문의] " + user.getName());
-        mail.setText("보낸 사람: " + user.getName() + " (" + user.getEmail() + ")\n\n" + content);
+            SimpleMailMessage mail = new SimpleMailMessage();
+            mail.setTo("seunga906@gmail.com");
+            mail.setSubject("[문의] " + user.getName());
+            mail.setText("보낸 사람: " + user.getName() + " (" + user.getEmail() + ")\n\n" + content);
 
-        mailSender.send(mail);
+            mailSender.send(mail);
+        } catch (Exception e) {
+            throw new InvalidRequestException("메일 보내기에 실패했습니다.");
+        }
+    }
+
+    public void model(String model, String userId) {
+
+        if (!"free".equals(model) && !"gpt".equals(model) && !"claude".equals(model)) {
+            throw new InvalidRequestException("유효하지 않은 모델입니다");
+        }
+
+        try {
+            userRepository.updateAiModel(userId, model);
+        } catch (Exception e) {
+            throw new DataAccessException("모델 변경에 실패했습니다.");
+        }
+    }
+
+    public String getModel(String userId) {
+        try {
+            User u = userRepository.findById(userId)
+                    .orElseThrow(() -> new DataAccessException("유저 확인 불가"));
+            return u.getAiModel();
+        } catch (Exception e) {
+            new DataAccessException("모델 확인 불가");
+        }
+        return null;
     }
 }

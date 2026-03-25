@@ -5,7 +5,10 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
+import sele906.dev.beluo_backend.ai.client.ClaudeClient;
 import sele906.dev.beluo_backend.ai.client.OpenAiClient;
+import sele906.dev.beluo_backend.ai.client.OpenRouterClient;
+import sele906.dev.beluo_backend.ai.prompt.dto.PromptData;
 import sele906.dev.beluo_backend.ai.prompt.service.PromptService;
 import sele906.dev.beluo_backend.chat.domain.Conversation;
 import sele906.dev.beluo_backend.chat.domain.Message;
@@ -15,6 +18,8 @@ import sele906.dev.beluo_backend.exception.AiResponseException;
 import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.PromptBuildException;
 import sele906.dev.beluo_backend.exception.SummaryException;
+import sele906.dev.beluo_backend.user.domain.User;
+import sele906.dev.beluo_backend.user.repository.user.UserRepository;
 
 import java.time.Instant;
 import java.util.*;
@@ -35,30 +40,44 @@ public class ChatService {
     private OpenAiClient openAiClient;
 
     @Autowired
+    private OpenRouterClient openRouterClient;
+
+    @Autowired
+    private ClaudeClient claudeClient;
+
+    @Autowired
     private PromptService promptService;
 
-    private static final AtomicInteger counter = new AtomicInteger(0);
+    @Autowired
+    private UserRepository userRepository;
 
     //채팅 api 실행
-    public String sendChatApi(String sessionId) {
-
-        //10번 테스트 제한
-//        if (counter.incrementAndGet() > 10) {
-//            return "오늘 테스트는 여기까지! 🛑";
-//        }
+    public String sendChatApi(String sessionId, String userId) {
 
         //프롬프트 작성
-        List<Map<String, String>> prompt = promptService.buildPrompt(sessionId);
+        PromptData promptData = promptService.buildPrompt(sessionId);
 
         //예외처리
-        if (prompt.isEmpty()) {
+        if (promptData.getSystemMessages().isEmpty() && promptData.getRecentMessages().isEmpty()) {
             throw new PromptBuildException("프롬프트 확인 불가");
         }
 
-        //모델 설정
-
         //api 보내기
-        String reply = openAiClient.chat(prompt);
+        //유저별 분기처리
+        User u = userRepository.findById(userId)
+                .orElseThrow(() -> new DataAccessException("유저 확인 불가"));
+
+        String reply = null;
+
+        if (u.getAiModel().equals("free")) {
+            reply = openRouterClient.freeChat(promptData);
+        } else if (u.getAiModel().equals("gpt")) {
+            reply = openAiClient.chat(promptData);
+        } else if (u.getAiModel().equals("claude")) {
+            reply = claudeClient.chat(promptData);
+        }
+
+        //
 
         //예외처리
         if (reply == null) {
