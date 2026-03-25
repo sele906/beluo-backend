@@ -59,13 +59,13 @@ public class ChatService {
 
         //예외처리
         if (promptData.getSystemMessages().isEmpty() && promptData.getRecentMessages().isEmpty()) {
-            throw new PromptBuildException("프롬프트 확인 불가");
+            throw new PromptBuildException("프롬프트를 확인할 수 없어요");
         }
 
         //api 보내기
         //유저별 분기처리
         User u = userRepository.findById(userId)
-                .orElseThrow(() -> new DataAccessException("유저 확인 불가"));
+                .orElseThrow(() -> new DataAccessException("유저를 확인할 수 없어요"));
 
         String reply = null;
 
@@ -79,7 +79,7 @@ public class ChatService {
 
         //예외처리
         if (reply == null) {
-            throw new AiResponseException("API 응답 확인 불가");
+            throw new AiResponseException("API 응답을 확인할 수 없어요");
         }
 
         return reply;
@@ -101,7 +101,7 @@ public class ChatService {
 
             return messageRepository.save(m);
         } catch (Exception e) {
-            throw new DataAccessException("메세지 저장 실패", e);
+            throw new DataAccessException("메세지 저장에 실패했습니다", e);
         }
     }
 
@@ -113,7 +113,7 @@ public class ChatService {
 
         //예외처리
         if (result.getMatchedCount() == 0) {
-            throw new SummaryException("요약 카운트 증가 실패");
+            throw new SummaryException("요약 카운트 증가에 실패했습니다");
         }
     }
 
@@ -129,7 +129,7 @@ public class ChatService {
         try {
             messages = messageRepository.requestChatBefore(sessionId, cursor, limit);
         } catch (Exception e) {
-            throw new DataAccessException("메세지 불러오기 실패", e);
+            throw new DataAccessException("메세지를 불러올 수 없어요", e);
         }
 
         Map<String, Object> result = new HashMap<>();
