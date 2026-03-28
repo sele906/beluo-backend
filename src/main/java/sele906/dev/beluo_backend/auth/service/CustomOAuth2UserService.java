@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import sele906.dev.beluo_backend.credit.service.CreditService;
 import sele906.dev.beluo_backend.user.domain.User;
 import sele906.dev.beluo_backend.user.repository.user.UserRepository;
 
@@ -19,9 +20,11 @@ import java.util.Map;
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final UserRepository userRepository;
+    private final CreditService creditService;
 
-    public CustomOAuth2UserService(UserRepository userRepository) {
+    public CustomOAuth2UserService(UserRepository userRepository, CreditService creditService) {
         this.userRepository = userRepository;
+        this.creditService = creditService;
     }
 
     @Override
@@ -37,6 +40,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         String picture = (String) attributes.get("picture");
 
         //DB에서 찾거나 신규가입
+        boolean[] isNewUser = {false};
         User user = userRepository.findByEmail(email)
                 .orElseGet(() -> {
                     User newUser = new User();
@@ -47,8 +51,13 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                     newUser.setRole("USER");
                     newUser.setUserImgUrl(picture);
                     newUser.setCreatedAt(Instant.now());
+                    isNewUser[0] = true;
                     return userRepository.save(newUser);
                 });
+
+        if (isNewUser[0]) {
+            creditService.grantFreeBeta(user.getId());
+        }
 
         return new DefaultOAuth2User(List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole())), attributes, "sub");
     }

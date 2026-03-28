@@ -124,6 +124,20 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "로그아웃 성공"));
     }
 
+    // 인증 코드 발송
+    @PostMapping("/verify/send")
+    public ResponseEntity<?> verifySend(@RequestBody Map<String, String> body) {
+        authService.verifyEmail(body.get("email"));
+        return ResponseEntity.ok(Map.of("message", "인증 코드가 발송됐습니다"));
+    }
+
+    // 인증 코드 확인
+    @PostMapping("/verify/check")
+    public ResponseEntity<?> verifyCheck(@RequestBody Map<String, String> body) {
+        authService.checkVerity(body.get("email"), body.get("code"));
+        return ResponseEntity.ok(Map.of("message", "이메일 인증 완료"));
+    }
+
     @PostMapping(value = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> join(
             @RequestPart("user") User user,

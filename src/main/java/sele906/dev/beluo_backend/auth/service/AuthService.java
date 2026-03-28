@@ -3,10 +3,14 @@ package sele906.dev.beluo_backend.auth.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import sele906.dev.beluo_backend.credit.service.CreditService;
 import sele906.dev.beluo_backend.user.domain.User;
 import sele906.dev.beluo_backend.auth.dto.TokenResponse;
 import sele906.dev.beluo_backend.user.repository.user.UserRepository;
@@ -16,6 +20,8 @@ import sele906.dev.beluo_backend.exception.InvalidRequestException;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class AuthService {
@@ -27,10 +33,19 @@ public class AuthService {
     private JwtService jwtService;
 
     @Autowired
+    private JavaMailSender mailSender;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private Cloudinary cloudinary;
+
+    @Autowired
+    private CreditService creditService;
 
     public TokenResponse login(User user) {
 
@@ -120,6 +135,7 @@ public class AuthService {
         u.setPassword(passwordEncoder.encode(user.getPassword()));
         u.setName(user.getName());
         u.setCreatedAt(Instant.now());
+        u.setBirth(user.getBirth());
 
         // 프로필 사진 업로드
         if (file != null && !file.isEmpty()) {
@@ -137,5 +153,41 @@ public class AuthService {
         } catch (Exception e) {
             throw new DataAccessException("회원가입 실패", e);
         }
+
+        creditService.grantFreeBeta(u.getId());
+    }
+
+    // 인증 코드 발송
+    public void verifyEmail(String email) {
+
+        String code = String.format("%06d", new Random().nextInt(1000000));
+
+        redisTemplate.opsForValue().set("verify:" + email, code,5, TimeUnit.MINUTES);
+
+
+        try {
+            SimpleMailMessage mail = new SimpleMailMessage();
+            mail.setTo(email);
+            mail.setSubject("[BELUO] 이메일 인증 코드");
+            mail.setText("인증 코드: " + code + "\n\n5분 내에 입력해 주세요.");
+            mailSender.send(mail);
+        } catch (Exception e) {
+            throw new InvalidRequestException("메일 발송에 실패했습니다.");
+        }
+    }
+
+    // 인증 코드 확인
+    public void checkVerity(String email, String code) {
+        String saved = redisTemplate.opsForValue().get("verify:" + email);
+
+        if (saved == null) {
+            throw new InvalidRequestException("인증 코드를 먼저 요청해 주세요.");
+        }
+
+        if (!saved.equals(code)) {
+            throw new InvalidRequestException("인증 코드가 올바르지 않습니다.");
+        }
+
+        redisTemplate.delete("verify:" + email);
     }
 }

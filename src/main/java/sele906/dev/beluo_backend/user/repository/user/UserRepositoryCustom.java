@@ -8,4 +8,6 @@ public interface UserRepositoryCustom {
     void updateById(String userId, User user);
     void anonymizeById(String userId);
     void updateAiModel(String userId, String aiModel);
+    void incrementCredit(String userId, int amount);
+    void deductCredit(String userId, int amount);
 }

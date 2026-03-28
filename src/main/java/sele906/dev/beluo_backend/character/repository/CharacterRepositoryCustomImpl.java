@@ -129,7 +129,7 @@ public class CharacterRepositoryCustomImpl implements CharacterRepositoryCustom 
 
         Query query = new Query(criteria);
         query.with(Sort.by(Sort.Direction.DESC, "createdAt"));
-        query.limit(10);
+        query.limit(5);
 
         query.fields()
                 .include("createdAt")

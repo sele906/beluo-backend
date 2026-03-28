@@ -22,10 +22,10 @@ import sele906.dev.beluo_backend.user.repository.user.UserRepository;
 import sele906.dev.beluo_backend.character.domain.Character;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 public class MyPageService {
@@ -84,24 +84,21 @@ public class MyPageService {
             // 2단계: likedCharacters 조회
             List<String> characterIds = likeIds.stream()
                     .filter(id -> !blockedIds.contains(id))
-                    .limit(10)
+                    .limit(5)
                     .toList();
             Map<String, Character> characterMap = characterRepository.findLikedCharacters(characterIds).stream()
-                    .collect(java.util.stream.Collectors.toMap(c -> c.getId().toString(), c -> c));
+                    .collect(Collectors.toMap(c -> c.getId().toString(), c -> c));
             List<Character> likedCharacters = characterIds.stream()
                     .filter(characterMap::containsKey)
                     .map(characterMap::get)
                     .toList();
 
-            Map<String, Object> map = new HashMap<>();
-            map.put("info", userFuture.get());
-            map.put("created", createdFuture.get());
-            map.put("liked", likedCharacters);
+            return Map.of(
+                    "info", userFuture.get(),
+                    "created", createdFuture.get(),
+                    "liked", likedCharacters
+            );
 
-            return map;
-
-        } catch (InvalidRequestException e) {
-            throw e;
         } catch (Exception e) {
             throw new DataAccessException("마이페이지 불러오기 실패", e);
         }

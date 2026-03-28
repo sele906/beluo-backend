@@ -24,6 +24,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         query.fields()
                 .include("userImgUrl")
                 .include("email")
+                .include("credit")
                 .include("name");
 
         return mongoTemplate.findOne(query, User.class);
@@ -38,6 +39,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .include("userImgUrl")
                 .include("email")
                 .include("name")
+                .include("credit")
+                .include("birth")
                 .include("provider")
                 .include("createdAt");
 
@@ -53,6 +56,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         Update update = new Update()
                 .set("name", user.getName())
+                .set("email", user.getEmail())
+                .set("birth", user.getBirth())
                 .set("userImgUrl", user.getUserImgUrl());
 
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
@@ -66,6 +71,20 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     public void updateAiModel(String userId, String aiModel) {
         Query query = new Query(Criteria.where("_id").is(userId));
         Update update = new Update().set("aiModel", aiModel);
+        mongoTemplate.updateFirst(query, update, User.class);
+    }
+
+    @Override
+    public void incrementCredit(String userId, int amount) {
+        Query query = new Query(Criteria.where("_id").is(userId));
+        Update update = new Update().inc("credit", amount);
+        mongoTemplate.updateFirst(query, update, User.class);
+    }
+
+    @Override
+    public void deductCredit(String userId, int amount) {
+        Query query = new Query(Criteria.where("_id").is(userId));
+        Update update = new Update().inc("credit", -amount);
         mongoTemplate.updateFirst(query, update, User.class);
     }
 

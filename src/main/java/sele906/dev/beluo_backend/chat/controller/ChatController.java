@@ -5,10 +5,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.chat.service.ChatService;
-import sele906.dev.beluo_backend.exception.InvalidRequestException;
-import sele906.dev.beluo_backend.user.service.ChatCountService;
+import sele906.dev.beluo_backend.credit.service.CreditService;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,7 +17,7 @@ public class ChatController {
     private ChatService chatService;
 
     @Autowired
-    private ChatCountService chatCountService;
+    private CreditService creditService;
 
     //메세지 보내기
     @PostMapping("/send")
@@ -32,10 +30,7 @@ public class ChatController {
             userId = auth.getName();
         }
 
-        if (chatCountService.chatLimit(userId)) {
-            throw new InvalidRequestException("최대 채팅 횟수가 50회를 초과하였습니다");
-        }
-        chatCountService.chatCountSave(userId);
+        creditService.useCredit(userId, "CHAT");
 
         //정보 가져오기
         String userMessage = body.get("message");
@@ -70,10 +65,7 @@ public class ChatController {
             userId = auth.getName();
         }
 
-        if (chatCountService.chatLimit(userId)) {
-            throw new InvalidRequestException("최대 채팅 횟수가 50회를 초과하였습니다");
-        }
-        chatCountService.chatCountSave(userId);
+        creditService.useCredit(userId, "REGENERATE");
 
         //답변 재생성
         String sessionId = body.get("sessionId");

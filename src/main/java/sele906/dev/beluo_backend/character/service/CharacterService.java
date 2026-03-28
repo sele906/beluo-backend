@@ -54,7 +54,7 @@ public class CharacterService {
     public Map<String, Object> getCharacterOverviewList(String userId) {
 
         try {
-            // 1단계: blocked, likeList 병렬 실행
+            // blocked, likeIds DB 조회만 병렬 실행
             CompletableFuture<List<String>> blockedFuture = CompletableFuture.supplyAsync(() -> {
                 if (userId == null) return List.of();
                 return blockedRepository.findByUserId(userId).stream()
@@ -73,43 +73,31 @@ public class CharacterService {
             List<String> blockedIds = blockedFuture.get();
             List<String> likeIds = likeIdsFuture.get();
 
-            // 2단계: recent(캐시), popular(캐시), likedCharacters 병렬 실행
-            CompletableFuture<List<Character>> recentFuture = CompletableFuture.supplyAsync(() -> {
-                List<String> finalBlockedIds = blockedIds;
-                return characterCacheService.getRecentCharacters().stream()
-                        .filter(c -> !finalBlockedIds.contains(c.getId().toString()))
-                        .toList();
-            });
+            // 캐시 조회는 메모리 직접 접근이라 동기로 처리
+            List<Character> recent = characterCacheService.getRecentCharacters().stream()
+                    .filter(c -> !blockedIds.contains(c.getId().toString()))
+                    .toList();
 
-            CompletableFuture<List<Character>> popularFuture = CompletableFuture.supplyAsync(() -> {
-                List<String> finalBlockedIds = blockedIds;
-                return characterCacheService.getPopularCharacters().stream()
-                        .filter(c -> !finalBlockedIds.contains(c.getId().toString()))
-                        .toList();
-            });
+            List<Character> popular = characterCacheService.getPopularCharacters().stream()
+                    .filter(c -> !blockedIds.contains(c.getId().toString()))
+                    .toList();
 
-            CompletableFuture<List<Character>> likedFuture = CompletableFuture.supplyAsync(() -> {
-                if (userId == null) return List.of();
+            // liked는 DB 조회가 있으므로 비동기 유지
+            List<Character> liked = List.of();
+            if (userId != null) {
                 List<String> characterIds = likeIds.stream()
                         .filter(id -> !blockedIds.contains(id))
                         .limit(10)
                         .toList();
                 Map<String, Character> characterMap = characterRepository.findLikedCharacters(characterIds).stream()
                         .collect(java.util.stream.Collectors.toMap(c -> c.getId().toString(), c -> c));
-                return characterIds.stream()
+                liked = characterIds.stream()
                         .filter(characterMap::containsKey)
                         .map(characterMap::get)
                         .toList();
-            });
+            }
 
-            CompletableFuture.allOf(recentFuture, popularFuture, likedFuture).join();
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("recent", recentFuture.get());
-            response.put("popular", popularFuture.get());
-            response.put("liked", likedFuture.get());
-
-            return response;
+            return Map.of("recent", recent, "popular", popular, "liked", liked);
 
         } catch (Exception e) {
             throw new DataAccessException("캐릭터 리스트 불러오기 실패", e);
