@@ -165,7 +165,7 @@ public class MyPageController {
 
     //기존 모델 설정 불러오기
     @GetMapping("/model")
-    public String model(Authentication auth) {
+    public Map<String, Object> model(Authentication auth) {
 
         String userId = null;
 
@@ -173,7 +173,7 @@ public class MyPageController {
             userId = auth.getName();
         }
 
-        return myPageService.getModel(userId);
+        return myPageService.getCreditInfo(userId);
     }
 
     //모델 설정

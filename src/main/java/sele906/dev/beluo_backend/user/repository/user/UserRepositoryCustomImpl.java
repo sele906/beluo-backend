@@ -39,7 +39,6 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .include("userImgUrl")
                 .include("email")
                 .include("name")
-                .include("credit")
                 .include("birth")
                 .include("provider")
                 .include("createdAt");

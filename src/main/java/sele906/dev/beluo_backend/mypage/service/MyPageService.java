@@ -241,6 +241,8 @@ public class MyPageService {
         User u = new User();
         u.setName(user.getName());
         u.setUserImgUrl(user.getUserImgUrl());
+        u.setEmail(user.getEmail());
+        u.setBirth(user.getBirth());
 
         // 비밀번호 처리
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
@@ -313,14 +315,13 @@ public class MyPageService {
         }
     }
 
-    public String getModel(String userId) {
+    public Map<String, Object> getCreditInfo(String userId) {
         try {
             User u = userRepository.findById(userId)
                     .orElseThrow(() -> new DataAccessException("유저 확인 불가"));
-            return u.getAiModel();
+            return Map.of("credit", u.getCredit(), "model", u.getAiModel());
         } catch (Exception e) {
-            new DataAccessException("모델 확인 불가");
+            throw new DataAccessException("크레딧 정보 조회 실패");
         }
-        return null;
     }
 }
