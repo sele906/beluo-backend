@@ -61,7 +61,6 @@ public class PromptService {
 
         //요약 프롬프트 결합
         if (summaryPrompt != null && !summaryPrompt.isEmpty()) {
-            System.out.println("summaryPrompt: " + summaryPrompt);
             systemMessages.add(Map.of(
                     "role", "system",
                     "content", buildSummaryInstruction(summaryPrompt)
@@ -75,11 +74,6 @@ public class PromptService {
                     "content", m.getContent()
             ));
         }
-
-        System.out.println("=========완성된 최종 프롬프트=========");
-        systemMessages.forEach(p -> System.out.println(p.toString()));
-        recentMessages.forEach(p -> System.out.println(p.toString()));
-        System.out.println("==================");
 
         return new PromptData(systemMessages, recentMessages);
     }
@@ -120,30 +114,16 @@ public class PromptService {
         String content = summaryMessage.getContent();
         int sinceLastSummaryCount = summaryMessage.getSinceLastSummaryCount();
 
-        //테스트
-        System.out.println("=========요약 프롬프트 불러오기=========");
-
-        System.out.println("content:  " + content);
-        System.out.println("sinceLastSummaryCount: " + sinceLastSummaryCount);
-
-        System.out.println("==================");
-
         //요약 이후 대화가 10개 쌓였으면 대화 요약 실행
         if (sinceLastSummaryCount > 10 && !summaryMessage.getIsSummarizing()) {
 
             try {
                 String finishedSummary = summaryService.summarizeChat(sessionId);
-
-                //테스트
-                System.out.println("=========완성된 새로운 요약 프롬프트=========");
-                System.out.println("finishedSummary: " + finishedSummary);
-                System.out.println("==================");
-
                 if (finishedSummary != null) {
                     return finishedSummary;
                 }
             } catch (Exception e) {
-                System.out.println("요약 실패, 기존 요약으로 폴백: " + e.getMessage());
+                // 요약 실패 시 기존 요약으로 폴백
             }
 
             return content; // 요약 실패 시 기존 요약으로 폴백
@@ -171,18 +151,6 @@ public class PromptService {
         if (recentMessages.isEmpty()) {
             throw new PromptBuildException("최근 대화 데이터 확인 불가");
         }
-
-        //테스트용
-        //최종 프롬프트에 첨부될 최근 대화 출력
-        System.out.println("=========최종 프롬프트에 첨부될 최근 대화=========");
-
-        System.out.println("sinceLastSummaryCount: " + sinceLastSummaryCount);
-
-        for (Message r : recentMessages) {
-            System.out.println(r.getContent());
-        }
-
-        System.out.println("==================");
 
         return recentMessages;
     }

@@ -58,17 +58,9 @@ public class ClaudeClient {
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, res ->
                             res.bodyToMono(String.class)
-                                    .map(err -> new RuntimeException(err))
+                                    .map(err -> new AiResponseException(err))
                     )
                     .bodyToMono(Map.class)
-                    .doOnError(e -> {
-                        if (e instanceof WebClientResponseException ex) {
-                            System.out.println("API 에러 상태코드: " + ex.getStatusCode());
-                            System.out.println("API 에러 바디: " + ex.getResponseBodyAsString());
-                        } else {
-                            System.out.println("API 에러: " + e.getMessage());
-                        }
-                    })
                     .block(Duration.ofSeconds(35));
         } catch (WebClientRequestException | IllegalStateException e) {
             throw new AiResponseException("AI 응답 시간이 초과됐어요. 잠시 후 다시 시도해 주세요.");

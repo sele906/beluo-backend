@@ -157,6 +157,31 @@ public class AuthService {
         creditService.grantFreeBeta(u.getId());
     }
 
+    public void oauthJoin(String userId, String name, String birth, MultipartFile file) throws IOException {
+        //유저 정보 가져오기
+        User u = userRepository.findById(userId)
+                .orElseThrow(() -> new DataAccessException("존재하지 않는 사용자입니다"));
+
+        //유저 정보 업데이트
+        u.setBirth(birth);
+        u.setName(name);
+
+        // 프로필 사진 업로드
+        if (file != null && !file.isEmpty()) {
+            Map result = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap("folder", "profile")
+            );
+            u.setUserImgUrl((String) result.get("secure_url"));
+        }
+
+        try {
+            userRepository.save(u);
+        } catch (Exception e) {
+            throw new DataAccessException("추가 정보 저장 실패", e);
+        }
+    }
+
     // 인증 코드 발송
     public void verifyEmail(String email) {
 
@@ -190,4 +215,6 @@ public class AuthService {
 
         redisTemplate.delete("verify:" + email);
     }
+
+
 }

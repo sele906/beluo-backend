@@ -113,14 +113,6 @@ public class OpenAiClient {
                     .bodyValue(body)
                     .retrieve()
                     .bodyToMono(Map.class)
-                    .doOnError(e -> {
-                        if (e instanceof WebClientResponseException ex) {
-                            System.out.println("API 에러 상태코드: " + ex.getStatusCode());
-                            System.out.println("API 에러 바디: " + ex.getResponseBodyAsString());
-                        } else {
-                            System.out.println("API 에러: " + e.getMessage());
-                        }
-                    })
                     .block(Duration.ofSeconds(25));
 
             if (response == null) {

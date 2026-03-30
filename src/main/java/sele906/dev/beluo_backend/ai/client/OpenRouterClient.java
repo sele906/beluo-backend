@@ -76,7 +76,7 @@ public class OpenRouterClient {
                 Thread.sleep(delay);
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
-                throw new RuntimeException("Retry 중 인터럽트 발생", ie);
+                throw new AiResponseException("AI 응답 중 오류가 발생했습니다.");
             }
 
             delay *= 2;
@@ -111,19 +111,19 @@ public class OpenRouterClient {
         }
 
         if (response == null) {
-            throw new RuntimeException("응답이 없습니다.");
+            throw new AiResponseException("AI 응답 시간이 초과됐어요. 잠시 후 다시 시도해 주세요.");
         }
 
         List<Map> choices = (List<Map>) response.get("choices");
 
         if (choices == null || choices.isEmpty()) {
-            throw new RuntimeException("choices가 없습니다.");
+            throw new AiResponseException("AI 응답 확인 불가");
         }
 
         Map message = (Map) choices.get(0).get("message");
 
         if (message == null) {
-            throw new RuntimeException("message 없음");
+            throw new AiResponseException("AI 응답 확인 불가");
         }
 
         return (String) message.get("content");

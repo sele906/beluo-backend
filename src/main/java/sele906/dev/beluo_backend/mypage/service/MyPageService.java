@@ -123,8 +123,6 @@ public class MyPageService {
 
         try {
             return characterRepository.findCreatedCharacters(userId);
-        } catch (InvalidRequestException e) {
-            throw e;
         } catch (Exception e) {
             throw new DataAccessException("제작한 캐릭터 목록 불러오기 실패", e);
         }
@@ -181,14 +179,8 @@ public class MyPageService {
 
     //캐릭터 상세정보
     public Character characterDetail(String id) {
-        try {
-            Character character = characterRepository.findById(id)
-                    .orElseThrow(() -> new InvalidRequestException("캐릭터를 찾을 수 없습니다"));
-
-            return character;
-        } catch (Exception e) {
-            throw new DataAccessException("캐릭터 상세정보 불러오기 실패");
-        }
+        return characterRepository.findById(id)
+                .orElseThrow(() -> new InvalidRequestException("캐릭터를 찾을 수 없습니다"));
     }
 
     public void characterDelete(String id, String userId) {
@@ -207,7 +199,7 @@ public class MyPageService {
         }
     }
 
-    public void characterEdit(String characterId, Character character, MultipartFile file, String userId) throws IOException {
+    public void characterEdit(String characterId, Character character, MultipartFile file, String userId) {
 
         Character c = new Character();
         c.setCharacterName(character.getCharacterName());
@@ -218,11 +210,15 @@ public class MyPageService {
 
         // 파일 처리
         if (file != null && !file.isEmpty()) {
-            Map result = cloudinary.uploader().upload(
-                    file.getBytes(),
-                    ObjectUtils.asMap("folder", "character")
-            );
-            c.setCharacterImgUrl((String) result.get("secure_url"));
+            try {
+                Map result = cloudinary.uploader().upload(
+                        file.getBytes(),
+                        ObjectUtils.asMap("folder", "character")
+                );
+                c.setCharacterImgUrl((String) result.get("secure_url"));
+            } catch (IOException e) {
+                throw new DataAccessException("이미지 업로드 실패", e);
+            }
         } else {
             c.setCharacterImgUrl(character.getCharacterImgUrl());
         }
@@ -237,7 +233,8 @@ public class MyPageService {
         }
     }
 
-    public void profileEdit(String userId, User user, MultipartFile file) throws IOException {
+    public void profileEdit(String userId, User user, MultipartFile file) {
+
         User u = new User();
         u.setName(user.getName());
         u.setUserImgUrl(user.getUserImgUrl());
@@ -251,11 +248,15 @@ public class MyPageService {
 
         // 파일 처리
         if (file != null && !file.isEmpty()) {
-            Map result = cloudinary.uploader().upload(
-                    file.getBytes(),
-                    ObjectUtils.asMap("folder", "character")
-            );
-            u.setUserImgUrl((String) result.get("secure_url"));
+            try {
+                Map result = cloudinary.uploader().upload(
+                        file.getBytes(),
+                        ObjectUtils.asMap("folder", "user")
+                );
+                u.setUserImgUrl((String) result.get("secure_url"));
+            } catch (IOException e) {
+                throw new DataAccessException("이미지 업로드 실패", e);
+            }
         } else {
             u.setUserImgUrl(user.getUserImgUrl());
         }
@@ -263,7 +264,7 @@ public class MyPageService {
         try {
             userRepository.updateById(userId, u);
         } catch (Exception e) {
-            throw new DataAccessException("캐릭터 업데이트 실패", e);
+            throw new DataAccessException("유저 업데이트 실패", e);
         }
     }
 

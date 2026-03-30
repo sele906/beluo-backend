@@ -61,10 +61,8 @@ public class CreditService {
             history.setAmount(-cost);
             history.setCreatedAt(Instant.now());
             creditHistoryRepository.save(history);
-        } catch (InvalidRequestException e) {
-            throw e;
         } catch (Exception e) {
-            throw new DataAccessException("크레딧 차감에 실패했습니다.");
+            throw new DataAccessException("크레딧 차감에 실패했습니다.", e);
         }
     }
 

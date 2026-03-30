@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.user.domain.User;
 import sele906.dev.beluo_backend.user.repository.user.UserRepository;
 import sele906.dev.beluo_backend.auth.service.JwtService;
@@ -35,7 +36,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = (String) oAuth2User.getAttributes().get("email");
 
-        User user = userRepository.findByEmail(email).orElseThrow();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new DataAccessException("사용자 확인 불가"));
 
         //JWT 발급
         String accessToken = jwtService.generateAccessToken(user.getId(), user.getRole());
@@ -59,7 +61,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 .secure(true)
                 .sameSite("Lax")
                 .path("/")
-                .maxAge(604800)
+                .maxAge(2592000)
                 .build();
 
         response.addHeader("Set-Cookie", accessCookie.toString());
@@ -68,7 +70,11 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         //OAuth 세션 정리
         SecurityContextHolder.clearContext();
 
-        //리다이렉트
-        response.sendRedirect(url + "/oauth2/redirect");
+        if (user.getBirth() == null) {
+            response.sendRedirect(url + "/oauth2/join");
+        } else {
+            response.sendRedirect(url + "/oauth2/redirect");
+        }
+
     }
 }

@@ -44,7 +44,7 @@ public class AuthController {
                 .secure(true)
                 .sameSite("Lax")
                 .path("/")
-                .maxAge(604800)
+                .maxAge(2592000)
                 .build();
 
         response.addHeader("Set-Cookie", accessCookie.toString());
@@ -83,7 +83,7 @@ public class AuthController {
                 .secure(true)
                 .sameSite("Lax")
                 .path("/")
-                .maxAge(604800)
+                .maxAge(2592000)
                 .build();
 
         response.addHeader("Set-Cookie", accessCookie.toString());
@@ -144,6 +144,17 @@ public class AuthController {
             @RequestPart(value = "file", required = false) MultipartFile file
     ) throws IOException {
         authService.join(user, file);
+        return ResponseEntity.ok(Map.of("message", "회원가입 완료"));
+    }
+
+    @PostMapping(value = "/oauth2/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> oauthJoin(
+            Authentication authentication,
+            @RequestParam("name") String name,
+            @RequestParam("birth") String birth,
+            @RequestPart(value = "file", required = false) MultipartFile file
+    ) throws IOException {
+        authService.oauthJoin(authentication.getName(), name, birth, file);
         return ResponseEntity.ok(Map.of("message", "회원가입 완료"));
     }
 }

@@ -23,9 +23,9 @@ public class LikeController {
 
     //좋아요 삭제
     @DeleteMapping("/{id}")
-    public void cancelLike(@PathVariable String id, Authentication auth) {
-        if (auth != null) {
-            likeService.cancelLike(auth.getName(), id);
-        }
+    public ResponseEntity<Void> cancelLike(@PathVariable String id, Authentication auth) {
+        if (auth == null) return ResponseEntity.status(401).build();
+        likeService.cancelLike(auth.getName(), id);
+        return ResponseEntity.ok().build();
     }
 }

@@ -54,7 +54,7 @@ public class MyPageController {
     public void profileEdit(
             @RequestPart("user") User user,
             @RequestPart(value = "file", required = false) MultipartFile file,
-            Authentication auth) throws IOException {
+            Authentication auth) {
         String userId = null;
 
         if (auth != null) {
@@ -127,7 +127,7 @@ public class MyPageController {
             @PathVariable String id,
             @RequestPart("character") Character character,
             @RequestPart(value = "file", required = false) MultipartFile file,
-            Authentication auth) throws IOException {
+            Authentication auth) {
         String userId = null;
 
         if (auth != null) {

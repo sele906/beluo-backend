@@ -24,9 +24,9 @@ public class BlockedController {
 
     //차단 해제
     @DeleteMapping("/{id}")
-    public void cancelBlocked(@PathVariable String id, Authentication auth) {
-        if (auth != null) {
-            blockedService.cancelBlocked(auth.getName(), id);
-        }
+    public ResponseEntity<Void> cancelBlocked(@PathVariable String id, Authentication auth) {
+        if (auth == null) return ResponseEntity.status(401).build();
+        blockedService.cancelBlocked(auth.getName(), id);
+        return ResponseEntity.ok().build();
     }
 }
