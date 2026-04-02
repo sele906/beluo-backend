@@ -43,4 +43,5 @@ install.cmd
 CLAUDE.md
 src/main/resources/static/system_prompt.txt
 src/main/resources/static/summary_prompt.txt
+src/main/resources/static/summary_short_prompt.txt
 src/main/resources/static/character_prompt.txt

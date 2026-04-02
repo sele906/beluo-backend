@@ -5,10 +5,6 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import sele906.dev.beluo_backend.ai.prompt.dto.PromptData;
 import sele906.dev.beluo_backend.ai.prompt.repository.PromptRepository;
@@ -16,9 +12,7 @@ import sele906.dev.beluo_backend.chat.domain.Conversation;
 import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.chat.repository.conversation.ConversationRepository;
 import sele906.dev.beluo_backend.chat.service.SummaryService;
-import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.PromptBuildException;
-import sele906.dev.beluo_backend.exception.SummaryException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +38,7 @@ public class PromptService {
     @Value("classpath:static/system_prompt.txt")
     private Resource systemPromptResource;
 
-    @Value("classpath:static/summary_prompt.txt")
+    @Value("classpath:static/summary_short_prompt.txt")
     private Resource summaryPromptResource;
 
     private String systemPromptTemplate;
@@ -93,6 +87,16 @@ public class PromptService {
                     "role", m.getRole(),
                     "content", m.getContent()
             ));
+        }
+
+        System.out.println("===== [systemMessages] =====");
+        for (Map<String, String> m : systemMessages) {
+            System.out.println("[role] " + m.get("role"));
+            System.out.println("[content]\n" + m.get("content"));
+        }
+        System.out.println("===== [recentMessages] =====");
+        for (Map<String, String> m : recentMessages) {
+            System.out.println("[role] " + m.get("role") + " / [content] " + m.get("content"));
         }
 
         return new PromptData(systemMessages, recentMessages);
