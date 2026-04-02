@@ -20,8 +20,8 @@ public class ConversationRepositoryCustomImpl implements ConversationRepositoryC
     private MongoTemplate mongoTemplate;
 
     //채팅방 리스트 불러오기
-    public List<Conversation> findRecentConversations(String userId, List<String> blockedIds) {
-        Criteria criteria = Criteria.where("userId").is(userId).and("lastChatAt").lt(Instant.now());
+    public List<Conversation> findRecentConversations(String userId, List<String> blockedIds, Instant before) {
+        Criteria criteria = Criteria.where("userId").is(userId).and("lastChatAt").lt(before);
         if (blockedIds != null && !blockedIds.isEmpty()) {
             criteria = criteria.and("characterId").nin(blockedIds);
         }
@@ -33,7 +33,8 @@ public class ConversationRepositoryCustomImpl implements ConversationRepositoryC
                 .include("sessionId")
                 .include("conversationName")
                 .include("characterName")
-                .include("characterImgUrl");
+                .include("characterImgUrl")
+                .include("lastChatAt");
 
         List<Conversation> requestRecentConversations = mongoTemplate.find(query, Conversation.class);
 

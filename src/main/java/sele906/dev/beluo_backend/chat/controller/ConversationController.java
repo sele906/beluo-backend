@@ -3,11 +3,9 @@ package sele906.dev.beluo_backend.chat.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import sele906.dev.beluo_backend.chat.domain.Conversation;
 import sele906.dev.beluo_backend.chat.service.ConversationService;
 import sele906.dev.beluo_backend.exception.InvalidRequestException;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,9 +28,11 @@ public class ConversationController {
         return conversationService.createConversation(characterId, userId);
     }
 
-    //최근 10개 채팅방 출력
+    //채팅방 리스트 (커서 기반 페이지네이션)
     @GetMapping("/list")
-    public List<Conversation> getConversationList(Authentication auth) {
+    public Map<String, Object> getConversationList(
+            @RequestParam(required = false) String before,
+            Authentication auth) {
 
         String userId = null;
 
@@ -40,7 +40,7 @@ public class ConversationController {
             userId = auth.getName();
         }
 
-        return conversationService.getConversationList(userId);
+        return conversationService.getConversationList(userId, before);
     }
 
     //채팅방 상세정보

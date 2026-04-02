@@ -148,17 +148,29 @@ public class ConversationService {
     }
 
     //채팅방 리스트 불러오기
-    public List<Conversation> getConversationList(String userId) {
+    public Map<String, Object> getConversationList(String userId, String before) {
 
         if (userId == null) {
-            return List.of();
+            return Map.of("conversations", List.of(), "hasMore", false);
         }
+
+        Instant cursor = (before != null && !before.isBlank())
+                ? Instant.parse(before)
+                : Instant.now();
 
         try {
             List<String> blockedIds = blockedRepository.findByUserId(userId).stream()
                     .map(Blocked::getCharacterId)
                     .toList();
-            return conversationRepository.findRecentConversations(userId, blockedIds);
+            List<Conversation> conversations = conversationRepository.findRecentConversations(userId, blockedIds, cursor);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("conversations", conversations);
+            result.put("hasMore", conversations.size() == 10);
+            if (!conversations.isEmpty()) {
+                result.put("nextCursor", conversations.get(conversations.size() - 1).getLastChatAt().toString());
+            }
+            return result;
         } catch (Exception e) {
             throw new DataAccessException("채팅방 리스트 불러오기 실패", e);
         }
