@@ -205,6 +205,26 @@ cp /src/main/resources/.env.example .env
 
 ---
 
+## 프롬프트 파일
+
+프롬프트는 보안상 gitignore 처리되어 있습니다. 아래 4개 파일을 생성하세요.
+
+```
+src/main/resources/static/system_prompt.txt
+src/main/resources/static/character_prompt.txt
+src/main/resources/static/summary_prompt.txt
+src/main/resources/static/summary_short_prompt.txt
+```
+
+| 파일 | 사용처 | 설명 |
+|------|--------|------|
+| `system_prompt.txt` | PromptService | 캐릭터 롤플레이 행동 원칙 |
+| `character_prompt.txt` | CharacterService | 캐릭터 설정 텍스트 → JSON 변환 파서 |
+| `summary_prompt.txt` | SummaryService | 대화 요약 생성 프롬프트 |
+| `summary_short_prompt.txt` | PromptService | 요약 데이터 기반 감정 상태 주입 프롬프트 |
+
+---
+
 ## 실행 방법
 
 **로컬 실행**
