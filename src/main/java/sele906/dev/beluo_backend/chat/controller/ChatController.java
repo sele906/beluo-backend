@@ -23,33 +23,31 @@ public class ChatController {
     @PostMapping("/send")
     public Map<String, String> chatSend(@RequestBody Map<String, String> body, Authentication auth) {
 
-        //유저 챗 카운트
         String userId = null;
-
         if (auth != null) {
             userId = auth.getName();
         }
 
-        creditService.useCredit(userId, "CHAT");
+        creditService.checkCredit(userId);
 
-        //정보 가져오기
         String userMessage = body.get("message");
         String sessionId = body.get("sessionId");
 
-        //유저 메세지 db에 저장
-        //role
-        String userRole = "user";
-
-        //content
-        String userContent = userMessage;
-
-        //유저 메세지 db 저장
-        Message savedUserMessage = chatService.chatDataSave(userRole, userContent, sessionId);
+        // 유저 메세지 db 저장
+        Message savedUserMessage = chatService.chatDataSave("user", userMessage, sessionId);
         chatService.afterSummaryChatCount(sessionId);
 
-        //프롬프트에 최근 대화 합쳐서 api 보내기 (ai 답변은 저장 X, confirm에서 저장)
-        String reply = chatService.sendChatApi(sessionId, userId);
-        //실패하면 유저 메세지 db에서 삭제하는 로직 있어야 할듯
+        // AI 호출 실패 시 유저 메세지 롤백, 크레딧 차감 안 함
+        String reply;
+        try {
+            reply = chatService.sendChatApi(sessionId, userId);
+        } catch (Exception e) {
+            chatService.deleteMessage(savedUserMessage.getId());
+            throw e;
+        }
+
+        // 성공 시에만 크레딧 차감
+        creditService.useCredit(userId, "CHAT");
 
         return Map.of("reply", reply, "userMessageId", savedUserMessage.getId());
     }
@@ -58,18 +56,18 @@ public class ChatController {
     @PostMapping("/regenerate")
     public Map<String, String> chatRegenerate(@RequestBody Map<String, String> body, Authentication auth) {
 
-        //유저 챗 카운트
         String userId = null;
-
         if (auth != null) {
             userId = auth.getName();
         }
 
-        creditService.useCredit(userId, "REGENERATE");
+        creditService.checkCredit(userId);
 
-        //답변 재생성
+        // AI 호출 성공 시에만 크레딧 차감
         String sessionId = body.get("sessionId");
         String reply = chatService.sendChatApi(sessionId, userId);
+
+        creditService.useCredit(userId, "REGENERATE");
 
         return Map.of("reply", reply);
     }
@@ -96,6 +94,12 @@ public class ChatController {
             @RequestParam(required = false) String before
     ) {
         return chatService.requestRecentChat(sessionId, before);
+    }
+
+    //고아 메세지 롤백 (유저 이탈 시 프론트에서 호출, sendBeacon은 POST만 지원)
+    @PostMapping("/orphan")
+    public void deleteOrphanMessage(@RequestParam String sessionId) {
+        chatService.deleteOrphanUserMessage(sessionId);
     }
 
     //메세지 수정

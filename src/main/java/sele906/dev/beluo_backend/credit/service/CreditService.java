@@ -40,6 +40,18 @@ public class CreditService {
         }
     }
 
+    // 크레딧 사전 확인 (차감 없이 잔액만 검증)
+    public void checkCredit(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataAccessException("존재하지 않는 사용자입니다."));
+
+        int cost = getCreditCost(user.getAiModel());
+
+        if (user.getCredit() < cost) {
+            throw new InvalidRequestException("크레딧이 부족합니다");
+        }
+    }
+
     // 채팅/재생성 시 크레딧 차감 (모델별 비용 자동 적용)
     public void useCredit(String userId, String source) {
         User user = userRepository.findById(userId)
@@ -69,8 +81,8 @@ public class CreditService {
     private int getCreditCost(String aiModel) {
         return switch (aiModel) {
             case "claude" -> 5;
-            case "gpt"    -> 2;
-            default       -> 1; // free
+            case "gpt"    -> 3;
+            default       -> 1;
         };
     }
 }

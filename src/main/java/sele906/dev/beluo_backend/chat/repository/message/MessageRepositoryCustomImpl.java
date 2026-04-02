@@ -102,6 +102,19 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
         return mongoTemplate.updateFirst(query, update, Message.class);
     }
 
+    //sessionId의 마지막 메세지 조회
+    @Override
+    public Message findLastBySessionId(String sessionId) {
+        Query query = new Query(
+                Criteria.where("sessionId").is(sessionId)
+                        .and("role").in("user", "assistant")
+        );
+        query.with(Sort.by(Sort.Direction.DESC, "createdAt"));
+        query.limit(1);
+
+        return mongoTemplate.findOne(query, Message.class);
+    }
+
     //메세지 편집
     @Override
     public void updateMessage(String sessionId, String messageId, String content) {

@@ -105,6 +105,19 @@ public class ChatService {
         }
     }
 
+    //메세지 삭제 (AI 호출 실패 시 롤백용)
+    public void deleteMessage(String messageId) {
+        messageRepository.deleteById(messageId);
+    }
+
+    //고아 메세지 삭제 (유저가 응답 대기 중 이탈 시 롤백용)
+    public void deleteOrphanUserMessage(String sessionId) {
+        Message last = messageRepository.findLastBySessionId(sessionId);
+        if (last != null && "user".equals(last.getRole())) {
+            messageRepository.deleteById(last.getId());
+        }
+    }
+
     //요약 후 실행된 대화 카운트
     public void afterSummaryChatCount(String sessionId) {
 

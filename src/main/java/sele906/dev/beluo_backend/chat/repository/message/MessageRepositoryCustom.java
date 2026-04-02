@@ -28,4 +28,7 @@ public interface MessageRepositoryCustom {
     UpdateResult summaryDataUpdate(String sessionId, String finishedSummary, Instant newLastSummarizedAt);
 
     void updateMessage(String sessionId, String messageId, String content);
+
+    //sessionId의 마지막 메세지 조회
+    Message findLastBySessionId(String sessionId);
 }
