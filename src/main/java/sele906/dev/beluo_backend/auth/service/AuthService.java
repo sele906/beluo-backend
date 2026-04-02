@@ -51,11 +51,11 @@ public class AuthService {
 
         //db에서 사용자 확인 필요
         User u = userRepository.findByEmail(user.getEmail())
-                .orElseThrow(() -> new InvalidRequestException("존재하지 않는 유저입니다"));
+                .orElseThrow(() -> new InvalidRequestException("아이디를 확인해주세요"));
 
         //비밀번호 검증
         if (!passwordEncoder.matches(user.getPassword(), u.getPassword())) {
-            throw new InvalidRequestException("비밀번호가 맞지 않습니다");
+            throw new InvalidRequestException("비밀번호를 확인해주세요");
         }
 
         //JWT 발급
