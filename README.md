@@ -21,7 +21,7 @@ AI 캐릭터 채팅 플랫폼 **Beluo**의 백엔드 서버입니다.<br/>
 
 **Infra / Tool**
 
-<img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white"> <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white"> <img src="https://img.shields.io/badge/render-white?style=for-the-badge&logo=render&logoColor=black&color=white">
+<img src="https://img.shields.io/badge/render-white?style=for-the-badge&logo=render&logoColor=white&color=black"> <img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white"> <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
 
 ---
 
@@ -197,8 +197,6 @@ Spring Boot 3.3.5
 
 ## 환경 변수
 
-`.env` 파일을 루트에 생성하고 아래 변수를 설정하세요.
-
 ```env
 # Server
 PORT=8080
@@ -257,5 +255,5 @@ docker run -p 8080:8080 --env-file .env beluo-backend
 
 ## 관련 레포지토리
 
-- Frontend: [beluo-frontend](https://github.com/sele906/beluo-frontend.git)
+Frontend: [beluo-frontend](https://github.com/sele906/beluo-frontend.git)
 
