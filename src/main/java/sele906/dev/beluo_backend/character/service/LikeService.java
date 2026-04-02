@@ -37,7 +37,7 @@ public class LikeService {
             likeRepository.save(like);
             characterRepository.increaseLikeCount(characterId);
         } catch (Exception e) {
-            throw new DataAccessException("관심있는 캐릭터로 저장할 수 없습니다.");
+            throw new DataAccessException("관심있는 캐릭터로 저장할 수 없어요. 잠시후 다시 시도해 주세요");
         }
     }
 
@@ -54,7 +54,7 @@ public class LikeService {
             likeRepository.deleteByUserIdAndCharacterId(userId, characterId);
             characterRepository.decreaseLikeCount(characterId);
         } catch (Exception e) {
-            throw new DataAccessException("관심있는 캐릭터 삭제에 실패했습니다.");
+            throw new DataAccessException("관심있는 캐릭터를 삭제할 수 없어요. 잠시후 다시 시도해 주세요");
         }
     }
 }

@@ -74,7 +74,7 @@ public class ClaudeClient {
         List<Map> content = (List<Map>) response.get("content");
 
         if (content == null || content.isEmpty()) {
-            throw new AiResponseException("Claude content가 없습니다.");
+            throw new AiResponseException("Claude가 메세지를 읽을 수 없어요. 잠시 후 다시 시도해 주세요");
         }
 
         return (String) content.get(0).get("text");

@@ -77,7 +77,7 @@ public class ConversationService {
         try {
             conversationRepository.save(c);
         } catch (Exception e) {
-            throw new DataAccessException("대화 세팅 저장 실패", e);
+            throw new DataAccessException("대화 생성을 할 수 없어요. 잠시후 다시 시도해 주세요", e);
         }
 
         //시스템 프롬프트 생성
@@ -93,14 +93,14 @@ public class ConversationService {
                     .setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
             systemMessage.setContent(nonNullMapper.writeValueAsString(character.getPersonalityJson()));
         } catch (Exception e) {
-            throw new DataAccessException("캐릭터 설정 직렬화 실패", e);
+            throw new DataAccessException("캐릭터 설정을 저장할 수 없어요. 잠시후 다시 시도해 주세요", e);
         }
 
         //db 저장
         try {
             messageRepository.save(systemMessage);
         } catch (Exception e) {
-            throw new DataAccessException("시스템 메세지 저장 실패", e);
+            throw new DataAccessException("시스템 메세지를 저장할 수 없어요. 잠시후 다시 시도해 주세요", e);
         }
 
         //빈 요약 프롬프트 생성
@@ -119,7 +119,7 @@ public class ConversationService {
         try {
             messageRepository.save(summaryMessage);
         } catch (Exception e) {
-            throw new DataAccessException("요약 메세지 저장 실패", e);
+            throw new DataAccessException("요약 메세지를 저장할 수 없어요. 잠시후 다시 시도해 주세요", e);
         }
 
         //첫 메세지 생성
@@ -139,7 +139,7 @@ public class ConversationService {
         try {
             messageRepository.save(m);
         } catch (Exception e) {
-            throw new DataAccessException("메세지 저장 실패", e);
+            throw new DataAccessException("메세지를 저장할 수 없어요. 잠시후 다시 시도해 주세요", e);
         }
 
         characterRepository.increaseConvCount(c.getCharacterId());
@@ -172,7 +172,7 @@ public class ConversationService {
             }
             return result;
         } catch (Exception e) {
-            throw new DataAccessException("채팅방 리스트 불러오기 실패", e);
+            throw new DataAccessException("채팅방 리스트를 불러올 수 없어요. 잠시후 다시 시도해 주세요", e);
         }
     }
 
@@ -201,7 +201,7 @@ public class ConversationService {
         try {
             conversationRepository.updateConversationName(sessionId, conversationName);
         } catch (Exception e) {
-            throw new DataAccessException("채팅방 이름 변경에 실패했습니다");
+            throw new DataAccessException("채팅방 이름을 변경할 수 없어요. 잠시후 다시 시도해 주세요");
         }
     }
 
@@ -210,7 +210,7 @@ public class ConversationService {
         try {
             conversationRepository.anonymizeOneByUserId(sessionId, userId);
         } catch (Exception e) {
-            throw new DataAccessException("채팅방 삭제에 실패했습니다");
+            throw new DataAccessException("채팅방을 삭제할 수 없어요. 잠시후 다시 시도해 주세요");
         }
     }
 }

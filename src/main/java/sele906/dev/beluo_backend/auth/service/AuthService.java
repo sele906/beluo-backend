@@ -51,11 +51,11 @@ public class AuthService {
 
         //db에서 사용자 확인 필요
         User u = userRepository.findByEmail(user.getEmail())
-                .orElseThrow(() -> new DataAccessException("존재하지 않는 유저입니다"));
+                .orElseThrow(() -> new InvalidRequestException("존재하지 않는 유저입니다"));
 
         //비밀번호 검증
         if (!passwordEncoder.matches(user.getPassword(), u.getPassword())) {
-            throw new DataAccessException("비밀번호가 맞지 않습니다");
+            throw new InvalidRequestException("비밀번호가 맞지 않습니다");
         }
 
         //JWT 발급
@@ -67,7 +67,7 @@ public class AuthService {
         try {
             userRepository.save(u);
         } catch (Exception e) {
-            throw new DataAccessException("Refresh 토큰 저장 실패", e);
+            throw new DataAccessException("Refresh Token 저장에 실패했습니다", e);
         }
 
         return new TokenResponse(accessToken, refreshToken);
@@ -77,12 +77,12 @@ public class AuthService {
 
         //쿠키 없으면 거절
         if (refreshToken == null) {
-            throw new InvalidRequestException("refresh Token 없음");
+            throw new InvalidRequestException("Refresh Token이 없습니다");
         }
 
         //토큰 유효한지 확인
         if (!jwtService.isValid(refreshToken)) {
-            throw new InvalidRequestException("refresh Token 만료 또는 취소");
+            throw new InvalidRequestException("refresh Token이 만료 또는 취소되었습니다");
         }
 
         //토큰에서 userId 꺼내기
@@ -93,7 +93,7 @@ public class AuthService {
 
         //db에 저장된 refreshToken이랑 일치하는지 확인
         if (!refreshToken.equals(user.getRefreshToken())) {
-            throw new InvalidRequestException("유효하지 않은 refresh Token");
+            throw new InvalidRequestException("유효하지 않은 Refresh Token 입니다");
         }
 
         //JWT 발급
@@ -105,7 +105,7 @@ public class AuthService {
         try {
             userRepository.save(user);
         } catch (Exception e) {
-            throw new DataAccessException("Refresh 토큰 저장 실패", e);
+            throw new DataAccessException("Refresh Token 저장에 실패했습니다", e);
         }
 
         //new Token 발급
@@ -124,7 +124,7 @@ public class AuthService {
         try {
             userRepository.save(user);
         } catch (Exception e) {
-            throw new DataAccessException("Refresh 토큰 삭제 실패", e);
+            throw new DataAccessException("Refresh Token 삭제에 실패했습니다", e);
         }
     }
 
@@ -151,7 +151,7 @@ public class AuthService {
         try {
             userRepository.save(u);
         } catch (Exception e) {
-            throw new DataAccessException("회원가입 실패", e);
+            throw new DataAccessException("회원가입에 실패했습니다. 다시 시도해 주세요", e);
         }
 
         creditService.grantFreeBeta(u.getId());
@@ -178,7 +178,7 @@ public class AuthService {
         try {
             userRepository.save(u);
         } catch (Exception e) {
-            throw new DataAccessException("추가 정보 저장 실패", e);
+            throw new DataAccessException("추가 회원정보 저장에 실패했습니다. 다시 시도해 주세요", e);
         }
     }
 
@@ -197,7 +197,7 @@ public class AuthService {
             mail.setText("인증 코드: " + code + "\n\n5분 내에 입력해 주세요.");
             mailSender.send(mail);
         } catch (Exception e) {
-            throw new InvalidRequestException("메일 발송에 실패했습니다.");
+            throw new InvalidRequestException("메일 발송에 실패했습니다. 다시 시도해 주세요");
         }
     }
 
@@ -206,11 +206,11 @@ public class AuthService {
         String saved = redisTemplate.opsForValue().get("verify:" + email);
 
         if (saved == null) {
-            throw new InvalidRequestException("인증 코드를 먼저 요청해 주세요.");
+            throw new InvalidRequestException("인증 코드를 먼저 요청해 주세요");
         }
 
         if (!saved.equals(code)) {
-            throw new InvalidRequestException("인증 코드가 올바르지 않습니다.");
+            throw new InvalidRequestException("인증 코드가 올바르지 않습니다");
         }
 
         redisTemplate.delete("verify:" + email);

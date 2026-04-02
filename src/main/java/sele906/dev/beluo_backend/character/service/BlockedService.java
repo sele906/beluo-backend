@@ -25,7 +25,7 @@ public class BlockedService {
         try {
             blockedRepository.save(blocked);
         } catch (Exception e) {
-            throw new DataAccessException("차단할 캐릭터 목록에 저장할 수 없습니다.");
+            throw new DataAccessException("차단할 캐릭터 목록에 저장할 수 없습니다. 다시 시도해 주세요");
         }
     }
 
@@ -34,7 +34,7 @@ public class BlockedService {
         try {
             blockedRepository.deleteByUserIdAndCharacterId(userId, characterId);
         } catch (Exception e) {
-            throw new DataAccessException("캐릭터 차단 해제에 실패했습니다.");
+            throw new DataAccessException("캐릭터 차단 해제에 실패했습니다. 다시 시도해 주세요");
         }
     }
 }

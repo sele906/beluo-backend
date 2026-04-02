@@ -14,6 +14,7 @@ import sele906.dev.beluo_backend.character.repository.BlockedRepository;
 import sele906.dev.beluo_backend.character.repository.CharacterRepository;
 import sele906.dev.beluo_backend.character.repository.LikeRepository;
 import sele906.dev.beluo_backend.character.service.CharacterCacheService;
+import sele906.dev.beluo_backend.character.service.CharacterService;
 import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.InvalidRequestException;
 import sele906.dev.beluo_backend.chat.repository.conversation.ConversationRepository;
@@ -56,6 +57,9 @@ public class MyPageService {
 
     @Autowired
     private CharacterCacheService characterCacheService;
+
+    @Autowired
+    private CharacterService characterService;
 
     public Map<String, Object> overview(String userId) {
 
@@ -100,7 +104,7 @@ public class MyPageService {
             );
 
         } catch (Exception e) {
-            throw new DataAccessException("마이페이지 불러오기 실패", e);
+            throw new DataAccessException("마이페이지 정보를 불러올 수 없어요. 잠시후 이용해 주세요", e);
         }
     }
 
@@ -115,7 +119,7 @@ public class MyPageService {
         } catch (InvalidRequestException e) {
             throw e;
         } catch (Exception e) {
-            throw new DataAccessException("마이페이지 불러오기 실패", e);
+            throw new DataAccessException("마이페이지 정보를 불러올 수 없어요. 잠시후 이용해 주세요", e);
         }
     }
 
@@ -124,7 +128,7 @@ public class MyPageService {
         try {
             return characterRepository.findCreatedCharacters(userId);
         } catch (Exception e) {
-            throw new DataAccessException("제작한 캐릭터 목록 불러오기 실패", e);
+            throw new DataAccessException("캐릭터 목록을 불러올 수 없어요. 잠시후 이용해 주세요", e);
         }
     }
 
@@ -152,7 +156,7 @@ public class MyPageService {
                     .toList();
 
         } catch (Exception e) {
-            throw new DataAccessException("관심있는 캐릭터 목록 불러오기 실패", e);
+            throw new DataAccessException("관심있는 캐릭터 목록을 불러올 수 없어요. 잠시후 이용해 주세요", e);
         }
     }
 
@@ -173,7 +177,7 @@ public class MyPageService {
                     .map(characterMap::get)
                     .toList();
         } catch (Exception e) {
-            throw new DataAccessException("차단된 캐릭터 목록 불러오기 실패", e);
+            throw new DataAccessException("차단된 캐릭터 목록을 불러올 수 없어요. 잠시후 이용해 주세요", e);
         }
     }
 
@@ -195,7 +199,7 @@ public class MyPageService {
             // 홈 화면 캐시 즉시 제거
             characterCacheService.evictCache();
         } catch (Exception e) {
-            throw new DataAccessException("캐릭터 삭제 실패", e);
+            throw new DataAccessException("캐릭터를 삭제할 수 없어요. 잠시후 이용해 주세요", e);
         }
     }
 
@@ -217,11 +221,14 @@ public class MyPageService {
                 );
                 c.setCharacterImgUrl((String) result.get("secure_url"));
             } catch (IOException e) {
-                throw new DataAccessException("이미지 업로드 실패", e);
+                throw new DataAccessException("이미지를 업로드 할 수 없어요. 잠시후 이용해 주세요", e);
             }
         } else {
             c.setCharacterImgUrl(character.getCharacterImgUrl());
         }
+
+        //성격 json으로 변환
+        c.setPersonalityJson(characterService.toParseToJsonPersonality(character.getPersonality()));
 
         c.setPublic(character.isPublic());
 
@@ -229,7 +236,7 @@ public class MyPageService {
             characterRepository.updateByIdAndUserId(characterId, userId, c);
             characterCacheService.evictCache();
         } catch (Exception e) {
-            throw new DataAccessException("캐릭터 업데이트 실패", e);
+            throw new DataAccessException("캐릭터 정보를 수정할 수 없어요. 잠시후 이용해 주세요", e);
         }
     }
 
@@ -255,7 +262,7 @@ public class MyPageService {
                 );
                 u.setUserImgUrl((String) result.get("secure_url"));
             } catch (IOException e) {
-                throw new DataAccessException("이미지 업로드 실패", e);
+                throw new DataAccessException("이미지를 업로드할 수 없어요. 잠시후 이용해 주세요", e);
             }
         } else {
             u.setUserImgUrl(user.getUserImgUrl());
@@ -264,7 +271,7 @@ public class MyPageService {
         try {
             userRepository.updateById(userId, u);
         } catch (Exception e) {
-            throw new DataAccessException("유저 업데이트 실패", e);
+            throw new DataAccessException("회원정보를 수정할 수 없어요. 잠시후 이용해 주세요", e);
         }
     }
 
@@ -283,7 +290,7 @@ public class MyPageService {
             // 홈 화면 캐시 즉시 제거
             characterCacheService.evictCache();
         } catch (Exception e) {
-            throw new DataAccessException("회원탈퇴 실패", e);
+            throw new DataAccessException("회원탈퇴에 실패했어요. 잠시후 이용해 주세요", e);
         }
     }
 
@@ -299,7 +306,7 @@ public class MyPageService {
 
             mailSender.send(mail);
         } catch (Exception e) {
-            throw new InvalidRequestException("메일 보내기에 실패했습니다.");
+            throw new InvalidRequestException("메일 보내기에 실패했어요. 잠시후 이용해 주세요.");
         }
     }
 
@@ -312,7 +319,7 @@ public class MyPageService {
         try {
             userRepository.updateAiModel(userId, model);
         } catch (Exception e) {
-            throw new DataAccessException("모델 변경에 실패했습니다.");
+            throw new DataAccessException("모델 변경에 실패했어요. 잠시후 이용해 주세요.");
         }
     }
 
@@ -322,7 +329,7 @@ public class MyPageService {
                     .orElseThrow(() -> new DataAccessException("유저 확인 불가"));
             return Map.of("credit", u.getCredit(), "model", u.getAiModel());
         } catch (Exception e) {
-            throw new DataAccessException("크레딧 정보 조회 실패");
+            throw new DataAccessException("크레딧 정보를 조회할 수 없어요. 잠시후 이용해 주세요");
         }
     }
 }

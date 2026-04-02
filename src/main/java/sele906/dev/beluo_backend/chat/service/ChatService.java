@@ -59,7 +59,7 @@ public class ChatService {
 
         //예외처리
         if (promptData.getSystemMessages().isEmpty() && promptData.getRecentMessages().isEmpty()) {
-            throw new PromptBuildException("프롬프트를 확인할 수 없어요");
+            throw new PromptBuildException("프롬프트를 확인할 수 없어요. 잠시 후 다시 시도해 주세요");
         }
 
         //api 보내기
@@ -79,7 +79,7 @@ public class ChatService {
 
         //예외처리
         if (reply == null) {
-            throw new AiResponseException("API 응답을 확인할 수 없어요");
+            throw new AiResponseException("API 응답을 확인할 수 없어요. 잠시 후 다시 시도해 주세요");
         }
 
         return reply;
@@ -101,7 +101,7 @@ public class ChatService {
 
             return messageRepository.save(m);
         } catch (Exception e) {
-            throw new DataAccessException("메세지 저장에 실패했습니다", e);
+            throw new DataAccessException("메세지를 저장할 수 없어요. 잠시 후 다시 시도해 주세요", e);
         }
     }
 
@@ -126,7 +126,7 @@ public class ChatService {
 
         //예외처리
         if (result.getMatchedCount() == 0) {
-            throw new SummaryException("요약 카운트 증가에 실패했습니다");
+            throw new SummaryException("요약 횟수를 증가시킬 수 없어요. 잠시 후 다시 시도해 주세요");
         }
     }
 
@@ -142,7 +142,7 @@ public class ChatService {
         try {
             messages = messageRepository.requestChatBefore(sessionId, cursor, limit);
         } catch (Exception e) {
-            throw new DataAccessException("메세지를 불러올 수 없어요", e);
+            throw new DataAccessException("메세지를 불러올 수 없어요. 잠시 후 다시 시도해 주세요", e);
         }
 
         Map<String, Object> result = new HashMap<>();
@@ -161,7 +161,7 @@ public class ChatService {
         try {
             messageRepository.updateMessage(sessionId, messageId, content);
         } catch (Exception e) {
-            throw new DataAccessException("메세지 수정에 실패했습니다.");
+            throw new DataAccessException("메세지를 수정할 수 없어요. 잠시 후 다시 시도해 주세요");
         }
     }
 }

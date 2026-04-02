@@ -100,12 +100,12 @@ public class PromptService {
 
         //예외처리
         if (systemMessage == null) {
-            throw new PromptBuildException("시스템 프롬프트 확인 불가");
+            throw new PromptBuildException("시스템 프롬프트를 확인할 수 없어요. 잠시 후 다시 시도해 주세요");
         }
 
         // {{char}}, {{user}} 변수 치환
         Conversation conversation = conversationRepository.findBySessionId(sessionId)
-                .orElseThrow(() -> new PromptBuildException("대화방 확인 불가"));
+                .orElseThrow(() -> new PromptBuildException("대화방을 확인할 수 없어요. 잠시 후 다시 시도해 주세요"));
 
         String content = systemMessage.getContent()
                 .replace("{{char}}", conversation.getCharacterName() != null ? conversation.getCharacterName() : "")
@@ -122,7 +122,7 @@ public class PromptService {
 
         //예외처리
         if (summaryMessage == null) {
-            throw new PromptBuildException("요약 프롬프트 확인 불가");
+            throw new PromptBuildException("요약 프롬프트를 확인할 수 없어요. 잠시 후 다시 시도해 주세요");
         }
 
         String content = summaryMessage.getContent();
@@ -153,7 +153,7 @@ public class PromptService {
 
         //예외처리
         if (summaryMessage == null) {
-            throw new PromptBuildException("요약 데이터 확인 불가");
+            throw new PromptBuildException("요약 데이터를 확인할 수 없어요. 잠시 후 다시 시도해 주세요");
         }
 
         int sinceLastSummaryCount = summaryMessage.getSinceLastSummaryCount();
@@ -163,7 +163,7 @@ public class PromptService {
 
         //예외처리
         if (recentMessages.isEmpty()) {
-            throw new PromptBuildException("최근 대화 데이터 확인 불가");
+            throw new PromptBuildException("최근 대화 데이터를 확인할 수 없어요. 잠시 후 다시 시도해 주세요");
         }
 
         return recentMessages;

@@ -69,7 +69,7 @@ public class SummaryService {
 
         //예외처리
         if (summaryMessage == null) {
-            throw new DataAccessException("요약 데이터 확인 불가");
+            throw new DataAccessException("요약 데이터를 확인할 수 없어요. 잠시후 다시 시도해 주세요");
         }
 
         String content = summaryMessage.getContent();
@@ -92,7 +92,7 @@ public class SummaryService {
 
         //예외처리
         if (recentMessagesToSummarize.isEmpty()) {
-            throw new DataAccessException("요약할 최근 대화 목록 확인 불가");
+            throw new DataAccessException("요약할 최근 대화 목록을 확인할 수 없어요. 잠시후 다시 시도해 주세요");
         }
 
         String previousSummary = (content != null && !content.isEmpty())
@@ -131,7 +131,7 @@ public class SummaryService {
 
         //예외처리
         if (result.getMatchedCount() == 0) {
-            throw new SummaryException("요약 대화 데이터 업데이트 실패");
+            throw new SummaryException("요약 대화 데이터를 업데이트할 수 없어요. 잠시후 다시 시도해 주세요");
         }
 
         return finishedSummary;

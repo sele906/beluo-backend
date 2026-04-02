@@ -54,7 +54,7 @@ public class OpenAiClient {
         List<Map> choices = (List<Map>) response.get("choices");
 
         if (choices == null || choices.isEmpty()) {
-            throw new AiResponseException("OpenAI 응답 확인 불가");
+            throw new AiResponseException("OpenAI 응답을 확인할 수 없어요. 잠시 후 다시 시도해 주세요");
         }
 
         Map message = (Map) choices.get(0).get("message");
@@ -76,7 +76,7 @@ public class OpenAiClient {
         List<Map> choices = (List<Map>) response.get("choices");
 
         if (choices == null || choices.isEmpty()) {
-            throw new AiResponseException("OpenAI 응답 확인 불가");
+            throw new AiResponseException("OpenAI 응답을 확인할 수 없어요. 잠시 후 다시 시도해 주세요");
         }
 
         Map message = (Map) choices.get(0).get("message");
@@ -98,7 +98,7 @@ public class OpenAiClient {
         List<Map> choices = (List<Map>) response.get("choices");
 
         if (choices == null || choices.isEmpty()) {
-            throw new AiResponseException("OpenAI 응답 확인 불가");
+            throw new AiResponseException("OpenAI 응답을 확인할 수 없어요. 잠시 후 다시 시도해 주세요");
         }
 
         Map message = (Map) choices.get(0).get("message");

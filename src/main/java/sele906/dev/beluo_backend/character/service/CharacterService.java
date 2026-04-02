@@ -114,7 +114,7 @@ public class CharacterService {
             return Map.of("recent", recent, "popular", popular, "liked", liked);
 
         } catch (Exception e) {
-            throw new DataAccessException("캐릭터 리스트 불러오기 실패", e);
+            throw new DataAccessException("캐릭터 리스트를 불러올 수 없어요. 잠시후 다시 시도해 주세요", e);
         }
     }
 
@@ -135,7 +135,7 @@ public class CharacterService {
             return response;
 
         } catch (Exception e) {
-            throw new DataAccessException("캐릭터 목록 불러오기 실패", e);
+            throw new DataAccessException("캐릭터 목록을 불러올 수 없어요. 잠시후 다시 시도해 주세요", e);
         }
     }
 
@@ -165,7 +165,7 @@ public class CharacterService {
         } catch (InvalidRequestException e) {
             throw e;
         } catch (Exception e) {
-            throw new DataAccessException("캐릭터 상세정보 불러오기 실패", e);
+            throw new DataAccessException("캐릭터 상세정보를 불러올 수 없어요. 잠시후 다시 시도해 주세요", e);
         }
     }
 
@@ -193,7 +193,7 @@ public class CharacterService {
         }
 
         //성격 json으로 변환
-        c.setPersonalityJson(createPersonality(character.getPersonality()));
+        c.setPersonalityJson(toParseToJsonPersonality(character.getPersonality()));
 
         c.setUserId(userId);
 
@@ -206,16 +206,16 @@ public class CharacterService {
             characterCacheService.evictCache();
             return saved.getId().toString();
         } catch (Exception e) {
-            throw new DataAccessException("캐릭터 세팅 저장 실패", e);
+            throw new DataAccessException("캐릭터를 저장할 수 없어요. 잠시후 다시 시도해 주세요", e);
         }
     }
 
     //캐릭터 성격 json으로 정리
-    public PersonalityJson createPersonality(String personalityString) {
+    public PersonalityJson toParseToJsonPersonality(String personalityString) {
 
         //예외처리
         if (personalityString == null) {
-            throw new DataAccessException("캐릭터 성격 확인 불가");
+            throw new DataAccessException("캐릭터 성격을 확인할 수 없어요. 잠시후 다시 시도해 주세요");
         }
 
         //json 변환 프롬프트 작성
@@ -232,14 +232,14 @@ public class CharacterService {
         int start = raw.indexOf('{');
         int end = raw.lastIndexOf('}');
         if (start == -1 || end == -1) {
-            throw new DataAccessException("personalityJson 응답 형식 오류: " + raw);
+            throw new DataAccessException("캐릭터 성격 정보 저장 중 오류가 발생했습니다. 잠시후 다시 시도해 주세요");
         }
         String jsonOnly = raw.substring(start, end + 1);
 
         try {
             return objectMapper.readValue(jsonOnly, PersonalityJson.class);
         } catch (Exception e) {
-            throw new DataAccessException("personalityJson 파싱 실패", e);
+            throw new DataAccessException("캐릭터 성격 정보 저장 중 오류가 발생했습니다. 잠시후 다시 시도해 주세요", e);
         }
     }
 

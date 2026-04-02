@@ -36,7 +36,7 @@ public class CreditService {
             history.setCreatedAt(Instant.now());
             creditHistoryRepository.save(history);
         } catch (Exception e) {
-            throw new DataAccessException("크레딧 지급에 실패했습니다.");
+            throw new DataAccessException("크레딧 지급에 실패했어요. 잠시후 다시 시도해 주세요");
         }
     }
 
@@ -48,7 +48,7 @@ public class CreditService {
         int cost = getCreditCost(user.getAiModel());
 
         if (user.getCredit() < cost) {
-            throw new InvalidRequestException("크레딧이 부족합니다");
+            throw new InvalidRequestException("크레딧이 부족해요. 충전 후 이용해 주세요");
         }
     }
 
@@ -60,7 +60,7 @@ public class CreditService {
         int cost = getCreditCost(user.getAiModel());
 
         if (user.getCredit() < cost) {
-            throw new InvalidRequestException("크레딧이 부족합니다");
+            throw new InvalidRequestException("크레딧이 부족해요. 충전 후 이용해 주세요");
         }
 
         try {
@@ -74,7 +74,7 @@ public class CreditService {
             history.setCreatedAt(Instant.now());
             creditHistoryRepository.save(history);
         } catch (Exception e) {
-            throw new DataAccessException("크레딧 차감에 실패했습니다.", e);
+            throw new DataAccessException("크레딧 차감에 실패했어요", e);
         }
     }
 
