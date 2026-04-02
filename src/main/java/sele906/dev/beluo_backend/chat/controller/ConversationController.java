@@ -18,8 +18,8 @@ public class ConversationController {
     private ConversationService conversationService;
 
     //캐릭터 상세정보 페이지와 이어짐
-    @GetMapping("/create")
-    public String createConversation(@RequestParam String characterId, Authentication auth) {
+    @PostMapping("/create/{characterId}")
+    public String createConversation(@PathVariable String characterId, Authentication auth) {
 
         if (auth == null) {
             throw new InvalidRequestException("로그인이 필요합니다");
@@ -44,8 +44,8 @@ public class ConversationController {
     }
 
     //채팅방 상세정보
-    @GetMapping("/detail")
-    public Map<String, Object> getConversationDetail(@RequestParam String sessionId) {
+    @GetMapping("/detail/{sessionId}")
+    public Map<String, Object> getConversationDetail(@PathVariable String sessionId) {
         return conversationService.getConversationDetail(sessionId);
     }
 

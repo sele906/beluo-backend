@@ -90,9 +90,9 @@ public class ChatController {
     }
 
     //메세지 출력
-    @GetMapping("/messages")
+    @GetMapping("/messages/{sessionId}")
     public Map<String, Object> getMessageList(
-            @RequestParam String sessionId,
+            @PathVariable String sessionId,
             @RequestParam(required = false) String before
     ) {
         return chatService.requestRecentChat(sessionId, before);

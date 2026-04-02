@@ -197,41 +197,10 @@ Spring Boot 3.3.5
 
 ## 환경 변수
 
-```env
-# Server
-PORT=8080
+환경 변수는 `.env.example`을 참고해 `.env` 파일을 생성하세요.
 
-# MongoDB
-MONGO_USER=
-MONGO_PASSWORD=
-MONGO_CLUSTER=
-MONGO_DATABASE=
-
-# Redis
-REDIS_HOST=
-REDIS_PORT=
-
-# JWT
-JWT_SECRET=
-JWT_ACCESS_TOKEN_EXPIRATION=
-JWT_REFRESH_TOKEN_EXPIRATION=
-
-# AI API
-OPENAI_API_KEY=
-CLAUDE_API_KEY=
-OPENROUTER_API_KEY=
-
-# Google OAuth2
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GOOGLE_REDIRECT_URI=
-
-# Mail (Gmail SMTP)
-MAIL_USERNAME=
-MAIL_PASSWORD=
-
-# Frontend
-APP_FRONTEND_URL=
+```bash
+cp /src/main/resources/.env.example .env
 ```
 
 ---

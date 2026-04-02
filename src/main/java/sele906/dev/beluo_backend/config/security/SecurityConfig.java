@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/conversation/list",
+                                "/",
                                 "/api/character",
                                 "/api/character/list",
                                 "/api/character/*/summary",
@@ -55,11 +55,7 @@ public class SecurityConfig {
                                 "/login/**"
                         ).permitAll()
                         .anyRequest().authenticated()               // 나머지는 토큰 필요
-//                       .requestMatchers("/admin/**").hasRole("ADMIN")
                 )
-//                .authorizeHttpRequests(auth -> auth
-//                        .anyRequest().permitAll()
-//                )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(u -> u.userService(customOAuth2UserService))
                         .failureHandler(oAuth2FailureHandler)
