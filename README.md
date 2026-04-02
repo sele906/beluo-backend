@@ -169,12 +169,12 @@ Spring Boot 3.3.5
 
 ### 대화 `/api/conversation`
 | Method | URL | 설명 | 인증 |
-|--------|-----|------|------|
-| GET | `/list` | 대화 목록 조회 | O |
-| GET | `/create/{characterId}` | 대화 세션 생성 | O |
-| GET | `/detail/{sessionId}` | 대화 상세 조회 | O |
-| PATCH | `/edit` | 대화 이름 수정 | O |
-| DELETE | `/delete/{id}` | 대화 삭제 | O |
+|--------|-----|------|----|
+| GET | `/list` | 대화 목록 조회 | X  |
+| GET | `/create/{characterId}` | 대화 세션 생성 | O  |
+| GET | `/detail/{sessionId}` | 대화 상세 조회 | O  |
+| PATCH | `/edit` | 대화 이름 수정 | O  |
+| DELETE | `/delete/{id}` | 대화 삭제 | O  |
 
 ### 마이페이지 `/api/mypage`
 | Method | URL | 설명 | 인증 |
