@@ -1,7 +1,10 @@
 package sele906.dev.beluo_backend.ai.prompt.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -17,6 +20,8 @@ import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.PromptBuildException;
 import sele906.dev.beluo_backend.exception.SummaryException;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 //프롬프트 조립하는 역할
@@ -35,6 +40,21 @@ public class PromptService {
 
     @Autowired
     private ConversationRepository conversationRepository;
+
+    @Value("classpath:static/system_prompt.txt")
+    private Resource systemPromptResource;
+
+    @Value("classpath:static/summary_prompt.txt")
+    private Resource summaryPromptResource;
+
+    private String systemPromptTemplate;
+    private String summaryPromptTemplate;
+
+    @PostConstruct
+    public void loadPromptTemplates() throws IOException {
+        systemPromptTemplate = new String(systemPromptResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        summaryPromptTemplate = new String(summaryPromptResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+    }
 
     //최종 프롬프트
     public PromptData buildPrompt(String sessionId) {
@@ -55,7 +75,7 @@ public class PromptService {
         if (systemPrompt != null) {
             systemMessages.add(Map.of(
                     "role", systemPrompt.getRole(),
-                    "content", """PROMPT_REMOVED""" + systemPrompt.getContent()
+                    "content", systemPromptTemplate + systemPrompt.getContent()
             ));
         }
 
@@ -172,7 +192,7 @@ public class PromptService {
             int hostility = (int) emotionalState.getOrDefault("hostility", 0);
             int comfort = (int) emotionalState.getOrDefault("comfort", 0);
 
-            return """PROMPT_REMOVED""".formatted(affection, trust, hostility, comfort, relationshipPhase, conversationSummary);
+            return summaryPromptTemplate.formatted(affection, trust, hostility, comfort, relationshipPhase, conversationSummary);
         } catch (Exception e) {
             // JSON 파싱 실패 시 텍스트 그대로 사용 (이전 포맷 호환)
             return "다음은 이전 대화에서 형성된 관계와 감정에 대한 요약이다. 반드시 이 내용을 반영하여 캐릭터의 말투, 태도, 감정이 자연스럽게 이어지도록 답변하라.\n\n" + summaryJson;

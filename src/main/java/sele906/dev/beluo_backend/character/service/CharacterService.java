@@ -18,7 +18,11 @@ import sele906.dev.beluo_backend.user.domain.User;
 import sele906.dev.beluo_backend.user.repository.user.UserRepository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -49,6 +53,16 @@ public class CharacterService {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Value("classpath:static/character_prompt.txt")
+    private Resource characterPromptResource;
+
+    private String characterPromptTemplate;
+
+    @PostConstruct
+    public void loadPromptTemplates() throws IOException {
+        characterPromptTemplate = new String(characterPromptResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+    }
 
     //캐릭터 overview
     public Map<String, Object> getCharacterOverviewList(String userId) {
@@ -205,9 +219,9 @@ public class CharacterService {
         }
 
         //json 변환 프롬프트 작성
-        Map<String, String> personalityJsonPrompt =  Map.of(
+        Map<String, String> personalityJsonPrompt = Map.of(
                 "role", "system",
-                "content", """PROMPT_REMOVED""" + personalityString + "}"
+                "content", characterPromptTemplate + personalityString + "}"
         );
 
         //캐릭터 프롬프트 출력
