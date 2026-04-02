@@ -95,16 +95,6 @@ public class SummaryService {
             throw new DataAccessException("요약할 최근 대화 목록 확인 불가");
         }
 
-        //테스트용
-        //요약 프롬프트에 첨부될 최근 대화 출력
-        System.out.println("=========요약 프롬프트에 첨부될 최근 대화=========");
-
-        for (Message r : recentMessagesToSummarize) {
-            System.out.println(r.getContent());
-        }
-
-        System.out.println("==================");
-
         String previousSummary = (content != null && !content.isEmpty())
                 ? content
                 : "없음 (초기 상태, 모든 감정 수치는 캐릭터 성격에 맞게 초기화)";
@@ -129,26 +119,12 @@ public class SummaryService {
         //요약 프롬프트 출력
         String finishedSummary = openAiClient.summary(sendSummaryMessage);
 
-        //요약 확인 테스트
-        System.out.println("=========요약 확인 테스트=========");
-
-        System.out.println(finishedSummary);
-
-        System.out.println("==================");
-
         //요약 데이터 업데이트
         //요약 날짜를 10개 최근 대화 중 가장 최근 날짜로 수정
         Instant newLastSummarizedAt =
                 recentMessagesToSummarize
                         .get(recentMessagesToSummarize.size() - 1)
                         .getCreatedAt();
-
-        //테스트
-        System.out.println("=========요약 데이터 날짜 확인=========");
-
-        System.out.println("newLastSummarizedAt" + newLastSummarizedAt);
-
-        System.out.println("==================");
 
         //요약 데이터 업데이트
         UpdateResult result = messageRepository.summaryDataUpdate(sessionId, finishedSummary, newLastSummarizedAt);

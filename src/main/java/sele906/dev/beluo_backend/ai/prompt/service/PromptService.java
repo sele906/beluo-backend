@@ -89,16 +89,6 @@ public class PromptService {
             ));
         }
 
-        System.out.println("===== [systemMessages] =====");
-        for (Map<String, String> m : systemMessages) {
-            System.out.println("[role] " + m.get("role"));
-            System.out.println("[content]\n" + m.get("content"));
-        }
-        System.out.println("===== [recentMessages] =====");
-        for (Map<String, String> m : recentMessages) {
-            System.out.println("[role] " + m.get("role") + " / [content] " + m.get("content"));
-        }
-
         return new PromptData(systemMessages, recentMessages);
     }
 

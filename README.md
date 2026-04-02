@@ -159,13 +159,14 @@ Spring Boot 3.3.5
 | DELETE | `/blocked/{id}` | 차단 해제 | O |
 
 ### 채팅 `/api/chat`
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|------|
-| POST | `/send` | 메시지 전송 | O |
-| POST | `/regenerate` | AI 응답 재생성 | O |
-| POST | `/confirm` | AI 응답 확정 저장 | O |
-| GET | `/messages/{sessionId}?before=` | 메시지 히스토리 조회 | O |
-| PATCH | `/edit` | 메시지 수정 | O |
+| Method | URL | 설명              | 인증 |
+|--------|-----|-----------------|------|
+| POST | `/send` | 메시지 전송          | O |
+| POST | `/regenerate` | AI 응답 재생성       | O |
+| POST | `/confirm` | AI 응답 확정 저장     | O |
+| POST | `/orphan` | 서버 오류시 AI 응답 롤백 | O |
+| GET | `/messages/{sessionId}?before=` | 메시지 히스토리 조회     | O |
+| PATCH | `/edit` | 메시지 수정          | O |
 
 ### 대화 `/api/conversation`
 | Method | URL | 설명 | 인증 |

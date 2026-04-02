@@ -96,7 +96,7 @@ public class ChatController {
         return chatService.requestRecentChat(sessionId, before);
     }
 
-    //고아 메세지 롤백 (유저 이탈 시 프론트에서 호출, sendBeacon은 POST만 지원)
+    //고아 메세지 롤백
     @PostMapping("/orphan")
     public void deleteOrphanMessage(@RequestParam String sessionId) {
         chatService.deleteOrphanUserMessage(sessionId);
