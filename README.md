@@ -52,19 +52,19 @@ Client
   │
 Spring Boot 3.3.5
   │
-  ├── Spring Security (JWT Filter + OAuth2)
-  ├── Caffeine Cache (로컬, 5분)
+  ├── Spring Security 
+  ├── Caffeine Cache 
   ├── Redis
   │
-  ├── MongoDB Atlas (메인 DB, 소프트 삭제)
+  ├── MongoDB Atlas 
   │
-  ├── AI 클라이언트 (WebFlux)
+  ├── AI 클라이언트 
   │     ├── OpenAI
-  │     ├── Claude (Anthropic)
+  │     ├── Claude 
   │     └── OpenRouter
   │
-  ├── Cloudinary (이미지 업로드, 최대 10MB)
-  └── Gmail SMTP (이메일 인증)
+  ├── Cloudinary 
+  └── Gmail SMTP 
 ```
 
 ---
@@ -78,8 +78,8 @@ Spring Boot 3.3.5
 - 이메일 + 비밀번호 회원가입 / 로그인
 - Google OAuth2 소셜 로그인
 - 이메일 인증 코드 발송 및 검증
-- Access Token + Refresh Token (HttpOnly 쿠키 방식, XSS 방어)
-- 로그아웃 (토큰 무효화)
+- Access Token + Refresh Token 
+- 로그아웃 
 
 **캐릭터**
 
@@ -91,11 +91,11 @@ Spring Boot 3.3.5
 **채팅**
 
 - 캐릭터와 대화 세션 생성
-- 메시지 전송 (크레딧 차감)
-- AI 응답 재생성 (크레딧 차감)
+- 메시지 전송 
+- AI 응답 재생성 
 - AI 응답 확정 저장
 - 메시지 수정
-- 메시지 히스토리 조회 (커서 기반 페이지네이션)
+- 메시지 히스토리 조회 
 
 **대화 관리**
 
@@ -106,7 +106,7 @@ Spring Boot 3.3.5
 
 **마이페이지**
 
-- 프로필 조회 / 수정 (이미지 포함)
+- 프로필 조회 / 수정 
 - 회원 탈퇴
 - 내가 만든 캐릭터 조회 / 수정 / 삭제
 - 좋아요한 캐릭터 조회
