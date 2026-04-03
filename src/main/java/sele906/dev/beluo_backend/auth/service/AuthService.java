@@ -199,15 +199,13 @@ public class AuthService {
 
         redisTemplate.opsForValue().set("verify:" + email, code,5, TimeUnit.MINUTES);
 
-
-
         try {
             SimpleMailMessage mail = new SimpleMailMessage();
             mail.setTo(email);
             mail.setSubject("[BELUO] 이메일 인증 코드");
             mail.setText("인증 코드: " + code + "\n\n5분 내에 입력해 주세요.");
             mailSender.send(mail);
-        } catch (Exception e) { //메일 주소 갔는지 확인하는 기능...?
+        } catch (Exception e) {
             throw new InvalidRequestException("메일 발송에 실패했습니다. 다시 시도해 주세요");
         }
     }
