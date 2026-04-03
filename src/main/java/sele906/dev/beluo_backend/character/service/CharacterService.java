@@ -20,9 +20,9 @@ import sele906.dev.beluo_backend.user.repository.user.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -54,14 +54,14 @@ public class CharacterService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Value("classpath:static/character_prompt.txt")
-    private Resource characterPromptResource;
+    @Value("${prompt.character}")
+    private String characterPromptPath;
 
     private String characterPromptTemplate;
 
     @PostConstruct
     public void loadPromptTemplates() throws IOException {
-        characterPromptTemplate = new String(characterPromptResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        characterPromptTemplate = Files.readString(Path.of(characterPromptPath));
     }
 
     //캐릭터 overview

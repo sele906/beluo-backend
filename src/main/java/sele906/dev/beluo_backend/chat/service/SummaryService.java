@@ -4,8 +4,9 @@ import com.mongodb.client.result.UpdateResult;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import sele906.dev.beluo_backend.ai.client.OpenAiClient;
@@ -20,7 +21,6 @@ import sele906.dev.beluo_backend.exception.DataAccessException;
 import sele906.dev.beluo_backend.exception.SummaryException;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,14 +46,14 @@ public class SummaryService {
     @Autowired
     private CharacterRepository characterRepository;
 
-    @Value("classpath:static/summary_prompt.txt")
-    private Resource summaryPromptResource;
+    @Value("${prompt.summary}")
+    private String summaryPromptPath;
 
     private String summaryPromptTemplate;
 
     @PostConstruct
     public void loadPromptTemplates() throws IOException {
-        summaryPromptTemplate = new String(summaryPromptResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        summaryPromptTemplate = Files.readString(Path.of(summaryPromptPath));
     }
 
     //요약 채팅 api 실행

@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import sele906.dev.beluo_backend.ai.prompt.dto.PromptData;
 import sele906.dev.beluo_backend.ai.prompt.repository.PromptRepository;
 import sele906.dev.beluo_backend.chat.domain.Conversation;
@@ -15,7 +16,6 @@ import sele906.dev.beluo_backend.chat.service.SummaryService;
 import sele906.dev.beluo_backend.exception.PromptBuildException;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 //프롬프트 조립하는 역할
@@ -35,19 +35,19 @@ public class PromptService {
     @Autowired
     private ConversationRepository conversationRepository;
 
-    @Value("classpath:static/system_prompt.txt")
-    private Resource systemPromptResource;
+    @Value("${prompt.system}")
+    private String systemPromptPath;
 
-    @Value("classpath:static/summary_short_prompt.txt")
-    private Resource summaryPromptResource;
+    @Value("${prompt.summary-short}")
+    private String summaryShortPromptPath;
 
     private String systemPromptTemplate;
     private String summaryPromptTemplate;
 
     @PostConstruct
     public void loadPromptTemplates() throws IOException {
-        systemPromptTemplate = new String(systemPromptResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        summaryPromptTemplate = new String(summaryPromptResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        systemPromptTemplate = Files.readString(Path.of(systemPromptPath));
+        summaryPromptTemplate = Files.readString(Path.of(summaryShortPromptPath));
     }
 
     //최종 프롬프트
