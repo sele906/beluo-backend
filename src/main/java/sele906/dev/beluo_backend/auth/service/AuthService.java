@@ -136,6 +136,7 @@ public class AuthService {
         u.setName(user.getName());
         u.setCreatedAt(Instant.now());
         u.setBirth(user.getBirth());
+        u.setRole("USER");
 
         // 프로필 사진 업로드
         if (file != null && !file.isEmpty()) {
