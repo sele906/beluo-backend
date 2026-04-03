@@ -47,7 +47,7 @@ docker run -p 8080:8080 --env-file .env beluo-backend
 ```
 Client
   │
-  ├── JWT (HttpOnly Cookie)
+  ├── JWT 
   ├── Google OAuth2
   │
 Spring Boot 3.3.5
@@ -124,8 +124,7 @@ Spring Boot 3.3.5
 
 **대화 요약 자동화**
 
-- 장기 대화의 컨텍스트 관리를 위한 자동 요약
-- `lastSummarizedAt`, `sinceLastSummaryCount`, `summaryVersion`
+- 장기 대화의 컨텍스트 관리를 위한 요약
 
 **캐릭터 캐싱**
 
