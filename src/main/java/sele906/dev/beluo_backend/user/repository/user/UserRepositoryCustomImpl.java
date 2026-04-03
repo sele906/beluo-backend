@@ -55,9 +55,12 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         Update update = new Update()
                 .set("name", user.getName())
-                .set("email", user.getEmail())
                 .set("birth", user.getBirth())
                 .set("userImgUrl", user.getUserImgUrl());
+
+        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+            update.set("email", user.getEmail());
+        }
 
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             update.set("password", user.getPassword());

@@ -185,9 +185,20 @@ public class AuthService {
     // 인증 코드 발송
     public void verifyEmail(String email) {
 
+        // 이메일 형식 확인
+        if (!email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            throw new InvalidRequestException("유효하지 않은 이메일 형식입니다");
+        }
+
+        // 중복 이메일 확인
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new InvalidRequestException("이미 사용 중인 이메일입니다");
+        }
+
         String code = String.format("%06d", new Random().nextInt(1000000));
 
         redisTemplate.opsForValue().set("verify:" + email, code,5, TimeUnit.MINUTES);
+
 
 
         try {
@@ -196,7 +207,7 @@ public class AuthService {
             mail.setSubject("[BELUO] 이메일 인증 코드");
             mail.setText("인증 코드: " + code + "\n\n5분 내에 입력해 주세요.");
             mailSender.send(mail);
-        } catch (Exception e) {
+        } catch (Exception e) { //메일 주소 갔는지 확인하는 기능...?
             throw new InvalidRequestException("메일 발송에 실패했습니다. 다시 시도해 주세요");
         }
     }

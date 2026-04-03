@@ -242,11 +242,17 @@ public class MyPageService {
 
     public void profileEdit(String userId, User user, MultipartFile file) {
 
+        System.out.println(user);
+
         User u = new User();
         u.setName(user.getName());
         u.setUserImgUrl(user.getUserImgUrl());
-        u.setEmail(user.getEmail());
         u.setBirth(user.getBirth());
+
+        //이메일 처리
+        if (!"google".equals(user.getProvider())  && user.getEmail() != null && !user.getEmail().isEmpty()) {
+            u.setEmail(user.getEmail());
+        }
 
         // 비밀번호 처리
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
