@@ -171,7 +171,7 @@ public class AuthService {
         if (file != null && !file.isEmpty()) {
             Map result = cloudinary.uploader().upload(
                     file.getBytes(),
-                    ObjectUtils.asMap("folder", "profile")
+                    ObjectUtils.asMap("folder", "user")
             );
             u.setUserImgUrl((String) result.get("secure_url"));
         }

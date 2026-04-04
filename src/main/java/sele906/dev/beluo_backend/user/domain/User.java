@@ -25,7 +25,7 @@ public class User {
     private int credit;
 
     private String userImgUrl;
-    private String aiModel = "free";
+    private String aiModel = "gpt";
 
     private String role;
     private String refreshToken;
