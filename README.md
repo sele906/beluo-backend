@@ -242,7 +242,11 @@ docker run -p 8080:8080 --env-file .env beluo-backend
 
 ---
 
-## 관련 레포지토리
+## 추가 정보
 
-Frontend: [beluo-frontend](https://github.com/sele906/beluo-frontend.git)
+### 🔗 관련 레포지토리
+- Frontend: [beluo-frontend](https://github.com/sele906/beluo-frontend)
+
+### 📄 라이선스
+이 프로젝트는 MIT License를 따릅니다.
 
