@@ -25,23 +25,6 @@ AI 캐릭터 채팅 플랫폼 **Beluo**의 백엔드 서버입니다.<br/>
 
 ---
 
-## 실행 방법
-
-**로컬 실행**
-
-```
-./gradlew bootRun
-```
-
-**Docker 실행**
-
-```
-docker build -t beluo-backend .
-docker run -p 8080:8080 --env-file .env beluo-backend
-```
-
----
-
 ### 아키텍처 개요
 
 ```
@@ -65,6 +48,54 @@ Spring Boot 3.3.5
   │
   ├── Cloudinary 
   └── Gmail SMTP 
+```
+
+---
+
+## 환경 변수
+
+환경 변수는 `.env.example`을 참고해 `.env` 파일을 생성하세요.
+
+```bash
+cp /src/main/resources/.env.example .env
+```
+
+---
+
+## 프롬프트 파일
+
+프롬프트는 보안상 gitignore 처리되어 있습니다. 아래 4개 파일을 생성하세요.
+
+```
+src/main/resources/static/system_prompt.txt
+src/main/resources/static/character_prompt.txt
+src/main/resources/static/summary_prompt.txt
+src/main/resources/static/summary_short_prompt.txt
+```
+
+| 파일 | 사용처 | 설명 |
+|------|--------|------|
+| `system_prompt.txt` | PromptService | 캐릭터 롤플레이 행동 원칙 |
+| `character_prompt.txt` | CharacterService | 캐릭터 설정 프롬프트 |
+| `summary_prompt.txt` | SummaryService | 대화 요약 생성 프롬프트 |
+| `summary_short_prompt.txt` | PromptService | 요약 데이터 주입 프롬프트 |
+
+
+---
+
+## 실행 방법
+
+**로컬 실행**
+
+```
+./gradlew bootRun
+```
+
+**Docker 실행**
+
+```
+docker build -t beluo-backend .
+docker run -p 8080:8080 --env-file src/main/resources/.env beluo-backend
 ```
 
 ---
@@ -192,53 +223,6 @@ Spring Boot 3.3.5
 | GET | `/model` | 크레딧 / AI 모델 조회 | O |
 | POST | `/model` | AI 모델 선택 | O |
 | POST | `/inquiry` | 문의 제출 | O |
-
----
-
-## 환경 변수
-
-환경 변수는 `.env.example`을 참고해 `.env` 파일을 생성하세요.
-
-```bash
-cp /src/main/resources/.env.example .env
-```
-
----
-
-## 프롬프트 파일
-
-프롬프트는 보안상 gitignore 처리되어 있습니다. 아래 4개 파일을 생성하세요.
-
-```
-src/main/resources/static/system_prompt.txt
-src/main/resources/static/character_prompt.txt
-src/main/resources/static/summary_prompt.txt
-src/main/resources/static/summary_short_prompt.txt
-```
-
-| 파일 | 사용처 | 설명 |
-|------|--------|------|
-| `system_prompt.txt` | PromptService | 캐릭터 롤플레이 행동 원칙 |
-| `character_prompt.txt` | CharacterService | 캐릭터 설정 프롬프트 |
-| `summary_prompt.txt` | SummaryService | 대화 요약 생성 프롬프트 |
-| `summary_short_prompt.txt` | PromptService | 요약 데이터 주입 프롬프트 |
-
----
-
-## 실행 방법
-
-**로컬 실행**
-
-```bash
-./gradlew bootRun
-```
-
-**Docker 실행**
-
-```bash
-docker build -t beluo-backend .
-docker run -p 8080:8080 --env-file .env beluo-backend
-```
 
 ---
 
