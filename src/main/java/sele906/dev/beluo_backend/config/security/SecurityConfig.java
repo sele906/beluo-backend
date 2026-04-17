@@ -47,6 +47,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
+                                "/error",
                                 "/api/conversation/list",
                                 "/api/character",
                                 "/api/character/list",
@@ -58,8 +59,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/chat/**",
                                 "/api/conversation/**"
-                        ).hasAnyRole("USER", "GUEST")              // 게스트도 채팅 가능
-                        .anyRequest().hasRole("USER")               // 나머지는 일반 유저만
+                        ).hasAnyRole("USER", "GUEST", "ADMIN")              // 게스트도 채팅 가능
+                        .anyRequest().hasAnyRole("USER", "ADMIN")   // 나머지는 일반 유저랑 관리자
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(u -> u.userService(customOAuth2UserService))

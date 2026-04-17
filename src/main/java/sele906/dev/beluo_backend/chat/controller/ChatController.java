@@ -77,11 +77,15 @@ public class ChatController {
     public Map<String, String> chatConfirm(@RequestBody Map<String, String> body) {
 
         String sessionId = body.get("sessionId");
-        String aiRole = "assistant";
         String aiContent = body.get("reply");
+        String previousMessageId = body.get("previousMessageId"); // 재생성 confirm 시 이전 AI 메시지 ID
 
-        //ai 메세지 db 저장
-        Message savedAiMessage = chatService.chatDataSave(aiRole, aiContent, sessionId);
+        // 재생성 confirm이면 이전 AI 메시지 삭제
+        if (previousMessageId != null && !previousMessageId.isBlank()) {
+            chatService.deleteMessage(previousMessageId);
+        }
+
+        Message savedAiMessage = chatService.chatDataSave("assistant", aiContent, sessionId);
         chatService.afterSummaryChatCount(sessionId);
 
         return Map.of("messageId", savedAiMessage.getId());
