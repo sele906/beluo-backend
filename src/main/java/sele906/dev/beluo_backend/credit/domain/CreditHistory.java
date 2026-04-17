@@ -21,6 +21,7 @@ public class CreditHistory {
     private int amount;
     private String source; // FREE_BETA | PAYMENT | CHAT | REGENERATE
     private Instant expiredAt;
+    private boolean expired = false;
     private String memo;
     private String paymentId;
     private Instant createdAt;

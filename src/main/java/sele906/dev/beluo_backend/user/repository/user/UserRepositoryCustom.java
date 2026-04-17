@@ -10,4 +10,6 @@ public interface UserRepositoryCustom {
     void updateAiModel(String userId, String aiModel);
     void incrementCredit(String userId, int amount);
     void deductCredit(String userId, int amount);
+    void resetCreditForAllUsers(int credit);
+    void setCreditById(String userId, int credit);
 }

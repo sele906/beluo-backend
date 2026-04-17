@@ -19,8 +19,10 @@ import sele906.dev.beluo_backend.exception.InvalidRequestException;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -71,6 +73,33 @@ public class AuthService {
         }
 
         return new TokenResponse(accessToken, refreshToken);
+    }
+
+    public String guestLogin() {
+
+        String guestId = "guest_" + UUID.randomUUID();
+
+        User u = new User();
+        u.setId(guestId);
+        u.setEmail(guestId + "@guest.local"); // unique index 충돌 방지
+        u.setName("Guest");
+        u.setCreatedAt(Instant.now());
+        u.setRole("GUEST");
+        u.setUserImgUrl("https://res.cloudinary.com/dncvqdlih/image/upload/v1774283989/blank_user_t5mdgv.jpg");
+        u.setGuestExpiresAt(Instant.now().plus(1, ChronoUnit.DAYS));
+
+        try {
+            userRepository.save(u);
+        } catch (Exception e) {
+            throw new DataAccessException("게스트 계정 생성에 실패했습니다. 다시 시도해 주세요", e);
+        }
+
+        //JWT 발급
+        String accessToken = jwtService.generateAccessToken(u.getId(), u.getRole());
+
+        creditService.grantGuestFreeBeta(u.getId());
+
+        return accessToken;
     }
 
     public TokenResponse refresh(String refreshToken) {
@@ -225,6 +254,7 @@ public class AuthService {
 
         redisTemplate.delete("verify:" + email);
     }
+
 
 
 }

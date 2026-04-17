@@ -55,7 +55,11 @@ public class SecurityConfig {
                                 "/oauth2/**",
                                 "/login/**"
                         ).permitAll()
-                        .anyRequest().authenticated()               // 나머지는 토큰 필요
+                        .requestMatchers(
+                                "/api/chat/**",
+                                "/api/conversation/**"
+                        ).hasAnyRole("USER", "GUEST")              // 게스트도 채팅 가능
+                        .anyRequest().hasRole("USER")               // 나머지는 일반 유저만
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(u -> u.userService(customOAuth2UserService))

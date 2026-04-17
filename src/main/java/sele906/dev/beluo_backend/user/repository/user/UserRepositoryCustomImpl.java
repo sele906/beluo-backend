@@ -91,6 +91,23 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     }
 
     @Override
+    public void resetCreditForAllUsers(int credit) {
+        Query query = new Query(
+                Criteria.where("role").ne("GUEST")
+                        .and("deletedAt").is(null)
+        );
+        Update update = new Update().set("credit", credit);
+        mongoTemplate.updateMulti(query, update, User.class);
+    }
+
+    @Override
+    public void setCreditById(String userId, int credit) {
+        Query query = new Query(Criteria.where("_id").is(userId));
+        Update update = new Update().set("credit", credit);
+        mongoTemplate.updateFirst(query, update, User.class);
+    }
+
+    @Override
     public void anonymizeById(String userId) {
         Query query = new Query(Criteria.where("_id").is(userId));
         Update update = new Update()

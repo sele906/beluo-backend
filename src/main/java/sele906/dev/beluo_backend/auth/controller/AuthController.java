@@ -53,6 +53,26 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "로그인 성공"));
     }
 
+    //게스트 로그인
+    @PostMapping("/guest")
+    public ResponseEntity<?> guestLogin(HttpServletResponse response) {
+
+        String accessToken = authService.guestLogin();
+
+        // 쿠키에 토큰 담기
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(86400)
+                .build();
+
+        response.addHeader("Set-Cookie", accessCookie.toString());
+
+        return ResponseEntity.ok(Map.of("message", "로그인 성공"));
+    }
+
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
 
@@ -124,6 +144,15 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "로그아웃 성공"));
     }
 
+    @PostMapping(value = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> join(
+            @RequestPart("user") User user,
+            @RequestPart(value = "file", required = false) MultipartFile file
+    ) throws IOException {
+        authService.join(user, file);
+        return ResponseEntity.ok(Map.of("message", "회원가입 완료"));
+    }
+
     // 인증 코드 발송
     @PostMapping("/verify/send")
     public ResponseEntity<?> verifySend(@RequestBody Map<String, String> body) {
@@ -136,15 +165,6 @@ public class AuthController {
     public ResponseEntity<?> verifyCheck(@RequestBody Map<String, String> body) {
         authService.checkVerity(body.get("email"), body.get("code"));
         return ResponseEntity.ok(Map.of("message", "이메일 인증 완료"));
-    }
-
-    @PostMapping(value = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> join(
-            @RequestPart("user") User user,
-            @RequestPart(value = "file", required = false) MultipartFile file
-    ) throws IOException {
-        authService.join(user, file);
-        return ResponseEntity.ok(Map.of("message", "회원가입 완료"));
     }
 
     @PostMapping(value = "/oauth2/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

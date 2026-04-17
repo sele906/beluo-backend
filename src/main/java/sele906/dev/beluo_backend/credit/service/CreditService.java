@@ -40,6 +40,25 @@ public class CreditService {
         }
     }
 
+    //게스트 가입시 15 크레딧만
+    public void grantGuestFreeBeta(String userId) {
+        try {
+            userRepository.incrementCredit(userId, 15);
+
+            CreditHistory history = new CreditHistory();
+            history.setUserId(userId);
+            history.setType("GRANT");
+            history.setSource("GUEST_FREE_BETA");
+            history.setAmount(15);
+            history.setExpiredAt(Instant.now().plus(1, ChronoUnit.DAYS));
+            history.setMemo("베타 무료 크레딧");
+            history.setCreatedAt(Instant.now());
+            creditHistoryRepository.save(history);
+        } catch (Exception e) {
+            throw new DataAccessException("크레딧 지급에 실패했어요. 잠시후 다시 시도해 주세요");
+        }
+    }
+
     // 크레딧 사전 확인 (차감 없이 잔액만 검증)
     public void checkCredit(String userId) {
         User user = userRepository.findById(userId)
@@ -76,6 +95,51 @@ public class CreditService {
         } catch (Exception e) {
             throw new DataAccessException("크레딧 차감에 실패했어요", e);
         }
+    }
+
+    // 만료된 GRANT 이력을 실제 유저 크레딧에 반영
+    public void processExpiredCredits() {
+        creditHistoryRepository.findExpiredGrants().forEach(history -> {
+            User user = userRepository.findById(history.getUserId()).orElse(null);
+            if (user == null) return;
+
+            // 차감 후 0 미만 방지
+            int deduct = Math.min(history.getAmount(), user.getCredit());
+            userRepository.deductCredit(user.getId(), deduct);
+
+            // EXPIRE 이력 기록
+            CreditHistory expire = new CreditHistory();
+            expire.setUserId(user.getId());
+            expire.setType("EXPIRE");
+            expire.setSource(history.getSource());
+            expire.setAmount(-deduct);
+            expire.setMemo("크레딧 만료");
+            expire.setCreatedAt(Instant.now());
+            creditHistoryRepository.save(expire);
+
+            // 원본 GRANT 이력 만료 처리 완료 표시
+            history.setExpired(true);
+            creditHistoryRepository.save(history);
+        });
+    }
+
+    // FREE_BETA 크레딧 보유 유저 credit 0으로 초기화 (베타 종료 시)
+    public void expireFreeBetaCredits() {
+        creditHistoryRepository.findActiveGrantsBySource("FREE_BETA").forEach(history -> {
+            userRepository.setCreditById(history.getUserId(), 0);
+
+            CreditHistory expire = new CreditHistory();
+            expire.setUserId(history.getUserId());
+            expire.setType("EXPIRE");
+            expire.setSource("FREE_BETA");
+            expire.setAmount(0);
+            expire.setMemo("베타 종료로 인한 크레딧 초기화");
+            expire.setCreatedAt(Instant.now());
+            creditHistoryRepository.save(expire);
+
+            history.setExpired(true);
+            creditHistoryRepository.save(history);
+        });
     }
 
     private int getCreditCost(String aiModel) {
