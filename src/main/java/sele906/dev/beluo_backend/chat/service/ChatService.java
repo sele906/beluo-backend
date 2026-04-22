@@ -110,6 +110,14 @@ public class ChatService {
         messageRepository.deleteById(messageId);
     }
 
+    //confirm 시 마지막 메세지가 assistant면 삭제 (재생성/새로고침 후 confirm 덮어쓰기)
+    public void deleteLastAssistantIfExists(String sessionId) {
+        Message last = messageRepository.findLastBySessionId(sessionId);
+        if (last != null && "assistant".equals(last.getRole())) {
+            messageRepository.deleteById(last.getId());
+        }
+    }
+
     //고아 메세지 삭제 (유저가 응답 대기 중 이탈 시 롤백용)
     public void deleteOrphanUserMessage(String sessionId) {
         Message last = messageRepository.findLastBySessionId(sessionId);

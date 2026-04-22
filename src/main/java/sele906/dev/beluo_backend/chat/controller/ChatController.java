@@ -78,12 +78,9 @@ public class ChatController {
 
         String sessionId = body.get("sessionId");
         String aiContent = body.get("reply");
-        String previousMessageId = body.get("previousMessageId"); // 재생성 confirm 시 이전 AI 메시지 ID
 
-        // 재생성 confirm이면 이전 AI 메시지 삭제
-        if (previousMessageId != null && !previousMessageId.isBlank()) {
-            chatService.deleteMessage(previousMessageId);
-        }
+        // 마지막 메세지가 assistant면 삭제 (재생성 or 새로고침 후 confirm 케이스)
+        chatService.deleteLastAssistantIfExists(sessionId);
 
         Message savedAiMessage = chatService.chatDataSave("assistant", aiContent, sessionId);
         chatService.afterSummaryChatCount(sessionId);

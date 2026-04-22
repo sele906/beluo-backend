@@ -38,9 +38,14 @@ public class OpenAiClient {
 
     public String chat(PromptData promptData) {
 
+        List<Map<String, String>> recentMessages = new ArrayList<>(promptData.getRecentMessages());
+        while (!recentMessages.isEmpty() && "assistant".equals(recentMessages.get(recentMessages.size() - 1).get("role"))) {
+            recentMessages.remove(recentMessages.size() - 1);
+        }
+
         List<Map<String, String>> messages = new ArrayList<>();
         messages.addAll(promptData.getSystemMessages());
-        messages.addAll(promptData.getRecentMessages());
+        messages.addAll(recentMessages);
 
         Map<String, Object> body = Map.of(
             "model", "gpt-5-mini",
