@@ -12,6 +12,7 @@ import sele906.dev.beluo_backend.ai.prompt.dto.PromptData;
 import sele906.dev.beluo_backend.exception.AiResponseException;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,11 +45,17 @@ public class ClaudeClient {
                 .map(m -> m.get("content"))
                 .collect(Collectors.joining("\n\n"));
 
+        List<Map<String, String>> messages = new ArrayList<>(promptData.getRecentMessages());
+        // Claude requires conversation to end with a user message
+        while (!messages.isEmpty() && "assistant".equals(messages.get(messages.size() - 1).get("role"))) {
+            messages.remove(messages.size() - 1);
+        }
+
         Map<String, Object> body = new HashMap<>();
         body.put("model", "claude-sonnet-4-6");
         body.put("max_tokens", 1500);
         body.put("system", systemContent);
-        body.put("messages", promptData.getRecentMessages());
+        body.put("messages", messages);
 
         Map response;
         try {
