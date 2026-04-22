@@ -158,8 +158,8 @@ public class PromptService {
 
         int sinceLastSummaryCount = summaryMessage.getSinceLastSummaryCount();
 
-        //최근 대화 프롬프트 불러오기
-        List<Message> recentMessages = promptRepository.recentMessage(sessionId, sinceLastSummaryCount);
+        //최근 대화 프롬프트 불러오기 (최소 2개로 assistant 끝나도 user가 남도록)
+        List<Message> recentMessages = promptRepository.recentMessage(sessionId, Math.max(sinceLastSummaryCount, 2));
 
         //예외처리
         if (recentMessages.isEmpty()) {

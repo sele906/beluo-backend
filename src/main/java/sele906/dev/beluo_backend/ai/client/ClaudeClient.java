@@ -46,9 +46,11 @@ public class ClaudeClient {
                 .collect(Collectors.joining("\n\n"));
 
         List<Map<String, String>> messages = new ArrayList<>(promptData.getRecentMessages());
-        // Claude requires conversation to end with a user message
         while (!messages.isEmpty() && "assistant".equals(messages.get(messages.size() - 1).get("role"))) {
             messages.remove(messages.size() - 1);
+        }
+        if (messages.isEmpty()) {
+            throw new AiResponseException("대화 내용을 불러올 수 없어요. 잠시 후 다시 시도해 주세요.");
         }
 
         Map<String, Object> body = new HashMap<>();

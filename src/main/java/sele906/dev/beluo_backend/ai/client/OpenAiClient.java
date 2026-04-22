@@ -42,6 +42,9 @@ public class OpenAiClient {
         while (!recentMessages.isEmpty() && "assistant".equals(recentMessages.get(recentMessages.size() - 1).get("role"))) {
             recentMessages.remove(recentMessages.size() - 1);
         }
+        if (recentMessages.isEmpty()) {
+            throw new AiResponseException("대화 내용을 불러올 수 없어요. 잠시 후 다시 시도해 주세요.");
+        }
 
         List<Map<String, String>> messages = new ArrayList<>();
         messages.addAll(promptData.getSystemMessages());
