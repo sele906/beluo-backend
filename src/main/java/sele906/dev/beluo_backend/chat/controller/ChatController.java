@@ -78,12 +78,17 @@ public class ChatController {
 
         String sessionId = body.get("sessionId");
         String aiContent = body.get("reply");
+        boolean isRegenerate = Boolean.parseBoolean(body.getOrDefault("isRegenerate", "false"));
 
         // 마지막 메세지가 assistant면 삭제 (재생성 or 새로고침 후 confirm 케이스)
         chatService.deleteLastAssistantIfExists(sessionId);
 
         Message savedAiMessage = chatService.chatDataSave("assistant", aiContent, sessionId);
-        chatService.afterSummaryChatCount(sessionId);
+
+        // 재생성 확정은 새로운 교환이 아니므로 카운트 증가 안 함
+        if (!isRegenerate) {
+            chatService.afterSummaryChatCount(sessionId);
+        }
 
         return Map.of("messageId", savedAiMessage.getId());
     }
