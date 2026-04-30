@@ -13,7 +13,7 @@ AI 캐릭터 채팅 플랫폼 **Beluo**의 백엔드 서버입니다.<br/>
 
 **Database**
 
-<img src="https://img.shields.io/badge/mongodb-47A248?style=for-the-badge&logo=mongodb&logoColor=white"> <img src="https://img.shields.io/badge/redis-FF4438?style=for-the-badge&logo=redis&logoColor=white">
+<img src="https://img.shields.io/badge/mongodb-47A248?style=for-the-badge&logo=mongodb&logoColor=white"> 
 
 **AI**
 
