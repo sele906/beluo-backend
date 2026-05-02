@@ -30,7 +30,7 @@ public class CreditScheduler {
     }
 
     // 베타 종료 - FREE_BETA 크레딧 보유 유저 credit 0으로 초기화 (2026년 5/1 자정 한정)
-    @Scheduled(cron = "0 0 0 1 5 *")
+    @Scheduled(cron = "0 0 0 1 6 *")
     public void expireFreeBetaCredits() {
         if (LocalDate.now().getYear() != 2026) return;
         creditService.expireFreeBetaCredits();
