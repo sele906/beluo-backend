@@ -1,5 +1,6 @@
 package sele906.dev.beluo_backend.payment.polar.client;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -8,6 +9,7 @@ import sele906.dev.beluo_backend.payment.polar.config.PolarProperties;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class PolarClient {
 
@@ -16,6 +18,10 @@ public class PolarClient {
     public PolarClient(
             PolarProperties polarProperties
     ) {
+        log.info("Polar baseUrl={}", polarProperties.getBaseUrl());
+        log.info("Polar productId={}", polarProperties.getStarterProductId());
+        log.info("Polar successUrl={}", polarProperties.getSuccessUrl());
+
         this.webClient = WebClient.builder()
                 .baseUrl(polarProperties.getBaseUrl())
                 .defaultHeader("Authorization", "Bearer " + polarProperties.getAccessToken())
@@ -42,6 +48,11 @@ public class PolarClient {
                 .uri("/checkouts/")
                 .bodyValue(body)
                 .retrieve()
+                .onStatus(
+                        status -> status.is4xxClientError() || status.is5xxServerError(),
+                        response -> response.bodyToMono(String.class)
+                                .map(errorBody -> new RuntimeException("Polar API error: " + errorBody))
+                )
                 .bodyToMono(PolarCheckoutResponse.class)
                 .block();
     }
