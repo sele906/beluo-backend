@@ -24,10 +24,10 @@ public class CreditScheduler {
     }
 
     // 매일 자정에 일반 유저 크레딧 50으로 초기화
-    @Scheduled(cron = "0 0 0 * * *")
-    public void resetDailyCredit() {
-        userRepository.resetCreditForAllUsers(50);
-    }
+//    @Scheduled(cron = "0 0 0 * * *")
+//    public void resetDailyCredit() {
+//        userRepository.resetCreditForAllUsers(50);
+//    }
 
     // 베타 종료 - FREE_BETA 크레딧 보유 유저 credit 0으로 초기화 (2026년 5/1 자정 한정)
     @Scheduled(cron = "0 0 0 1 6 *")

@@ -44,7 +44,7 @@ Spring Boot 3.3.5
   ├── AI 클라이언트 
   │     ├── OpenAI
   │     ├── Claude 
-  │     └── OpenRouter
+  │     └── Groq
   │
   ├── Cloudinary 
   └── Gmail SMTP 

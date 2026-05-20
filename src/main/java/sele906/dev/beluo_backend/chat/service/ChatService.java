@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import sele906.dev.beluo_backend.ai.client.ClaudeClient;
+import sele906.dev.beluo_backend.ai.client.GroqClient;
 import sele906.dev.beluo_backend.ai.client.OpenAiClient;
 import sele906.dev.beluo_backend.ai.client.OpenRouterClient;
 import sele906.dev.beluo_backend.ai.prompt.dto.PromptData;
@@ -40,7 +41,7 @@ public class ChatService {
     private OpenAiClient openAiClient;
 
     @Autowired
-    private OpenRouterClient openRouterClient;
+    private GroqClient groqClient;
 
     @Autowired
     private ClaudeClient claudeClient;
@@ -70,7 +71,8 @@ public class ChatService {
         String reply = null;
 
         if (u.getAiModel().equals("free")) {
-            reply = openRouterClient.freeChat(promptData);
+            //reply = openRouterClient.chat(promptData);
+            reply = groqClient.chat(promptData);
         } else if (u.getAiModel().equals("gpt")) {
             reply = openAiClient.chat(promptData);
         } else if (u.getAiModel().equals("claude")) {

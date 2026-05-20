@@ -15,22 +15,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-//OpenAI API 연결하는 역할
-
 @Component
-public class OpenAiClient {
+public class GroqClient {
 
     private final WebClient webClient;
 
-    public OpenAiClient(@Value("${openai.api.key}") String openAiKey) {
+    public GroqClient(@Value("${groq.api.key}") String groqKey) {
         this.webClient = WebClient.builder()
-                .baseUrl("https://api.openai.com/v1")
-                .defaultHeader("Authorization", "Bearer " + openAiKey)
+                .baseUrl("https://api.groq.com/openai/v1")
+                .defaultHeader("Authorization", "Bearer " + groqKey)
                 .defaultHeader("Content-Type", "application/json")
                 .clientConnector(
                         new ReactorClientHttpConnector(
                                 HttpClient.create()
-                                        .responseTimeout(Duration.ofSeconds(20))
+                                        .responseTimeout(Duration.ofSeconds(35))
                         )
                 )
                 .build();
@@ -51,62 +49,21 @@ public class OpenAiClient {
         messages.addAll(recentMessages);
 
         Map<String, Object> body = Map.of(
-            "model", "gpt-5-mini",
-            "max_completion_tokens", 1500,
-            "reasoning_effort", "low",
-            "messages", messages
+                "model", "qwen/qwen3-32b",
+                "messages", messages,
+                "max_completion_tokens", 1500,
+                "reasoning_effort", "none",
+                "reasoning_format", "hidden",
+                "temperature", 0.7,
+                "top_p", 0.8
         );
 
-        Map response = callOpenAi(body);
+        Map response = callGroq(body);
 
         List<Map> choices = (List<Map>) response.get("choices");
 
         if (choices == null || choices.isEmpty()) {
-            throw new AiResponseException("OpenAI 응답을 확인할 수 없어요. 잠시 후 다시 시도해 주세요");
-        }
-
-        Map message = (Map) choices.get(0).get("message");
-
-        return (String) message.get("content");
-    }
-
-    public String summary(List<Map<String, String>> messages) {
-
-        Map<String, Object> body = Map.of(
-                "model", "gpt-5-mini",
-                "max_completion_tokens", 2000,
-                "reasoning_effort", "low",
-                "messages", messages
-        );
-
-        Map response = callOpenAi(body);
-
-        List<Map> choices = (List<Map>) response.get("choices");
-
-        if (choices == null || choices.isEmpty()) {
-            throw new AiResponseException("OpenAI 응답을 확인할 수 없어요. 잠시 후 다시 시도해 주세요");
-        }
-
-        Map message = (Map) choices.get(0).get("message");
-
-        return (String) message.get("content");
-    }
-
-    public String personality(Map<String, String> personality) {
-
-        Map<String, Object> body = Map.of(
-                "model", "gpt-5-mini",
-                "max_completion_tokens", 2000,
-                "reasoning_effort", "low",
-                "messages", List.of(personality)
-        );
-
-        Map response = callOpenAi(body);
-
-        List<Map> choices = (List<Map>) response.get("choices");
-
-        if (choices == null || choices.isEmpty()) {
-            throw new AiResponseException("OpenAI 응답을 확인할 수 없어요. 잠시 후 다시 시도해 주세요");
+            throw new AiResponseException("AI 응답을 확인할 수 없어요. 잠시 후 다시 시도해 주세요");
         }
 
         Map message = (Map) choices.get(0).get("message");
@@ -118,7 +75,7 @@ public class OpenAiClient {
         return (String) message.get("content");
     }
 
-    private Map callOpenAi(Map<String, Object> body) {
+    private Map callGroq(Map<String, Object> body) {
         try {
             Map response = webClient.post()
                     .uri("/chat/completions")
@@ -131,6 +88,9 @@ public class OpenAiClient {
                 throw new AiResponseException("AI 응답 시간이 초과됐어요. 잠시 후 다시 시도해 주세요.");
             }
             return response;
+        } catch (WebClientResponseException e) {
+            throw new AiResponseException("AI 요청 처리 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.");
+
         } catch (WebClientRequestException | IllegalStateException e) {
             throw new AiResponseException("AI 응답 시간이 초과됐어요. 잠시 후 다시 시도해 주세요.");
         }

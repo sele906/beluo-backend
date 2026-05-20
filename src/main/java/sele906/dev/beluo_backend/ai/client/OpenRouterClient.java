@@ -42,7 +42,7 @@ public class OpenRouterClient {
                 .build();
     }
 
-    public String freeChat(PromptData promptData) {
+    public String chat(PromptData promptData) {
         List<Map<String, String>> messages = new ArrayList<>();
         messages.addAll(promptData.getSystemMessages());
         messages.addAll(promptData.getRecentMessages());
