@@ -54,7 +54,8 @@ public class SecurityConfig {
                                 "/api/character/*/summary",
                                 "/api/auth/**",
                                 "/oauth2/**",
-                                "/login/**"
+                                "/login/**",
+                                "/api/payment/polar/webhook"
                         ).permitAll()
                         .requestMatchers(
                                 "/api/chat/**",

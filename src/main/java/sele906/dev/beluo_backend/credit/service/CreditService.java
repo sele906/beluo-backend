@@ -1,7 +1,9 @@
 package sele906.dev.beluo_backend.credit.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sele906.dev.beluo_backend.credit.domain.CreditHistory;
 import sele906.dev.beluo_backend.credit.repository.CreditHistoryRepository;
 import sele906.dev.beluo_backend.exception.DataAccessException;
@@ -12,6 +14,7 @@ import sele906.dev.beluo_backend.user.repository.user.UserRepository;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+@Slf4j
 @Service
 public class CreditService {
 
@@ -148,5 +151,28 @@ public class CreditService {
             case "gpt"    -> 3;
             default       -> 1;
         };
+    }
+
+    @Transactional
+    public void grantPaymentCredits(String userId, int amount, String paymentId) {
+        if (creditHistoryRepository.existsByPaymentId(paymentId)) {
+            log.info("이미 처리된 결제 webhook입니다. paymentId={}", paymentId);
+            return;
+        }
+
+        userRepository.incrementCredit(userId, amount);
+
+        CreditHistory history = new CreditHistory();
+        history.setUserId(userId);
+        history.setType("GRANT");
+        history.setAmount(amount);
+        history.setSource("PAYMENT");
+        history.setPaymentId(paymentId);
+        history.setMemo("Polar 결제 크레딧");
+        history.setExpired(false);
+        history.setCreatedAt(Instant.now());
+        history.setExpiredAt(null);
+
+        creditHistoryRepository.save(history);
     }
 }
