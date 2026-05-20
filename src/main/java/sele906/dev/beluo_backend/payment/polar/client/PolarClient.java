@@ -18,10 +18,6 @@ public class PolarClient {
     public PolarClient(
             PolarProperties polarProperties
     ) {
-        log.info("Polar baseUrl={}", polarProperties.getBaseUrl());
-        log.info("Polar productId={}", polarProperties.getStarterProductId());
-        log.info("Polar successUrl={}", polarProperties.getSuccessUrl());
-
         this.webClient = WebClient.builder()
                 .baseUrl(polarProperties.getBaseUrl())
                 .defaultHeader("Authorization", "Bearer " + polarProperties.getAccessToken())
@@ -48,11 +44,6 @@ public class PolarClient {
                 .uri("/checkouts/")
                 .bodyValue(body)
                 .retrieve()
-                .onStatus(
-                        status -> status.is4xxClientError() || status.is5xxServerError(),
-                        response -> response.bodyToMono(String.class)
-                                .map(errorBody -> new RuntimeException("Polar API error: " + errorBody))
-                )
                 .bodyToMono(PolarCheckoutResponse.class)
                 .block();
     }
