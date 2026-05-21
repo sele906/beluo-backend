@@ -28,7 +28,8 @@ public class PolarClient {
     public PolarCheckoutResponse createCheckout(
             String productId,
             String successUrl,
-            String userId
+            String userId,
+            int creditAmount
     ) {
         Map<String, Object> body = Map.of(
                 "products", List.of(productId),
@@ -36,7 +37,7 @@ public class PolarClient {
                 "external_customer_id", String.valueOf(userId),
                 "metadata", Map.of(
                         "userId", String.valueOf(userId),
-                        "creditAmount", "300"
+                        "creditAmount", String.valueOf(creditAmount)
                 )
         );
 

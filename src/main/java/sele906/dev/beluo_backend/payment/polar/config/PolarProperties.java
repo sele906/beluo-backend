@@ -11,7 +11,16 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "polar")
 public class PolarProperties {
     private String accessToken;
-    private String starterProductId;
     private String baseUrl;
     private String successUrl;
+
+    private Product product = new Product();
+
+    @Getter
+    @Setter
+    public static class Product {
+        private String credit100Id;
+        private String credit350Id;
+        private String credit650Id;
+    }
 }
