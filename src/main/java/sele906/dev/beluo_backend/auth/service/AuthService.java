@@ -72,10 +72,10 @@ public class AuthService {
             throw new DataAccessException("Refresh Token 저장에 실패했습니다", e);
         }
 
-        return new TokenResponse(accessToken, refreshToken);
+        return new TokenResponse(accessToken, refreshToken, u.getRole());
     }
 
-    public String guestLogin() {
+    public TokenResponse guestLogin() {
 
         String guestId = "guest_" + UUID.randomUUID();
 
@@ -99,7 +99,7 @@ public class AuthService {
 
         creditService.grantGuestFreeBeta(u.getId());
 
-        return accessToken;
+        return new TokenResponse(accessToken, null, "GUEST");
     }
 
     public TokenResponse refresh(String refreshToken) {
@@ -138,7 +138,7 @@ public class AuthService {
         }
 
         //new Token 발급
-        return new TokenResponse(newAccessToken, newRefreshToken);
+        return new TokenResponse(newAccessToken, newRefreshToken, user.getRole());
     }
 
     public void logout(Authentication authentication) {

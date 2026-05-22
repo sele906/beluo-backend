@@ -25,6 +25,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .include("userImgUrl")
                 .include("email")
                 .include("credit")
+                .include("role") //테스트용
                 .include("name");
 
         return mongoTemplate.findOne(query, User.class);

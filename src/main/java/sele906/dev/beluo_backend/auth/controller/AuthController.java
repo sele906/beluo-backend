@@ -50,17 +50,17 @@ public class AuthController {
         response.addHeader("Set-Cookie", accessCookie.toString());
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
-        return ResponseEntity.ok(Map.of("message", "로그인 성공"));
+        return ResponseEntity.ok(Map.of("message", "로그인 성공", "role", tokens.getRole()));
     }
 
     //게스트 로그인
     @PostMapping("/guest")
     public ResponseEntity<?> guestLogin(HttpServletResponse response) {
 
-        String accessToken = authService.guestLogin();
+        TokenResponse tokens = authService.guestLogin();
 
         // 쿠키에 토큰 담기
-        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")
@@ -70,7 +70,7 @@ public class AuthController {
 
         response.addHeader("Set-Cookie", accessCookie.toString());
 
-        return ResponseEntity.ok(Map.of("message", "로그인 성공"));
+        return ResponseEntity.ok(Map.of("message", "로그인 성공", "role", tokens.getRole()));
     }
 
     @PostMapping("/refresh")

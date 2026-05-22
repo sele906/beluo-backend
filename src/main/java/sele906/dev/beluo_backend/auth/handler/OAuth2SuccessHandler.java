@@ -73,7 +73,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         if (user.getBirth() == null) {
             response.sendRedirect(url + "/oauth2/join");
         } else {
-            response.sendRedirect(url + "/oauth2/redirect");
+            response.sendRedirect(url + "/oauth2/redirect?role=" + user.getRole());
         }
 
     }
