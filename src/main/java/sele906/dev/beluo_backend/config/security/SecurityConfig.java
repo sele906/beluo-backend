@@ -54,15 +54,13 @@ public class SecurityConfig {
                                 "/api/character/*/summary",
                                 "/api/auth/**",
                                 "/oauth2/**",
-                                "/login/**"
+                                "/login/**",
+                                "/api/payment/polar/webhook"
                         ).permitAll()
                         .requestMatchers(
                                 "/api/chat/**",
                                 "/api/conversation/**"
                         ).hasAnyRole("USER", "GUEST", "ADMIN") // 게스트도 채팅 가능
-                        .requestMatchers(
-                                "/api/payment/polar/webhook"
-                        ).hasAnyRole("ADMIN") // 관리자만 테스트 결제 가능
                         .anyRequest().hasAnyRole("USER", "ADMIN")   // 나머지는 일반 유저랑 관리자
                 )
                 .oauth2Login(oauth2 -> oauth2

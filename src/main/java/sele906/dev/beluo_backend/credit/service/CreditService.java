@@ -3,7 +3,6 @@ package sele906.dev.beluo_backend.credit.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import sele906.dev.beluo_backend.credit.domain.CreditHistory;
 import sele906.dev.beluo_backend.credit.repository.CreditHistoryRepository;
 import sele906.dev.beluo_backend.exception.DataAccessException;
@@ -153,7 +152,6 @@ public class CreditService {
         };
     }
 
-    @Transactional
     public void grantPaymentCredits(String userId, int amount, String paymentId) {
         if (creditHistoryRepository.existsByPaymentId(paymentId)) {
             log.info("이미 처리된 결제 webhook입니다. paymentId={}", paymentId);
