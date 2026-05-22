@@ -62,7 +62,7 @@ Spring Boot 3.3.5
 환경 변수는 `.env.example`을 참고해 `.env` 파일을 생성하세요.
 
 ```bash
-cp /src/main/resources/.env.example .env
+cp /src/main/resources/.env.example
 ```
 
 ---
@@ -156,7 +156,7 @@ docker run -p 8080:8080 --env-file src/main/resources/.env beluo-backend
 **결제 (테스트)**
 
 - Polar 결제 플랫폼 연동
-- 크레딧 상품 체크아웃 URL 생성 (100 / 350 / 650 크레딧)
+- 크레딧 상품 체크아웃 URL (100 / 350 / 650 크레딧)
 - Webhook 서명 검증 후 결제 완료 시 크레딧 자동 지급
 
 **크레딧 시스템**
@@ -236,10 +236,10 @@ docker run -p 8080:8080 --env-file src/main/resources/.env beluo-backend
 | POST | `/inquiry` | 문의 제출 | O |
 
 ### 결제 `/api/payment`
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|------|
-| POST | `/polar/checkout` | 크레딧 구매 체크아웃 URL 생성 | O |
-| POST | `/polar/webhook` | Polar 결제 완료 Webhook 수신 | X |
+| Method | URL | 설명                     | 인증 |
+|--------|-----|------------------------|------|
+| POST | `/polar/checkout` | Polar 결제 URL 생성        | O |
+| POST | `/polar/webhook` | Polar Webhook 수신 | X |
 
 **packageKey 값**
 
