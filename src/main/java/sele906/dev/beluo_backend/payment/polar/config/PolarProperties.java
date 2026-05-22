@@ -13,6 +13,7 @@ public class PolarProperties {
     private String accessToken;
     private String baseUrl;
     private String successUrl;
+    private String webhookSecret;
 
     private Product product = new Product();
 

@@ -1,15 +1,18 @@
 package sele906.dev.beluo_backend.payment.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.svix.Webhook;
+import com.svix.exceptions.WebhookVerificationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sele906.dev.beluo_backend.credit.service.CreditService;
+import sele906.dev.beluo_backend.payment.polar.config.PolarProperties;
 
-import java.util.Map;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/payment/polar/webhook")
 public class PolarWebhookController {
@@ -23,11 +26,16 @@ public class PolarWebhookController {
     @Autowired
     private CreditService creditService;
 
+    @Autowired
+    private PolarProperties polarProperties;
+
     @PostMapping
     public ResponseEntity<String> receiveWebhook(
             @RequestBody String body,
-            @RequestHeader Map<String, String> headers
+            @RequestHeader HttpHeaders headers
     ) throws Exception {
+
+        verifyPolarWebhook(body, headers);
 
         JsonNode root = objectMapper.readTree(body);
 
@@ -55,5 +63,18 @@ public class PolarWebhookController {
         creditService.grantPaymentCredits(userId, creditAmount, orderId);
 
         return ResponseEntity.ok("ok");
+    }
+
+    private void verifyPolarWebhook(String body, HttpHeaders springHeaders) {
+        try {
+
+            java.net.http.HttpHeaders javaHeaders = java.net.http.HttpHeaders.of(springHeaders, (k, v) -> true);
+
+            Webhook webhook = new Webhook(polarProperties.getWebhookSecret());
+            webhook.verify(body, javaHeaders);
+
+        } catch (WebhookVerificationException e) {
+            throw new IllegalArgumentException("유효하지 않은 Polar webhook 요청입니다.");
+        }
     }
 }
