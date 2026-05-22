@@ -19,6 +19,10 @@ AI 캐릭터 채팅 플랫폼 **Beluo**의 백엔드 서버입니다.<br/>
 
 <img src="https://img.shields.io/badge/openai-412991?style=for-the-badge&logoColor=white"> <img src="https://img.shields.io/badge/claude-D97757?style=for-the-badge&logo=anthropic&logoColor=white"> <img src="https://img.shields.io/badge/openrouter-6467F2?style=for-the-badge&logo=openrouter&logoColor=white">
 
+**Payment**
+
+<img src="https://img.shields.io/badge/polar-1A1A2E?style=for-the-badge&logoColor=white">
+
 **Infra / Tool**
 
 <img src="https://img.shields.io/badge/render-white?style=for-the-badge&logo=render&logoColor=white&color=black"> <img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white"> <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
@@ -47,7 +51,8 @@ Spring Boot 3.3.5
   │     └── Groq
   │
   ├── Cloudinary 
-  └── Gmail SMTP 
+  ├── Gmail SMTP 
+  └── Polar
 ```
 
 ---
@@ -148,6 +153,12 @@ docker run -p 8080:8080 --env-file src/main/resources/.env beluo-backend
 
 ### 시스템
 
+**결제 (테스트)**
+
+- Polar 결제 플랫폼 연동
+- 크레딧 상품 체크아웃 URL 생성 (100 / 350 / 650 크레딧)
+- Webhook 서명 검증 후 결제 완료 시 크레딧 자동 지급
+
 **크레딧 시스템**
 
 - AI API 사용량 제어를 위한 크레딧 차감 방식
@@ -223,6 +234,20 @@ docker run -p 8080:8080 --env-file src/main/resources/.env beluo-backend
 | GET | `/model` | 크레딧 / AI 모델 조회 | O |
 | POST | `/model` | AI 모델 선택 | O |
 | POST | `/inquiry` | 문의 제출 | O |
+
+### 결제 `/api/payment`
+| Method | URL | 설명 | 인증 |
+|--------|-----|------|------|
+| POST | `/polar/checkout` | 크레딧 구매 체크아웃 URL 생성 | O |
+| POST | `/polar/webhook` | Polar 결제 완료 Webhook 수신 | X |
+
+**packageKey 값**
+
+| 값 | 크레딧 |
+|----|--------|
+| `CREDIT_100` | 100 |
+| `CREDIT_350` | 350 |
+| `CREDIT_650` | 650 |
 
 ---
 
