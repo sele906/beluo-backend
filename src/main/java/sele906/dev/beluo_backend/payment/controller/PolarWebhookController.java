@@ -2,8 +2,7 @@ package sele906.dev.beluo_backend.payment.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.svix.Webhook;
-import com.svix.exceptions.WebhookVerificationException;
+import com.standardwebhooks.Webhook;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -11,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sele906.dev.beluo_backend.credit.service.CreditService;
 import sele906.dev.beluo_backend.payment.polar.config.PolarProperties;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @RestController
@@ -66,15 +66,17 @@ public class PolarWebhookController {
     }
 
     private void verifyPolarWebhook(String body, HttpHeaders springHeaders) {
+        String secret = polarProperties.getWebhookSecret();
+
         try {
+            new Webhook(secret.getBytes(StandardCharsets.UTF_8))
+                    .verify(body, springHeaders);
+            return;
 
-            java.net.http.HttpHeaders javaHeaders = java.net.http.HttpHeaders.of(springHeaders, (k, v) -> true);
-
-            Webhook webhook = new Webhook(polarProperties.getWebhookSecret());
-            webhook.verify(body, javaHeaders);
-
-        } catch (WebhookVerificationException e) {
-            throw new IllegalArgumentException("유효하지 않은 Polar webhook 요청입니다.");
+        } catch (Exception e) {
+            log.warn("Polar webhook 실패: {}", e.getMessage());
         }
+
+        throw new IllegalArgumentException("유효하지 않은 Polar webhook 요청입니다.");
     }
 }

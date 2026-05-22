@@ -49,7 +49,7 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
 	// Polar
-	implementation 'com.svix:svix:1.45.1'
+	implementation 'com.standardwebhooks:standardwebhooks:1.1.1'
 }
 
 tasks.named('test') {
