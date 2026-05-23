@@ -35,14 +35,5 @@ public class CreditHistoryRepositoryCustomImpl implements CreditHistoryRepositor
         return mongoTemplate.find(query, CreditHistory.class);
     }
 
-    // 특정 source의 아직 만료 처리 안 된 GRANT 이력 조회
-    @Override
-    public List<CreditHistory> findActiveGrantsBySource(String source) {
-        Query query = new Query(
-                Criteria.where("type").is("GRANT")
-                        .and("source").is(source)
-                        .and("expired").is(false)
-        );
-        return mongoTemplate.find(query, CreditHistory.class);
-    }
+
 }

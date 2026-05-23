@@ -153,7 +153,7 @@ docker run -p 8080:8080 --env-file src/main/resources/.env beluo-backend
 
 ### 시스템
 
-**결제 (테스트)**
+**결제**
 
 - Polar 결제 플랫폼 연동
 - 크레딧 상품 체크아웃 URL (100 / 350 / 650 크레딧)

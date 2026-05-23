@@ -7,5 +7,5 @@ import java.util.List;
 public interface CreditHistoryRepositoryCustom {
     List<CreditHistory> findHistoryByUserId(String userId);
     List<CreditHistory> findExpiredGrants();
-    List<CreditHistory> findActiveGrantsBySource(String source);
+
 }

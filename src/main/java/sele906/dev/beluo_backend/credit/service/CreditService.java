@@ -24,18 +24,18 @@ public class CreditService {
     @Autowired
     private UserRepository userRepository;
 
-    // 가입 시 베타 무료 크레딧 50개 지급
+    // 가입 시 무료 크레딧 30개 지급
     public void grantFreeBeta(String userId) {
         try {
-            userRepository.incrementCredit(userId, 50);
+            userRepository.incrementCredit(userId, 30);
 
             CreditHistory history = new CreditHistory();
             history.setUserId(userId);
             history.setType("GRANT");
             history.setSource("FREE_BETA");
-            history.setAmount(50);
+            history.setAmount(30);
             history.setExpiredAt(Instant.now().plus(60, ChronoUnit.DAYS));
-            history.setMemo("베타 무료 크레딧");
+            history.setMemo("회원가입 무료 크레딧");
             history.setCreatedAt(Instant.now());
             creditHistoryRepository.save(history);
         } catch (Exception e) {
@@ -121,25 +121,6 @@ public class CreditService {
             creditHistoryRepository.save(expire);
 
             // 원본 GRANT 이력 만료 처리 완료 표시
-            history.setExpired(true);
-            creditHistoryRepository.save(history);
-        });
-    }
-
-    // FREE_BETA 크레딧 보유 유저 credit 0으로 초기화 (베타 종료 시)
-    public void expireFreeBetaCredits() {
-        creditHistoryRepository.findActiveGrantsBySource("FREE_BETA").forEach(history -> {
-            userRepository.setCreditById(history.getUserId(), 0);
-
-            CreditHistory expire = new CreditHistory();
-            expire.setUserId(history.getUserId());
-            expire.setType("EXPIRE");
-            expire.setSource("FREE_BETA");
-            expire.setAmount(0);
-            expire.setMemo("베타 종료로 인한 크레딧 초기화");
-            expire.setCreatedAt(Instant.now());
-            creditHistoryRepository.save(expire);
-
             history.setExpired(true);
             creditHistoryRepository.save(history);
         });
