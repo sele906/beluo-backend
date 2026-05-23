@@ -1,5 +1,6 @@
 package sele906.dev.beluo_backend.credit.service;
 
+import org.springframework.dao.DuplicateKeyException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -153,13 +154,6 @@ public class CreditService {
     }
 
     public void grantPaymentCredits(String userId, int amount, String paymentId) {
-        if (creditHistoryRepository.existsByPaymentId(paymentId)) {
-            log.info("이미 처리된 결제 webhook입니다. paymentId={}", paymentId);
-            return;
-        }
-
-        userRepository.incrementCredit(userId, amount);
-
         CreditHistory history = new CreditHistory();
         history.setUserId(userId);
         history.setType("GRANT");
@@ -171,6 +165,13 @@ public class CreditService {
         history.setCreatedAt(Instant.now());
         history.setExpiredAt(null);
 
-        creditHistoryRepository.save(history);
+        try {
+            creditHistoryRepository.save(history);
+        } catch (DuplicateKeyException e) {
+            log.info("이미 처리된 결제 webhook입니다. paymentId={}", paymentId);
+            return;
+        }
+
+        userRepository.incrementCredit(userId, amount);
     }
 }

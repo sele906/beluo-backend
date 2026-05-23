@@ -60,6 +60,11 @@ public class PolarWebhookController {
         String userId = metadata.path("userId").asText();
         int creditAmount = metadata.path("creditAmount").asInt();
 
+        if (userId == null || userId.isBlank() || creditAmount <= 0) {
+            log.warn("Polar webhook metadata 누락 또는 비정상 값. userId={}, creditAmount={}", userId, creditAmount);
+            return ResponseEntity.badRequest().body("invalid metadata");
+        }
+
         creditService.grantPaymentCredits(userId, creditAmount, orderId);
 
         return ResponseEntity.ok("ok");
