@@ -90,7 +90,7 @@ src/main/resources/static/summary_short_prompt.txt
 
 ## 실행 방법
 
-### 사전 준비
+**사전 준비**
 
 로컬 실행 시 Redis가 필요합니다.
 
