@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 5s    # 부하 중 변화를 촘촘히 보려고 5초
+
+scrape_configs:
+  - job_name: 'beluo'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080']   # 컨테이너에서 호스트 접근

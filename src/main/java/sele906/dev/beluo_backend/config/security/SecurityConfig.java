@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -75,6 +77,27 @@ public class SecurityConfig {
                         )
                 );
 
+        return http.build();
+    }
+
+    // 로컬
+    @Bean @Order(1) @Profile("local")
+    SecurityFilterChain localActuator(HttpSecurity http) throws Exception {
+        http.securityMatcher("/actuator/**")
+                .authorizeHttpRequests(a -> a.anyRequest().permitAll())
+                .csrf(c -> c.disable());
+        return http.build();
+    }
+
+    // 운영
+    @Bean @Order(1) @Profile("prod")
+    SecurityFilterChain prodActuator(HttpSecurity http) throws Exception {
+        http.securityMatcher("/actuator/**")
+                .authorizeHttpRequests(a -> a
+                        .requestMatchers("/actuator/health/**").permitAll()
+                        .anyRequest().authenticated())
+                .httpBasic(Customizer.withDefaults())
+                .csrf(c -> c.disable());
         return http.build();
     }
 }

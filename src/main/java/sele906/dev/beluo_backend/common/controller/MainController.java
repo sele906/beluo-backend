@@ -16,6 +16,6 @@ public class MainController {
 
     @GetMapping("/")
     public ResponseEntity<String> mainPage(Authentication auth) {
-        return new ResponseEntity<>("hello!", HttpStatus.OK);
+        return new ResponseEntity<>("Hello! Welcome to Beluo", HttpStatus.OK);
     }
 }
