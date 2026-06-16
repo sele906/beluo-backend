@@ -50,6 +50,10 @@ dependencies {
 
 	// Polar
 	implementation 'com.standardwebhooks:standardwebhooks:1.1.1'
+
+	// 부하 테스트
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {
