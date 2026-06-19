@@ -1,10 +1,7 @@
 package sele906.dev.beluo_backend.notification.controller;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sele906.dev.beluo_backend.notification.service.FcmTokenService;
 
 import java.util.Map;
