@@ -18,6 +18,7 @@ public class FcmSendService {
         WebpushNotification webpushNotification = WebpushNotification.builder()
                 .setTitle(title)
                 .setBody(body)
+                .setTag(sessionId)
                 .build();
 
         WebpushConfig webpushConfig = WebpushConfig.builder()
