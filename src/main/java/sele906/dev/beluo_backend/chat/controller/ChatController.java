@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import sele906.dev.beluo_backend.chat.domain.Message;
 import sele906.dev.beluo_backend.chat.service.ChatService;
 import sele906.dev.beluo_backend.credit.service.CreditService;
+import sele906.dev.beluo_backend.notification.rabbit.NotificationMessage;
+import sele906.dev.beluo_backend.notification.rabbit.NotificationProducer;
 
 import java.util.Map;
 
@@ -18,6 +20,9 @@ public class ChatController {
 
     @Autowired
     private CreditService creditService;
+
+    @Autowired
+    private NotificationProducer notificationProducer;
 
     //메세지 보내기
     @PostMapping("/send")
@@ -49,6 +54,9 @@ public class ChatController {
         // 성공 시에만 크레딧 차감
         creditService.useCredit(userId, "CHAT");
 
+        //AI 응답 완료 후 알림 이벤트
+        notificationProducer.send(new NotificationMessage(userId, sessionId, reply));
+
         return Map.of("reply", reply, "userMessageId", savedUserMessage.getId());
     }
 
@@ -68,6 +76,9 @@ public class ChatController {
         String reply = chatService.sendChatApi(sessionId, userId);
 
         creditService.useCredit(userId, "REGENERATE");
+
+        //AI 응답 완료 후 알림 이벤트
+        notificationProducer.send(new NotificationMessage(userId, sessionId, reply));
 
         return Map.of("reply", reply);
     }

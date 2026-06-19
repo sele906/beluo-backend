@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sele906.dev.beluo_backend.chat.service.ChatService;
+import sele906.dev.beluo_backend.notification.service.FcmTokenService;
 
 @RestController
 public class MainController {

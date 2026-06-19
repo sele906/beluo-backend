@@ -54,6 +54,10 @@ dependencies {
 	// 부하 테스트
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+	// 메세지큐
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	implementation 'com.google.firebase:firebase-admin:9.4.1'
 }
 
 tasks.named('test') {
