@@ -1,6 +1,7 @@
 package sele906.dev.beluo_backend.notification.service;
 
 import com.google.firebase.messaging.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -8,11 +9,27 @@ public class FcmSendService {
 
     private final FcmTokenService fcmTokenService;
 
+    @Value("${fcm.mock.enabled:false}")
+    private boolean mockEnabled;
+
+    @Value("${fcm.mock.delay-ms:100}")
+    private long mockDelayMs;
+
     public FcmSendService(FcmTokenService fcmTokenService) {
         this.fcmTokenService = fcmTokenService;
     }
 
     public void sendToToken(String token, String title, String body, String sessionId) {
+
+        // 측정 모드: 실제 FCM 발송 대신 지연만 줌
+        if (mockEnabled) {
+            try {
+                Thread.sleep(mockDelayMs);   // FCM 호출 시간 흉내 (100ms)
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return;   // 실제 발송 안 함
+        }
 
         // webpush 알림 — OS가 직접 띄움 (모바일에서 안정적)
         WebpushNotification webpushNotification = WebpushNotification.builder()
