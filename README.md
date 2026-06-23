@@ -13,11 +13,11 @@ AI 캐릭터 채팅 플랫폼 **Beluo**의 백엔드 서버입니다.<br/>
 
 **Database**
 
-<img src="https://img.shields.io/badge/mongodb-47A248?style=for-the-badge&logo=mongodb&logoColor=white"> 
+<img src="https://img.shields.io/badge/mongodb-47A248?style=for-the-badge&logo=mongodb&logoColor=white"> <img src="https://img.shields.io/badge/redis-DC382D?style=for-the-badge&logo=redis&logoColor=white">
 
 **AI**
 
-<img src="https://img.shields.io/badge/openai-412991?style=for-the-badge&logoColor=white"> <img src="https://img.shields.io/badge/claude-D97757?style=for-the-badge&logo=anthropic&logoColor=white"> <img src="https://img.shields.io/badge/openrouter-6467F2?style=for-the-badge&logo=openrouter&logoColor=white">
+<img src="https://img.shields.io/badge/openai-412991?style=for-the-badge&logoColor=white"> <img src="https://img.shields.io/badge/claude-D97757?style=for-the-badge&logo=anthropic&logoColor=white"> <img src="https://img.shields.io/badge/groq-F55036?style=for-the-badge&logoColor=white">
 
 **Payment**
 
@@ -25,7 +25,7 @@ AI 캐릭터 채팅 플랫폼 **Beluo**의 백엔드 서버입니다.<br/>
 
 **Infra / Tool**
 
-<img src="https://img.shields.io/badge/render-white?style=for-the-badge&logo=render&logoColor=white&color=black"> <img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white"> <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
+<img src="https://img.shields.io/badge/render-white?style=for-the-badge&logo=render&logoColor=white&color=black"> <img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white"> <img src="https://img.shields.io/badge/rabbitmq-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white"> <img src="https://img.shields.io/badge/firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black"> <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
 
 ---
 
@@ -50,6 +50,9 @@ Spring Boot 3.3.5
   │     ├── Claude 
   │     └── Groq
   │
+  ├── RabbitMQ
+  │     └── Firebase Cloud Messaging (FCM)
+  │
   ├── Cloudinary 
   ├── Gmail SMTP 
   └── Polar
@@ -64,6 +67,18 @@ Spring Boot 3.3.5
 ```bash
 cp /src/main/resources/.env.example
 ```
+
+---
+
+## 프로퍼티 구성
+
+프로퍼티는 공통 / 로컬 / 운영 3개 파일로 분리되어 있고, `SPRING_PROFILE` 환경 변수(`local` / `prod`)로 활성 프로필을 선택합니다.
+
+| 파일 | 용도 |
+|------|------|
+| `application.properties` | 공통 설정 (Redis, JWT, 메일, AI API 키, RabbitMQ 리스너 옵션 등) |
+| `application-local.properties` | 로컬 환경 (로컬 MongoDB, FCM Mock 발송, Prometheus 지표 노출) |
+| `application-prod.properties` | 운영 환경 (MongoDB Atlas, RabbitMQ 주소, 실제 FCM 발송) |
 
 ---
 
@@ -88,14 +103,27 @@ src/main/resources/static/summary_short_prompt.txt
 
 ---
 
+## Firebase 서비스 계정
+
+FCM 푸시 알림 발송을 위해 Firebase 서비스 계정 키 파일이 필요합니다. Firebase 콘솔 > 프로젝트 설정 > 서비스 계정 > 새 비공개 키 생성 후 아래 경로에 저장하세요.
+
+```
+src/main/resources/firebase/firebase-service-account.json
+```
+
+운영 환경에서는 파일 대신 `FIREBASE_SERVICE_ACCOUNT` 환경 변수에 JSON 내용을 넣어 대체합니다.
+
+---
+
 ## 실행 방법
 
 **사전 준비**
 
-로컬 실행 시 Redis가 필요합니다.
+로컬 실행 시 Redis와 RabbitMQ가 필요합니다.
 
 ```bash
 docker run --name redis -p 6379:6379 -d redis
+docker run --name rabbitmq -p 5672:5672 -p 15672:15672 -d rabbitmq:management
 ```
 
 **로컬 실행**
@@ -120,6 +148,7 @@ docker run -p 8080:8080 --env-file src/main/resources/.env beluo-backend
 **인증**
 
 - 이메일 + 비밀번호 회원가입 / 로그인
+- 게스트 로그인
 - Google OAuth2 소셜 로그인
 - 이메일 인증 코드 발송 및 검증
 - Access Token + Refresh Token 
@@ -155,9 +184,14 @@ docker run -p 8080:8080 --env-file src/main/resources/.env beluo-backend
 - 내가 만든 캐릭터 조회 / 수정 / 삭제
 - 좋아요한 캐릭터 조회
 - 차단한 캐릭터 조회
-- AI 모델 선택 (OpenAI / Claude / OpenRouter)
+- AI 모델 선택 (OpenAI / Claude / Groq)
 - 크레딧 현황 조회
 - 문의 제출
+
+**알림**
+
+- FCM 토큰 등록 / 삭제
+- AI 응답 완료 시 푸시 알림 수신
 
 ### 시스템
 
@@ -180,6 +214,12 @@ docker run -p 8080:8080 --env-file src/main/resources/.env beluo-backend
 
 - Caffeine 로컬 캐시로 캐릭터 조회 성능 최적화
 
+**알림 발송**
+
+- AI 응답 완료 시 RabbitMQ 비동기 큐를 통해 FCM 푸시 알림 발송
+- 발송 실패 시 재시도 및 DLQ 처리
+- 만료/무효 토큰 자동 삭제
+
 ---
 
 ## API 명세
@@ -191,8 +231,9 @@ docker run -p 8080:8080 --env-file src/main/resources/.env beluo-backend
 | POST | `/verify/send` | 이메일 인증 코드 발송 | X |
 | POST | `/verify/check` | 이메일 인증 코드 확인 | X |
 | POST | `/login` | 이메일 로그인 | X |
+| POST | `/guest` | 게스트 로그인 | X |
 | POST | `/join` | 이메일 회원가입 | X |
-| POST | `/oauth2/join` | OAuth2 회원가입 추가 정보 입력 | X |
+| POST | `/oauth2/join` | OAuth2 회원가입 추가 정보 입력 | O |
 | POST | `/logout` | 로그아웃 | O |
 
 ### 캐릭터 `/api/character`
@@ -256,6 +297,12 @@ docker run -p 8080:8080 --env-file src/main/resources/.env beluo-backend
 | `CREDIT_100` | 100 |
 | `CREDIT_350` | 350 |
 | `CREDIT_650` | 650 |
+
+### 알림 `/api/fcm`
+| Method | URL | 설명 | 인증 |
+|--------|-----|------|------|
+| POST | `/token` | FCM 토큰 등록 | O |
+| DELETE | `/token` | FCM 토큰 삭제 | O |
 
 ---
 

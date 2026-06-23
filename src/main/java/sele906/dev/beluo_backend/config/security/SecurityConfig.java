@@ -48,6 +48,11 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/api/chat/**",
+                                "/api/conversation/**",
+                                "/api/auth/oauth2/join"
+                        ).hasAnyRole("USER", "GUEST", "ADMIN") // 게스트도 채팅 가능
+                        .requestMatchers(
                                 "/",
                                 "/error",
                                 "/api/conversation/list",
@@ -59,10 +64,6 @@ public class SecurityConfig {
                                 "/login/**",
                                 "/api/payment/polar/webhook"
                         ).permitAll()
-                        .requestMatchers(
-                                "/api/chat/**",
-                                "/api/conversation/**"
-                        ).hasAnyRole("USER", "GUEST", "ADMIN") // 게스트도 채팅 가능
                         .anyRequest().hasAnyRole("USER", "ADMIN")   // 나머지는 일반 유저랑 관리자
                 )
                 .oauth2Login(oauth2 -> oauth2
