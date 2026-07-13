@@ -49,10 +49,10 @@ public class GroqClient {
         messages.addAll(recentMessages);
 
         Map<String, Object> body = Map.of(
-                "model", "qwen/qwen3-32b",
+                "model", "openai/gpt-oss-120b",
                 "messages", messages,
                 "max_completion_tokens", 1500,
-                "reasoning_effort", "none",
+                "reasoning_effort", "low",
                 "reasoning_format", "hidden",
                 "temperature", 0.7,
                 "top_p", 0.8
